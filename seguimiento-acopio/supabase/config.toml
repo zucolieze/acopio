@@ -1,5 +1,5 @@
 project_id = "seguimiento-acopio"
 
-[auth.email.template.magic_link]
-subject = "Tu código para entrar a Acopio"
-content_path = "./supabase/templates/magic_link.html"
+[auth.email]
+enable_signup = true
+enable_confirmations = false

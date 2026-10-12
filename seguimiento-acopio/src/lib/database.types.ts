@@ -1,4 +1,4 @@
-export type MemberRole = 'proveedor' | 'cliente'
+export type MemberRole = 'proveedor' | 'cliente' | 'admin'
 export type DestinationType = 'camion' | 'silo' | 'silobolsa'
 export type DestinationStatus = 'activo' | 'cerrado'
 

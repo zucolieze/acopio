@@ -12,9 +12,14 @@ activo → pesadas → cierre → historial**. Se inspira en el flujo de “Acti
 ### Ya funciona
 
 - React, TypeScript, Vite y PWA.
-- Acceso por correo con código OTP de seis dígitos.
-- Creación de grupos con código de invitación de seis caracteres y alta en un
-  grupo existente, eligiendo rol de proveedor o cliente.
+- Acceso con correo y contraseña y autocompletado nativo de credenciales.
+- Selector de modalidad Observador o Carrero y menú para crear un trabajo,
+  entrar a uno existente o sumarse con un código de invitación.
+- En modalidad Observador no se permite crear trabajos; puede entrar a trabajos
+  existentes o sumarse con un código. La pantalla de modalidades saluda al
+  usuario usando la parte del email anterior a `@`.
+- El admin de prueba puede cambiar entre la vista observador y carrero sin
+  cerrar sesión. La autorización de administración también se valida en Supabase.
 - Vista mobile-first con secciones Activos, Nuevo e Historial.
 - El proveedor puede abrir un camión, silo o silobolsa con nombre o número,
   registrar pesadas en kilos y cerrar el destino.
@@ -28,9 +33,11 @@ activo → pesadas → cierre → historial**. Se inspira en el flujo de “Acti
 - El esquema se administra mediante migraciones SQL; nunca se modifica a mano
   desde el panel de Supabase.
 
-La prueba local verificó OTP, creación de grupo y destino, carga y total de kilos,
-lectura del cliente, bloqueo de escritura para clientes y bloqueo de nuevas
-pesadas en destinos cerrados.
+Las migraciones y el seed local preparan las cuentas de prueba
+`observador@test.com` (contraseña `observador`), `carro@test.com` (contraseña
+`carro`) y `admin@test.com` (contraseña `admin`). Son credenciales
+exclusivamente locales: no deben reutilizarse ni habilitarse en un proyecto
+remoto.
 
 ### Modelo de carga actual
 
@@ -45,10 +52,28 @@ modelo agrícola.
 - Node.js LTS y npm.
 - React + TypeScript + Vite.
 - PWA con `vite-plugin-pwa`.
-- Supabase: Postgres, Auth OTP, Realtime y Row Level Security.
+- Supabase: Postgres, Auth con correo y contraseña, Realtime y Row Level
+  Security.
 - Docker Desktop para ejecutar Supabase localmente.
 - Vercel como destino de deploy previsto; el deploy remoto aún no fue validado
   como parte del flujo actual.
+
+## Organización del código
+
+El frontend sigue una arquitectura MVC liviana organizada por features:
+
+- `src/features/*/model/` concentra el acceso a Supabase y las operaciones de
+  cada dominio.
+- `src/features/*/hooks/` coordina estado, acciones y efectos de cada feature
+  (controladores).
+- `src/features/*/components/` contiene vistas enfocadas en renderizar datos y
+  delegar acciones mediante props.
+- `src/components/ui/`, `src/types/` y `src/utils/` reúnen piezas compartidas.
+- `src/app/AppController.tsx` compone las features y decide qué pantalla mostrar;
+  `src/App.tsx` es el punto de composición de la aplicación.
+
+Las features actuales son `auth`, `groups` y `loads`. Las campañas, campos y
+lotes se incorporarán en sus propias features cuando se implemente ese alcance.
 
 ## Desarrollo local
 
@@ -80,10 +105,8 @@ VITE_SUPABASE_ANON_KEY=<anon-key-local-de-supabase>
 ```
 
 El comando `db:start` levanta los servicios y `db:reset` recrea la base local,
-aplicando todas las migraciones. **`db:reset` borra los datos de desarrollo
-existentes.** Las cuentas nuevas reciben su código OTP en la bandeja local de
-correo, http://127.0.0.1:54324. Supabase Studio está en
-http://127.0.0.1:54323.
+aplicando todas las migraciones y el seed. **`db:reset` borra los datos de
+desarrollo existentes.** Supabase Studio está en http://127.0.0.1:54323.
 
 Para detener Supabase local:
 
@@ -114,6 +137,9 @@ Las migraciones en `supabase/migrations/` son la fuente de verdad:
 - `20261011200000_add_active_destinations.sql`: destinos activos/cerrados,
   pesadas asociadas al destino, políticas para el flujo simplificado y
   suscripción Realtime.
+- `20261012100000_enable_debug_admin_role.sql` y
+  `20261012100100_secure_debug_admin_role.sql`: rol admin de prueba y
+  comprobación de identidad y metadata del usuario en las políticas/RPC.
 
 El cliente tipado está en `src/lib/supabase.ts` y los tipos en
 `src/lib/database.types.ts`. La lógica de acceso a datos está en
@@ -137,10 +163,10 @@ El alcance original incluye los datos completos de descarga, grupos y roles,
 estructura agrícola, seguimiento en tiempo real y exportación. Después del primer
 prototipo de kilos, estos son los pasos pendientes:
 
-1. **Consolidar el flujo básico:** probarlo con usuarios reales de desarrollo y
-   mejorar mensajes y manejo de errores. Confirmar que proveedor/cliente y la
-   actualización en tiempo real se comporten como se espera en distintos
-   dispositivos.
+1. **Consolidar el flujo básico:** validar login con contraseña, menú de
+   trabajos, modalidades, comportamiento del admin temporal y permisos RLS con
+   las cuentas locales en distintos dispositivos.
+  1.1 **Refactor:** la aplicacion comenzara a crecer rapidamente, por lo que es necesario plantear una arquitectura digna de un CRM
 2. **Incorporar la estructura agrícola:** pantallas para crear y seleccionar
    campañas, campos y lotes; relacionar los destinos y pesadas con esa
    estructura.
@@ -155,9 +181,9 @@ prototipo de kilos, estos son los pasos pendientes:
    correspondientes en Vercel, vincular Supabase solo cuando se decida publicar,
    revisar las migraciones pendientes y validar el flujo en el dominio real.
 
-El orden original del MVP era setup, conexión Supabase, migraciones, OTP, grupos,
-campañas/campos/lotes, carga de proveedor, vista del cliente y CSV. El setup,
-la conexión local, las migraciones básicas, OTP, grupos y el circuito reducido de
+El orden original del MVP era setup, conexión Supabase, migraciones, autenticación,
+grupos, campañas/campos/lotes, carga de proveedor, vista del cliente y CSV. El
+setup, la conexión local, las migraciones y el circuito reducido de
 carga/seguimiento ya existen; la estructura agrícola, los campos completos del
 modelo original y el CSV siguen pendientes.
 
@@ -166,6 +192,7 @@ modelo original y el CSV siguen pendientes.
 - Mobile-first, botones grandes y formularios cortos, para usuarios con poca
   experiencia tecnológica.
 - Proveedor registra las pesadas; cliente consulta únicamente.
-- Login mediante código OTP por email, no magic link.
+- El acceso actual usa correo y contraseña para facilitar las pruebas locales.
+  El cambio de autenticación de producción deberá revisarse antes de publicar.
 - No implementar por ahora modo offline, mapas/GPS, gráficos ni notificaciones
   push.
