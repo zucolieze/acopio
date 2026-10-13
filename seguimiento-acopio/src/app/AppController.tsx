@@ -42,6 +42,13 @@ export default function AppController() {
     selectedMembership?.role === 'proveedor' ||
     (isAdminWork && adminMode === 'carrero')
 
+  function clearNotices() {
+    setAppNotice('')
+    auth.setNotice('')
+    groups.setNotice('')
+    loads.setNotice('')
+  }
+
   useEffect(() => {
     if (auth.session) {
       if (screen === 'login') {
@@ -56,8 +63,17 @@ export default function AppController() {
       setSelectedMode(null)
       setActiveGroupId('')
       setMenuAction(null)
+      setAppNotice('')
     }
   }, [auth.session, screen])
+
+  useEffect(() => {
+    setAppError('')
+    setAppNotice('')
+    auth.setNotice('')
+    groups.setNotice('')
+    loads.setNotice('')
+  }, [auth.session?.user.id])
 
   useEffect(() => {
     setMenuGroupId((current) =>
@@ -73,6 +89,7 @@ export default function AppController() {
   }, [groups.memberships])
 
   function handleChooseMode(mode: WorkMode) {
+    clearNotices()
     setSelectedMode(mode)
     setAdminMode(mode === 'carrero' ? 'carrero' : 'observador')
     setMenuAction(null)
@@ -87,6 +104,7 @@ export default function AppController() {
       setAppError('Elegí un trabajo en el que ya participás.')
       return
     }
+    clearNotices()
     setActiveGroupId(menuGroupId)
     setScreen('trabajo')
     setMenuAction(null)
@@ -98,11 +116,14 @@ export default function AppController() {
   async function handleCreateGroup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!selectedMode || selectedMode === 'observador' || !auth.session) return
+    clearNotices()
     const groupId = await groups.create(
       groupName.trim(),
       roleForMode(selectedMode, auth.isDebugAdmin),
     )
     if (!groupId) return
+    groups.setNotice('')
+    setAppNotice('Trabajo creado. Ya podés compartir el código de invitación.')
     setGroupName('')
     setActiveGroupId(groupId)
     setMenuAction(null)
@@ -112,11 +133,14 @@ export default function AppController() {
   async function handleJoinGroup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!selectedMode) return
+    clearNotices()
     const groupId = await groups.join(
       inviteCode.trim().toUpperCase(),
       roleForMode(selectedMode, auth.isDebugAdmin),
     )
     if (!groupId) return
+    groups.setNotice('')
+    setAppNotice('Te sumaste al trabajo.')
     setInviteCode('')
     setActiveGroupId(groupId)
     setMenuAction(null)
@@ -142,6 +166,11 @@ export default function AppController() {
     } catch (copyError) {
       loads.setError(messageFromError(copyError))
     }
+  }
+
+  function handleSignOut() {
+    clearNotices()
+    void auth.handleSignOut()
   }
 
   if (auth.configurationError) {
@@ -208,9 +237,9 @@ export default function AppController() {
         isDebugAdmin={auth.isDebugAdmin}
         busy={auth.busy === 'signout'}
         error={auth.error || groups.error}
-        notice={auth.notice}
+        notice={auth.notice || groups.notice || loads.notice}
         onChooseMode={handleChooseMode}
-        onSignOut={() => void auth.handleSignOut()}
+        onSignOut={handleSignOut}
       />
     )
   }
@@ -226,19 +255,26 @@ export default function AppController() {
         inviteCode={inviteCode}
         busy={groups.busy || auth.busy === 'signout'}
         error={appError || groups.error || auth.error}
-        notice={appNotice || groups.notice || auth.notice}
+        notice={appNotice || groups.notice || auth.notice || loads.notice}
         onActionChange={(action) => {
+          clearNotices()
           setMenuAction(action)
           setAppError('')
         }}
-        onSelectedGroupChange={setMenuGroupId}
+        onSelectedGroupChange={(groupId) => {
+          clearNotices()
+          setMenuGroupId(groupId)
+        }}
         onGroupNameChange={setGroupName}
         onInviteCodeChange={setInviteCode}
         onCreate={(event) => void handleCreateGroup(event)}
         onJoin={(event) => void handleJoinGroup(event)}
         onEnter={handleEnterGroup}
-        onChangeMode={() => setScreen('modalidad')}
-        onSignOut={() => void auth.handleSignOut()}
+        onChangeMode={() => {
+          clearNotices()
+          setScreen('modalidad')
+        }}
+        onSignOut={handleSignOut}
       />
     )
   }
@@ -260,29 +296,33 @@ export default function AppController() {
       expandedHistory={loads.expandedHistory}
       busy={loads.busy || (auth.busy === 'signout' ? 'signout' : '')}
       error={loads.error || auth.error}
-      notice={loads.notice || auth.notice}
+      notice={appNotice || loads.notice || groups.notice || auth.notice}
       live={loads.live}
       isProvider={Boolean(isProvider)}
       adminMode={adminMode}
       isDebugAdmin={auth.isDebugAdmin}
       onGroupChange={(groupId) => {
+        clearNotices()
         setActiveGroupId(groupId)
         loads.setTab('activos')
       }}
       onReturnToMenu={() => {
+        clearNotices()
         setScreen('menu')
         setMenuAction(null)
         setAppError('')
         setAppNotice('')
       }}
-      onSignOut={() => void auth.handleSignOut()}
-      onAdminModeToggle={() =>
+      onSignOut={handleSignOut}
+      onAdminModeToggle={() => {
+        clearNotices()
         setAdminMode((current) =>
           current === 'observador' ? 'carrero' : 'observador',
         )
-      }
+      }}
       onCopyInviteCode={() => void handleCopyInviteCode()}
       onTabChange={(tab) => {
+        clearNotices()
         loads.setTab(tab)
         loads.setError('')
         loads.setNotice('')

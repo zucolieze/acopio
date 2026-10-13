@@ -39,6 +39,7 @@ export function useGroups(client: Client | null, userId: string | undefined) {
 
   useEffect(() => {
     setError('')
+    setNotice('')
     void refresh().catch(() => undefined)
   }, [refresh])
 
