@@ -18,7 +18,7 @@ export async function fetchMemberships(
 
   const { data: groups, error: groupsError } = await client
     .from('groups')
-    .select('id, name, invite_code')
+    .select('id, name, invite_code, deleted_at')
     .in('id', memberRows.map((member) => member.group_id))
 
   if (groupsError) throw groupsError
@@ -26,7 +26,7 @@ export async function fetchMemberships(
   const groupsById = new Map(groups.map((group) => [group.id, group]))
   return memberRows.flatMap((member) => {
     const group = groupsById.get(member.group_id)
-    return group
+    return group && group.deleted_at === null
       ? [{
           groupId: group.id,
           groupName: group.name,
@@ -65,4 +65,31 @@ export async function joinGroup(
   if (error) throw error
   if (!data) throw new Error('No se pudo ingresar al trabajo.')
   return data
+}
+
+export async function updateGroup(
+  client: Client,
+  groupId: string,
+  name: string,
+) {
+  const { data, error } = await client
+    .from('groups')
+    .update({ name })
+    .eq('id', groupId)
+    .select('id')
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error('No se encontró el trabajo o no tenés permiso para editarlo.')
+}
+
+export async function softDeleteGroup(client: Client, groupId: string) {
+  const { data, error } = await client
+    .from('groups')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', groupId)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error('No se encontró el trabajo o ya fue eliminado.')
 }

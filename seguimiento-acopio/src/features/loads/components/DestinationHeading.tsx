@@ -6,20 +6,22 @@ type DestinationHeadingProps = {
   destination: Destination
   entries: Load[]
   closed?: boolean
+  deleted?: boolean
 }
 
 export function DestinationHeading({
   destination,
   entries,
   closed = false,
+  deleted = false,
 }: DestinationHeadingProps) {
   const total = entries.reduce((sum, entry) => sum + entry.kg, 0)
 
   return (
     <div className="destination-heading">
       <div className="destination-heading__topline">
-        <span className={closed ? 'status-badge is-closed' : 'status-badge'}>
-          {closed ? 'Cerrado' : 'Activo'}
+        <span className={deleted ? 'status-badge is-deleted' : closed ? 'status-badge is-closed' : 'status-badge'}>
+          {deleted ? 'Eliminado' : closed ? 'Cerrado' : 'Activo'}
         </span>
         <span className="destination-heading__type">
           {destinationLabels[destination.destination_type]}

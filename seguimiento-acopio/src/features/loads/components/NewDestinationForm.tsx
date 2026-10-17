@@ -5,23 +5,38 @@ import { destinationLabels } from '../types'
 type NewDestinationFormProps = {
   destinationType: DestinationType
   destinationName: string
+  truckCapacity: string
+  openingHumidity: string
   busy: boolean
+  loading: boolean
   onDestinationTypeChange: (type: DestinationType) => void
   onDestinationNameChange: (name: string) => void
-  onSubmit: (type: DestinationType, name: string) => void
+  onTruckCapacityChange: (value: string) => void
+  onOpeningHumidityChange: (value: string) => void
+  onSubmit: (
+    type: DestinationType,
+    name: string,
+    capacity: string,
+    humidity: string,
+  ) => void
 }
 
 export function NewDestinationForm({
   destinationType,
   destinationName,
+  truckCapacity,
+  openingHumidity,
   busy,
+  loading,
   onDestinationTypeChange,
   onDestinationNameChange,
+  onTruckCapacityChange,
+  onOpeningHumidityChange,
   onSubmit,
 }: NewDestinationFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onSubmit(destinationType, destinationName.trim())
+    onSubmit(destinationType, destinationName.trim(), truckCapacity, openingHumidity)
   }
 
   const placeholder =
@@ -61,8 +76,39 @@ export function NewDestinationForm({
             onChange={(event) => onDestinationNameChange(event.target.value)}
           />
         </label>
-        <button className="button button--primary button--large" disabled={busy}>
-          {busy ? 'Abriendo destino…' : 'Abrir destino'}
+        {destinationType === 'camion' && (
+          <label>
+            Límite de carga (kg)
+            <input
+              inputMode="decimal"
+              min="0.01"
+              placeholder="Ej.: 30000"
+              required
+              step="0.01"
+              type="number"
+              value={truckCapacity}
+              onChange={(event) => onTruckCapacityChange(event.target.value)}
+            />
+          </label>
+        )}
+        {destinationType !== 'camion' && (
+          <label>
+            Humedad inicial (%)
+            <input
+              inputMode="decimal"
+              max="100"
+              min="0"
+              placeholder="Ej.: 14.5"
+              required
+              step="0.01"
+              type="number"
+              value={openingHumidity}
+              onChange={(event) => onOpeningHumidityChange(event.target.value)}
+            />
+          </label>
+        )}
+        <button className="button button--primary button--large" disabled={busy || loading}>
+          {busy ? 'Abriendo destino…' : loading ? 'Cargando trabajo…' : 'Abrir destino'}
         </button>
       </form>
     </section>

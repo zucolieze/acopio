@@ -6,6 +6,8 @@ import {
   createGroup as createGroupInRepository,
   fetchMemberships,
   joinGroup as joinGroupInRepository,
+  softDeleteGroup as softDeleteGroupInRepository,
+  updateGroup as updateGroupInRepository,
 } from '../model/groupsRepository'
 import type { Membership } from '../types'
 
@@ -41,7 +43,21 @@ export function useGroups(client: Client | null, userId: string | undefined) {
     setError('')
     setNotice('')
     void refresh().catch(() => undefined)
-  }, [refresh])
+    if (!client || !userId) return
+
+    const channel = client
+      .channel(`group-memberships-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'groups' },
+        () => void refresh().catch(() => undefined),
+      )
+      .subscribe()
+
+    return () => {
+      void client.removeChannel(channel)
+    }
+  }, [client, refresh, userId])
 
   const create = useCallback(
     async (name: string, role: MemberRole) => {
@@ -85,6 +101,48 @@ export function useGroups(client: Client | null, userId: string | undefined) {
     [client, refresh],
   )
 
+  const rename = useCallback(
+    async (groupId: string, name: string) => {
+      if (!client) throw new Error('No se pudo conectar con la base de datos.')
+      setBusy(true)
+      setError('')
+      setNotice('')
+      try {
+        await updateGroupInRepository(client, groupId, name.trim())
+        await refresh()
+        setNotice('Trabajo actualizado. El cambio quedó registrado.')
+        return true
+      } catch (updateError) {
+        setError(messageFromError(updateError))
+        return false
+      } finally {
+        setBusy(false)
+      }
+    },
+    [client, refresh],
+  )
+
+  const remove = useCallback(
+    async (groupId: string) => {
+      if (!client) throw new Error('No se pudo conectar con la base de datos.')
+      setBusy(true)
+      setError('')
+      setNotice('')
+      try {
+        await softDeleteGroupInRepository(client, groupId)
+        await refresh()
+        setNotice('Trabajo eliminado del menú. El historial queda conservado.')
+        return true
+      } catch (deleteError) {
+        setError(messageFromError(deleteError))
+        return false
+      } finally {
+        setBusy(false)
+      }
+    },
+    [client, refresh],
+  )
+
   return {
     memberships,
     loading,
@@ -96,5 +154,7 @@ export function useGroups(client: Client | null, userId: string | undefined) {
     refresh,
     create,
     join,
+    rename,
+    remove,
   }
 }

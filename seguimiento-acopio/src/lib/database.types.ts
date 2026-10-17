@@ -25,6 +25,31 @@ type Group = {
   invite_code: string
   created_by: string | null
   created_at: string
+  deleted_at: string | null
+}
+
+type Season = {
+  id: string
+  group_id: string
+  name: string
+  year: number
+  created_at: string
+}
+
+type Field = {
+  id: string
+  group_id: string
+  season_id: string
+  name: string
+  created_at: string
+}
+
+type Lot = {
+  id: string
+  field_id: string
+  name: string
+  created_at: string
+  deleted_at: string | null
 }
 
 type Member = {
@@ -44,6 +69,13 @@ type Destination = {
   created_by: string | null
   created_at: string
   closed_at: string | null
+  lot_id: string
+  capacity_kg: number | null
+  opening_humidity: number | null
+  opening_humidity_at: string | null
+  closing_humidity: number | null
+  closing_humidity_at: string | null
+  deleted_at: string | null
 }
 
 type Load = {
@@ -53,6 +85,20 @@ type Load = {
   kg: number
   created_by: string | null
   created_at: string
+  deleted_at: string | null
+}
+
+type ChangeAudit = {
+  id: string
+  group_id: string
+  destination_id: string | null
+  entity_type: 'trabajo' | 'lote' | 'destino' | 'carga'
+  entity_id: string
+  action: 'editar' | 'eliminar'
+  actor_id: string | null
+  occurred_at: string
+  changes: Record<string, { antes: unknown; despues: unknown }>
+  kg_delta: number | null
 }
 
 export type Database = {
@@ -61,9 +107,12 @@ export type Database = {
       profiles: TableDefinition<Profile, 'id'>
       groups: TableDefinition<Group, 'name'>
       members: TableDefinition<Member, 'group_id' | 'user_id' | 'role'>
+      seasons: TableDefinition<Season, 'group_id' | 'name' | 'year'>
+      fields: TableDefinition<Field, 'group_id' | 'season_id' | 'name'>
+      lots: TableDefinition<Lot, 'field_id' | 'name'>
       destinations: TableDefinition<
         Destination,
-        'group_id' | 'destination_type' | 'name',
+        'group_id' | 'destination_type' | 'name' | 'lot_id',
         { created_by: string }
       >
       loads: TableDefinition<
@@ -71,6 +120,7 @@ export type Database = {
         'destination_id' | 'kg',
         { created_by: string }
       >
+      change_audit: TableDefinition<ChangeAudit, 'group_id' | 'entity_type' | 'entity_id' | 'action' | 'changes'>
     }
     Views: Record<string, never>
     Functions: {

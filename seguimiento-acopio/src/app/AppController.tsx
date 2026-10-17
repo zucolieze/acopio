@@ -147,13 +147,59 @@ export default function AppController() {
     setScreen('trabajo')
   }
 
-  function handleCloseDestination(destination: Parameters<typeof loads.close>[0]) {
+  function handleCloseDestination(
+    destination: Parameters<typeof loads.close>[0],
+    humidity: string,
+  ) {
     if (
       window.confirm(
         `¿Cerrar ${destinationLabels[destination.destination_type]} ${destination.name}? Ya no se podrán cargar más kilos.`,
       )
     ) {
-      void loads.close(destination)
+      void loads.close(destination, humidity)
+    }
+  }
+
+  function handleDeleteDestination(destination: Parameters<typeof loads.deleteDestination>[0]) {
+    if (
+      window.confirm(
+        `¿Eliminar ${destinationLabels[destination.destination_type]} ${destination.name}? El dato se ocultará del trabajo, pero quedará auditado.`,
+      )
+    ) {
+      void loads.deleteDestination(destination)
+    }
+  }
+
+  function handleDeleteLoad(load: Parameters<typeof loads.deleteLoad>[0]) {
+    if (
+      window.confirm(
+        `¿Eliminar la pesada de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
+      )
+    ) {
+      void loads.deleteLoad(load)
+    }
+  }
+
+  function handleDeleteLot(lot: Parameters<typeof loads.deleteLot>[0]) {
+    if (window.confirm(`¿Eliminar el lote ${lot.name}? Se conservarán sus destinos en el historial.`)) {
+      void loads.deleteLot(lot)
+    }
+  }
+
+  async function handleDeleteGroup() {
+    if (!selectedMembership) return
+    if (
+      !window.confirm(
+        `¿Eliminar el trabajo ${selectedMembership.groupName}? Ya no aparecerá en el menú, pero se conservará el historial.`,
+      )
+    ) {
+      return
+    }
+    const removed = await groups.remove(selectedMembership.groupId)
+    if (removed) {
+      setScreen('menu')
+      setActiveGroupId('')
+      setAppNotice('')
     }
   }
 
@@ -294,8 +340,22 @@ export default function AppController() {
       destinationName={loads.destinationName}
       loadKilos={loads.loadKilos}
       expandedHistory={loads.expandedHistory}
-      busy={loads.busy || (auth.busy === 'signout' ? 'signout' : '')}
-      error={loads.error || auth.error}
+      deletedDestinations={loads.deletedDestinations}
+      lots={loads.lots}
+      activeLots={loads.activeLots}
+      activeLotId={loads.activeLotId}
+      newLotName={loads.newLotName}
+      audits={loads.audits}
+      truckCapacity={loads.truckCapacity}
+      openingHumidity={loads.openingHumidity}
+      closingHumidity={loads.closingHumidity}
+      busy={
+        groups.busy
+          ? 'group'
+          : loads.busy || (auth.busy === 'signout' ? 'signout' : '')
+      }
+      loading={loads.loading}
+      error={loads.error || groups.error || auth.error}
       notice={appNotice || loads.notice || groups.notice || auth.notice}
       live={loads.live}
       isProvider={Boolean(isProvider)}
@@ -321,6 +381,15 @@ export default function AppController() {
         )
       }}
       onCopyInviteCode={() => void handleCopyInviteCode()}
+      onActiveLotChange={loads.setActiveLotId}
+      onNewLotNameChange={loads.setNewLotName}
+      onCreateLot={() => void loads.createLot()}
+      onRenameLot={(lot, name) => void loads.editLot(lot, name)}
+      onDeleteLot={handleDeleteLot}
+      onRenameGroup={(name) => {
+        if (selectedMembership) void groups.rename(selectedMembership.groupId, name)
+      }}
+      onDeleteGroup={() => void handleDeleteGroup()}
       onTabChange={(tab) => {
         clearNotices()
         loads.setTab(tab)
@@ -329,12 +398,25 @@ export default function AppController() {
       }}
       onDestinationTypeChange={loads.setDestinationType}
       onDestinationNameChange={loads.setDestinationName}
-      onCreateDestination={(type, name) => void loads.create(type, name)}
+      onTruckCapacityChange={loads.setTruckCapacity}
+      onOpeningHumidityChange={loads.setOpeningHumidity}
+      onCreateDestination={(type, name, capacity, humidity) =>
+        void loads.create(type, name, capacity, humidity)
+      }
       onKilosChange={(destinationId, value) =>
         loads.setLoadKilos((values) => ({ ...values, [destinationId]: value }))
       }
       onAddLoad={(destinationId, kilos) => void loads.add(destinationId, kilos)}
       onCloseDestination={handleCloseDestination}
+      onClosingHumidityChange={(destinationId, value) =>
+        loads.setClosingHumidity((values) => ({ ...values, [destinationId]: value }))
+      }
+      onEditLoad={(load, kilos, date) => void loads.editLoad(load, kilos, date)}
+      onDeleteLoad={handleDeleteLoad}
+      onEditDestination={(destination, changes) =>
+        void loads.editDestination(destination, changes)
+      }
+      onDeleteDestination={handleDeleteDestination}
       onHistoryToggle={loads.setExpandedHistory}
     />
   )

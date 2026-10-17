@@ -865,3 +865,257 @@ button:focus-visible {
     align-items: start;
   }
 }
+
+.lot-selection {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.lot-selection > label,
+.create-lot-form label,
+.group-edit-form label,
+.destination-edit-form label,
+.load-edit-form label,
+.destination-card__close-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #31443c;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.create-lot-form,
+.group-edit-form,
+.destination-edit-form,
+.load-edit-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.create-lot-form {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.lot-management,
+.audit-history-details,
+.audit-history,
+.work-management {
+  margin-top: 0.85rem;
+}
+
+.lot-management > summary,
+.audit-history-details > summary,
+.audit-history > h3 {
+  color: var(--color-green);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.lot-management ul,
+.audit-history > ul {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lot-management li {
+  padding: 0.7rem;
+  border: 1px solid #e4e9df;
+  border-radius: 0.7rem;
+  background: #fff;
+}
+
+.lot-management li > span {
+  font-weight: 650;
+}
+
+.lot-management__actions,
+.destination-management__actions,
+.load-list__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.lot-management__edit {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.link-button--danger {
+  color: #a52c21;
+}
+
+.destination-card__lot {
+  margin: 0.65rem 0;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.capacity-summary {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 0.65rem;
+  background: #f0f4ed;
+  color: #31443c;
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.capacity-summary.is-under {
+  background: #fff0ed;
+  color: #a52c21;
+}
+
+.capacity-summary.is-over {
+  background: #fff6d9;
+  color: #765400;
+}
+
+.capacity-summary.is-exact {
+  background: #e8f3e8;
+  color: #286943;
+}
+
+.humidity-summary {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.75rem 0;
+  padding: 0.85rem;
+  border-radius: 0.65rem;
+  background: #f4f6f2;
+}
+
+.humidity-summary > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.humidity-summary dt {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.humidity-summary dd {
+  margin: 0;
+  color: #31443c;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-align: right;
+}
+
+.destination-management {
+  margin: 0.8rem 0;
+}
+
+.destination-edit-form {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border-radius: 0.75rem;
+  background: #f6f8f4;
+}
+
+.destination-card__close-form {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.load-list__entry {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.load-list__entry > .load-list__actions,
+.load-list__entry > .load-edit-form {
+  grid-column: 1 / -1;
+}
+
+.load-edit-form {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: end;
+  padding: 0.75rem;
+  border-radius: 0.7rem;
+  background: #f6f8f4;
+}
+
+.audit-history {
+  padding-top: 0.8rem;
+  border-top: 1px solid #e4e9df;
+}
+
+.audit-history > h3 {
+  margin: 0;
+}
+
+.audit-history > ul > li {
+  padding: 0.7rem;
+  border-radius: 0.65rem;
+  background: #f6f8f4;
+  color: #31443c;
+  font-size: 0.82rem;
+}
+
+.audit-history > ul > li > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.audit-history > ul > li > div span {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.audit-history__changes {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.5rem 0;
+  padding-left: 1.1rem;
+}
+
+.audit-history-details {
+  padding-top: 0.75rem;
+  border-top: 1px solid #edf0eb;
+}
+
+.destination-card.is-deleted {
+  border-style: dashed;
+  background: #f8f8f6;
+}
+
+.status-badge.is-deleted {
+  background: #f9e8e5;
+  color: #8e2b1e;
+}
+
+.destination-history {
+  margin-top: 0.75rem;
+}
+
+.work-management {
+  padding-top: 0.8rem;
+  border-top: 1px solid #edf0eb;
+}
+
+.group-edit-form {
+  margin-top: 0.65rem;
+}
+
+@media (min-width: 42rem) {
+  .lot-selection {
+    grid-template-columns: minmax(12rem, 0.8fr) minmax(18rem, 1.2fr);
+    align-items: end;
+  }
+
+  .lot-management {
+    grid-column: 1 / -1;
+  }
+}
