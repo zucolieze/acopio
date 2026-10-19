@@ -224,8 +224,8 @@ prototipo. Los próximos pasos son:
 5. **Exportar CSV:** descarga filtrada por campaña, campo y lote, disponible
    solo en la vista de PC.
 6. **Validar seguridad y despliegue:** probar RLS y roles con las cuentas
-   locales; preparar variables públicas en Vercel y aplicar migraciones remotas
-   únicamente cuando se decida publicar.
+   locales y revisar el flujo remoto con cuentas de prueba antes de sumar
+   usuarios del piloto.
 
 El objetivo de evolución es mantener un monolito modular y portable que pueda
 servir como base para forks: dominio organizado por features, acceso a datos
@@ -242,3 +242,176 @@ Se priorizan cambios incrementales y simples antes que una plataforma genérica.
   publicar; no confundirlo con las credenciales locales de prueba.
 - No implementar por ahora modo offline, mapas/GPS, gráficos ni notificaciones
   push.
+
+## Deploy en Supabase y Vercel
+
+### Direcciones del prototipo
+
+- Aplicación desplegada: <https://acopio-five.vercel.app/>
+- Repositorio: <https://github.com/zucolieze/acopio>
+- Carpeta de la aplicación dentro del repositorio: `seguimiento-acopio/`
+
+La URL con `?_vercel_share=...` es un enlace de acceso compartido, no la URL
+estable para guardar o distribuir. Usá el dominio normal de Vercel.
+
+El frontend es una PWA estática en Vercel; autenticación, base de datos y
+Realtime los presta Supabase. Ver la pantalla de login confirma que el sitio se
+sirve, pero para confirmar una conexión funcional también hay que iniciar sesión
+con una cuenta remota y probar una operación real.
+
+### Si cierro las pestañas y quiero volver
+
+No hace falta mantener abierto VS Code, Chrome ni una terminal para que el
+deploy publicado siga funcionando. Para volver a usarlo, abrí
+<https://acopio-five.vercel.app/>. Los datos remotos permanecen en Supabase.
+
+Para desarrollar localmente, abrí una terminal en la carpeta del frontend:
+
+```powershell
+cd C:\Users\ezequ\OneDrive\Documentos\GitHub\acopio\seguimiento-acopio
+npm.cmd install
+```
+
+Revisá que exista `.env.local` en `seguimiento-acopio/` con la URL y la clave
+pública del proyecto Supabase que quieras usar localmente:
+
+```dotenv
+VITE_SUPABASE_URL=https://TU_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=TU_CLAVE_PUBLICA_ANON
+```
+
+No reemplaces las variables remotas de Vercel editando este archivo: `.env.local`
+solo configura la ejecución local y no se sube a GitHub. Para trabajar contra
+Supabase local, iniciá Docker Desktop y usá la URL y la clave local que informa
+`npm.cmd run db:start`.
+
+Luego podés iniciar Vite:
+
+```powershell
+npm.cmd run dev
+```
+
+Para comprobar cambios antes de enviarlos a GitHub:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+### Conectar o actualizar el esquema remoto
+
+Las migraciones versionadas en `supabase/migrations/` son la fuente de verdad.
+Cuando se agrega una migración nueva, probala primero en local con:
+
+```powershell
+npm.cmd exec --yes supabase -- migration up --local
+npm.cmd exec --yes supabase -- db lint --local
+```
+
+Para la primera conexión de la CLI o si cambiaste de proyecto remoto:
+
+```powershell
+npm.cmd exec --yes supabase -- login
+npm.cmd exec --yes supabase -- link --project-ref TU_PROJECT_REF
+```
+
+Antes de publicar migraciones, verificá el proyecto vinculado y los cambios
+pendientes:
+
+```powershell
+npm.cmd exec --yes supabase -- migration list --linked
+npm.cmd exec --yes supabase -- db push --dry-run
+```
+
+Si el Project Ref no es el esperado o el dry-run no coincide con las
+migraciones del repositorio, frená y revisá el vínculo. Si es correcto, aplicá
+las migraciones:
+
+```powershell
+npm.cmd run db:push
+```
+
+`db push` actualiza el esquema remoto con las migraciones pendientes; no copia
+los datos de la base local ni sus cuentas del seed. No uses `db:reset` contra
+un proyecto remoto: el reset es destructivo y está pensado para recrear la
+base local. No publiques `supabase/seed.sql` ni las contraseñas locales de
+prueba en el proyecto remoto.
+
+Si todavía no vinculaste este repositorio a la base correcta, no ejecutes
+`db:push` hasta comprobar el Project Ref. Conservá un backup antes de cambios
+importantes en el proyecto que ya tenga datos.
+
+### Variables de entorno en Vercel
+
+El proyecto de Vercel debe estar conectado al repositorio
+`zucolieze/acopio`, con estos ajustes:
+
+- **Root Directory:** `seguimiento-acopio`
+- **Framework Preset:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Install Command:** `npm install`
+
+En **Settings → Environment Variables** deben estar configuradas:
+
+- `VITE_SUPABASE_URL`: URL `https://TU_PROJECT_REF.supabase.co` del proyecto
+  remoto que usará el sitio.
+- `VITE_SUPABASE_ANON_KEY`: clave pública anon/publishable del mismo proyecto.
+
+Asigná las variables a **Preview** para probar deployments de ramas y a
+**Production** cuando quieras que el dominio estable use ese proyecto. Los
+entornos tienen valores independientes: verificá que URL y clave pertenezcan al
+mismo Supabase. Vite incorpora estas variables durante el build, así que luego
+de agregarlas o modificarlas hay que generar un deploy nuevo o hacer
+**Redeploy** del deployment correspondiente. Editar `.env.local` no cambia lo
+que ya está publicado.
+
+La clave anon/publishable está diseñada para el cliente web y el acceso queda
+protegido mediante RLS. Nunca uses `service_role` en el frontend, en archivos
+versionados o como una variable `VITE_*`.
+
+### Qué ocurre al crear ramas y hacer cambios
+
+Con la integración GitHub–Vercel activa, los deployments se generan al **hacer
+push** al repositorio:
+
+- Un commit hecho solo en tu computadora no dispara un deploy.
+- Al hacer push de una rama conectada, Vercel crea o actualiza un deployment
+  **Preview** para esa rama/commit y muestra su URL.
+- Al hacer merge o push a la **Production Branch** configurada en Vercel
+  (normalmente `main`), se genera un deployment de **Production** para el
+  dominio principal.
+- Un nuevo push actualiza el deployment de esa rama automáticamente; no hace
+  falta pulsar Redeploy en el flujo habitual.
+- **Redeploy** sirve para reconstruir un commit ya desplegado, por ejemplo
+  después de cambiar variables de entorno. No reemplaza el push cuando cambió
+  el código.
+
+Flujo recomendado para una funcionalidad:
+
+1. Crear una rama para el cambio y trabajar en ella.
+2. Ejecutar `npm.cmd run typecheck` y `npm.cmd run build`.
+3. Crear un commit y hacer push de la rama a GitHub.
+4. Probar el Preview de Vercel, incluyendo login, escritura, lectura y Realtime
+   con cuentas de prueba del proyecto Supabase de pruebas.
+5. Integrar la rama a la Production Branch solo después de revisar el Preview.
+
+Las ramas no crean automáticamente una base Supabase separada: si Preview y
+Production usan el mismo Supabase, ambos deployments comparten usuarios y datos.
+Para probar migraciones o cambios riesgosos, es preferible configurar un
+Supabase de pruebas separado y asignar sus variables al entorno Preview.
+
+### Cuentas, autenticación y seguridad del prototipo
+
+El login implementado actualmente es con correo y contraseña; Mailpit pertenece
+al Supabase local y no recibe correos del proyecto alojado. Las tres cuentas
+incluidas en el seed (`admin@test.com`, `carro@test.com` y
+`observador@test.com`) y sus contraseñas débiles son solo para uso local. No las
+crees ni las reutilices en Supabase remoto.
+
+Creá cuentas remotas de prueba con contraseñas únicas y fuertes, y sumalas a
+cada trabajo usando el código de invitación. El rol admin actual es de
+depuración y no debe considerarse una administración segura para producción.
+Antes de compartir ampliamente el sitio, verificá la configuración de Auth,
+las políticas RLS y quién puede crear cuentas. No publiques el dominio como
+producto de producción hasta revisar esos controles.
