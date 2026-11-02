@@ -12,7 +12,12 @@ activo → pesadas → cierre → historial**. Se inspira en el flujo de “Acti
 ### Ya funciona
 
 - React, TypeScript, Vite y PWA.
-- Acceso con correo y contraseña y autocompletado nativo de credenciales.
+- Acceso simple: botón "Continuar con Google" y enlace por correo (sin
+  contraseña); la cuenta se crea sola la primera vez. Como alternativa, correo y
+  contraseña con recuperación de contraseña por correo. Si la persona entra sin
+  nombre (enlace por correo), la app se lo pide una vez.
+- Instalación como PWA desde el enlace del sitio, con botón o instrucciones de
+  iPhone en la pantalla de ingreso.
 - Selector de modalidad Observador o Carrero y menú para crear un trabajo,
   entrar a uno existente o sumarse con un código de invitación.
 - En modalidad Observador no se permite crear trabajos; puede entrar a trabajos
@@ -414,15 +419,45 @@ Supabase de pruebas separado y asignar sus variables al entorno Preview.
 
 ### Cuentas, autenticación y seguridad del prototipo
 
-El login implementado actualmente es con correo y contraseña; Mailpit pertenece
-al Supabase local y no recibe correos del proyecto alojado. Las tres cuentas
-incluidas en el seed (`admin@test.com`, `carro@test.com` y
-`observador@test.com`) y sus contraseñas débiles son solo para uso local. No las
-crees ni las reutilices en Supabase remoto.
+Formas de entrar: Google, enlace por correo y correo con contraseña. Mailpit
+pertenece al Supabase local y no recibe correos del proyecto alojado. Las tres
+cuentas del seed (`admin@test.com`, `carro@test.com` y `observador@test.com`)
+y sus contraseñas débiles son solo para uso local; no las crees en el remoto.
 
-Creá cuentas remotas de prueba con contraseñas únicas y fuertes, y sumalas a
-cada trabajo usando el código de invitación. El rol admin actual es de
-depuración y no debe considerarse una administración segura para producción.
-Antes de compartir ampliamente el sitio, verificá la configuración de Auth,
-las políticas RLS y quién puede crear cuentas. No publiques el dominio como
-producto de producción hasta revisar esos controles.
+#### Configurar el ingreso en el proyecto remoto (una sola vez)
+
+1. **URLs**: Supabase > Authentication > URL Configuration. Poné como *Site URL*
+   el dominio de Vercel y agregá en *Redirect URLs* ese dominio y
+   `http://localhost:5173`. Sin esto los enlaces de correo y Google fallan.
+2. **Google**: en Google Cloud Console creá un *OAuth client ID* (tipo Web) con
+   la *Authorized redirect URI* que muestra Supabase en Authentication >
+   Sign In / Providers > Google. Pegá Client ID y Secret ahí y activá Google.
+3. **Correos**: el servicio de correo por defecto de Supabase tiene un límite
+   bajo por hora. Para uso real configurá un SMTP propio (Authentication >
+   SMTP Settings). Los enlaces son de un solo uso y algunos antivirus de correo
+   los "gastan" al revisarlos; si pasa, la app muestra "El enlace venció" y se
+   pide otro.
+4. **Plantilla**: en Authentication > Email Templates podés traducir los
+   correos "Magic Link" y "Reset Password" al español.
+
+#### Admin de prueba (solo para el dueño)
+
+La modalidad admin no figura en ninguna lista: aparece únicamente si la cuenta
+tiene la marca `debug_admin` en el servidor y, además, después de tocar cinco
+veces el saludo "Bienvenido …" de la pantalla de modalidades. La marca no se
+puede asignar desde la app. Para dársela a tu cuenta, ejecutá una vez en el
+SQL Editor de Supabase (con tu correo real):
+
+```sql
+update auth.users
+set raw_app_meta_data = raw_app_meta_data || '{"debug_admin": true}'::jsonb
+where email = 'tu-correo@ejemplo.com';
+```
+
+Cerrá sesión y volvé a entrar para que el token incluya la marca. Para quitarla:
+`raw_app_meta_data - 'debug_admin'`.
+
+
+
+Antes de compartir ampliamente el sitio, verificá la configuración de Auth, las
+políticas RLS y quién puede crear cuentas (el registro está abierto).

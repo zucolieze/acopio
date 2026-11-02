@@ -8,7 +8,9 @@ import type { Database } from '../../../lib/database.types'
 
 type Client = SupabaseClient<Database>
 
-export async function fetchFullName(client: Client, session: Session) {
+const appUrl = () => window.location.origin
+
+export async function fetchProfileName(client: Client, session: Session) {
   const { data, error } = await client
     .from('profiles')
     .select('full_name')
@@ -17,12 +19,28 @@ export async function fetchFullName(client: Client, session: Session) {
 
   if (error) throw error
 
-  return (
-    data?.full_name ??
-    session.user.user_metadata.full_name ??
-    session.user.email?.split('@')[0] ??
-    ''
-  )
+  const storedName = data?.full_name?.trim() || null
+  return {
+    storedName,
+    displayName:
+      storedName ??
+      session.user.user_metadata.full_name ??
+      session.user.email?.split('@')[0] ??
+      '',
+  }
+}
+
+export async function saveProfileName(
+  client: Client,
+  userId: string,
+  fullName: string,
+) {
+  const { error } = await client
+    .from('profiles')
+    .update({ full_name: fullName })
+    .eq('id', userId)
+
+  if (error) throw error
 }
 
 export async function signIn(
@@ -52,7 +70,7 @@ export async function signUp(
   const { data, error } = await client.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName }, emailRedirectTo: appUrl() },
   })
 
   if (error) throw error
@@ -61,14 +79,40 @@ export async function signUp(
   }
   if (!data.session) return null
 
-  const { error: profileError } = await client
-    .from('profiles')
-    .update({ full_name: fullName })
-    .eq('id', data.session.user.id)
-
-  if (profileError) throw profileError
+  await saveProfileName(client, data.session.user.id, fullName)
 
   return data.session
+}
+
+export async function sendMagicLink(client: Client, email: string) {
+  const { error } = await client.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: appUrl() },
+  })
+  if (error) throw error
+}
+
+export async function signInWithGoogle(client: Client) {
+  const { error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: appUrl(),
+      queryParams: { prompt: 'select_account' },
+    },
+  })
+  if (error) throw error
+}
+
+export async function sendPasswordReset(client: Client, email: string) {
+  const { error } = await client.auth.resetPasswordForEmail(email, {
+    redirectTo: appUrl(),
+  })
+  if (error) throw error
+}
+
+export async function updatePassword(client: Client, password: string) {
+  const { error } = await client.auth.updateUser({ password })
+  if (error) throw error
 }
 
 export async function signOut(client: Client) {
@@ -85,11 +129,14 @@ const authErrorMessages: Record<string, string> = {
   user_already_exists: 'Ya existe una cuenta con ese correo. Iniciá sesión.',
   email_exists: 'Ya existe una cuenta con ese correo. Iniciá sesión.',
   weak_password: 'La contraseña es muy débil. Usá al menos 8 caracteres.',
+  same_password: 'Elegí una contraseña distinta de la anterior.',
   signup_disabled: 'El registro de cuentas nuevas está deshabilitado.',
   validation_failed: 'Revisá que el correo y la contraseña sean válidos.',
+  otp_expired: 'El enlace venció o ya se usó. Pedí uno nuevo.',
   over_request_rate_limit: 'Hiciste demasiados intentos. Esperá un momento y probá de nuevo.',
-  over_email_send_rate_limit: 'Se enviaron demasiados correos. Esperá un momento y probá de nuevo.',
+  over_email_send_rate_limit: 'Ya te mandamos un correo hace instantes. Esperá un minuto antes de pedir otro.',
   user_banned: 'Esta cuenta está suspendida.',
+  provider_disabled: 'Entrar con Google todavía no está disponible.',
 }
 
 export function authErrorMessage(error: unknown) {
@@ -106,4 +153,25 @@ export function authErrorMessage(error: unknown) {
   return error instanceof Error
     ? error.message
     : 'Ocurrió un error inesperado. Probá de nuevo.'
+}
+
+export function readAuthErrorFromUrl() {
+  const params = new URLSearchParams(
+    window.location.hash.replace(/^#/, '') || window.location.search,
+  )
+  const code = params.get('error_code')
+  const hasError = params.has('error') || params.has('error_description')
+  if (!code && !hasError) return ''
+
+  return (
+    (code && authErrorMessages[code]) ||
+    'No pudimos completar el ingreso. Probá de nuevo.'
+  )
+}
+
+export function clearAuthErrorFromUrl() {
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  if (params.has('error') || params.has('error_code')) {
+    window.history.replaceState(null, '', window.location.pathname)
+  }
 }

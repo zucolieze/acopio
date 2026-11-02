@@ -1,1 +1,1 @@
-export type AuthMode = 'entrar' | 'crear'
+export type AuthMode = 'entrar' | 'clave' | 'crear' | 'recuperar'

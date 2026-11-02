@@ -1,5 +1,16 @@
 project_id = "seguimiento-acopio"
 
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173"]
+
 [auth.email]
 enable_signup = true
 enable_confirmations = false
+
+# Google se activa en el proyecto remoto desde el panel de Supabase
+# (Authentication > Sign In / Providers). Localmente queda apagado.
+[auth.external.google]
+enabled = false
+client_id = ""
+secret = ""

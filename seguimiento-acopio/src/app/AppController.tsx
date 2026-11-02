@@ -3,7 +3,13 @@ import type { FormEvent } from 'react'
 import type { MemberRole } from '../lib/database.types'
 import { Brand } from '../components/ui/Brand'
 import { Feedback } from '../components/ui/Feedback'
-import { AuthPage, ModeSelectionPage, useAuth } from '../features/auth'
+import {
+  AuthPage,
+  ModeSelectionPage,
+  ProfileNamePage,
+  ResetPasswordPage,
+  useAuth,
+} from '../features/auth'
 import { useGroups, WorkMenuPage } from '../features/groups'
 import { DashboardPage, destinationLabels, useLoads } from '../features/loads'
 import type { AppScreen, WorkMode } from '../types/app'
@@ -254,11 +260,38 @@ export default function AppController() {
         busy={auth.busy === 'auth'}
         error={auth.error}
         notice={auth.notice}
+        linkSentTo={auth.linkSentTo}
+        resendIn={auth.resendIn}
         onModeChange={auth.setAuthMode}
         onEmailChange={auth.setEmail}
         onPasswordChange={auth.setPassword}
         onFullNameChange={auth.setFullName}
-        onSubmit={auth.authMode === 'crear' ? auth.handleSignUp : auth.handleSignIn}
+        onGoogle={() => void auth.handleGoogle()}
+        onMagicLink={(event) => void auth.handleMagicLink(event)}
+        onResendMagicLink={() => void auth.handleResendMagicLink()}
+        onSignIn={(event) => void auth.handleSignIn(event)}
+        onSignUp={(event) => void auth.handleSignUp(event)}
+        onRecover={(event) => void auth.handleRecover(event)}
+      />
+    )
+  }
+
+  if (auth.recovering) {
+    return (
+      <ResetPasswordPage
+        busy={auth.busy === 'auth'}
+        error={auth.error}
+        onSubmit={(value) => void auth.handleUpdatePassword(value)}
+      />
+    )
+  }
+
+  if (auth.needsName && !auth.accountLoading) {
+    return (
+      <ProfileNamePage
+        busy={auth.busy === 'auth'}
+        error={auth.error}
+        onSubmit={(value) => void auth.handleSaveName(value)}
       />
     )
   }

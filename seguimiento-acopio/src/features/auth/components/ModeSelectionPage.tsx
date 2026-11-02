@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Brand } from '../../../components/ui/Brand'
 import { Feedback } from '../../../components/ui/Feedback'
 import type { WorkMode } from '../../../types/app'
@@ -21,6 +22,9 @@ export function ModeSelectionPage({
   onChooseMode,
   onSignOut,
 }: ModeSelectionPageProps) {
+  const [taps, setTaps] = useState(0)
+  const adminUnlocked = isDebugAdmin && taps >= 5
+
   return (
     <main className="center-page center-page--top">
       <header className="simple-header">
@@ -35,7 +39,9 @@ export function ModeSelectionPage({
         </button>
       </header>
       <section className="mode-selection">
-        <p className="eyebrow">Bienvenido {welcomeName}</p>
+        <p className="eyebrow" onClick={() => setTaps((count) => count + 1)}>
+          Bienvenido {welcomeName}
+        </p>
         <p className="eyebrow">Elegí cómo vas a usar Acopio</p>
         <h1>¿Qué necesitás hacer?</h1>
         <p className="muted">Después podés elegir un trabajo para continuar.</p>
@@ -59,7 +65,7 @@ export function ModeSelectionPage({
             <strong>Carrero</strong>
             <span>Abro destinos y cargo las pesadas.</span>
           </button>
-          {isDebugAdmin && (
+          {adminUnlocked && (
             <button
               className="mode-card mode-card--debug"
               type="button"

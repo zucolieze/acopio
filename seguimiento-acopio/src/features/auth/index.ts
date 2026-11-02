@@ -1,4 +1,5 @@
 export { AuthPage } from './components/AuthPage'
+export { ProfileNamePage, ResetPasswordPage } from './components/AccountSetupPages'
 export { ModeSelectionPage } from './components/ModeSelectionPage'
 export { useAuth } from './hooks/useAuth'
 export type { AuthMode } from './types'
