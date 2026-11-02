@@ -9,6 +9,7 @@ type NewDestinationFormProps = {
   openingHumidity: string
   busy: boolean
   loading: boolean
+  canOpen: boolean
   onDestinationTypeChange: (type: DestinationType) => void
   onDestinationNameChange: (name: string) => void
   onTruckCapacityChange: (value: string) => void
@@ -28,6 +29,7 @@ export function NewDestinationForm({
   openingHumidity,
   busy,
   loading,
+  canOpen,
   onDestinationTypeChange,
   onDestinationNameChange,
   onTruckCapacityChange,
@@ -41,7 +43,7 @@ export function NewDestinationForm({
 
   const placeholder =
     destinationType === 'camion'
-      ? 'Ej.: Camión 1'
+      ? 'ABC123 o AA123BB'
       : destinationType === 'silo'
         ? 'Ej.: Silo 3'
         : 'Ej.: Bolsa 12'
@@ -66,15 +68,31 @@ export function NewDestinationForm({
           ))}
         </div>
         <label>
-          Nombre o número
+          {destinationType === 'camion' ? 'Patente' : 'Nombre o número'}
           <input
+            autoCapitalize={destinationType === 'camion' ? 'characters' : undefined}
             autoComplete="off"
-            maxLength={120}
+            maxLength={destinationType === 'camion' ? 7 : 120}
+            minLength={destinationType === 'camion' ? 6 : undefined}
+            pattern={
+              destinationType === 'camion'
+                ? '(?:[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2})'
+                : undefined
+            }
             placeholder={placeholder}
             required
             value={destinationName}
-            onChange={(event) => onDestinationNameChange(event.target.value)}
+            onChange={(event) =>
+              onDestinationNameChange(
+                destinationType === 'camion'
+                  ? event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7)
+                  : event.target.value,
+              )
+            }
           />
+          {destinationType === 'camion' && (
+            <span className="muted small-copy">Sin espacios. Formato: ABC123 o AA123BB.</span>
+          )}
         </label>
         {destinationType === 'camion' && (
           <label>
@@ -107,8 +125,8 @@ export function NewDestinationForm({
             />
           </label>
         )}
-        <button className="button button--primary button--large" disabled={busy || loading}>
-          {busy ? 'Abriendo destino…' : loading ? 'Cargando trabajo…' : 'Abrir destino'}
+        <button className="button button--primary button--large" disabled={busy || loading || !canOpen}>
+          {busy ? 'Abriendo destino…' : loading ? 'Cargando trabajo…' : !canOpen ? 'Elegí un lote primero' : 'Abrir destino'}
         </button>
       </form>
     </section>

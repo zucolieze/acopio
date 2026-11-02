@@ -3,6 +3,12 @@ import type { Database, DestinationType } from '../../lib/database.types'
 export type Destination = Database['public']['Tables']['destinations']['Row']
 export type Load = Database['public']['Tables']['loads']['Row']
 export type Lot = Database['public']['Tables']['lots']['Row']
+export type Field = Database['public']['Tables']['fields']['Row']
+export type WorkMember = {
+  userId: string
+  role: Database['public']['Tables']['members']['Row']['role']
+  fullName: string
+}
 export type ChangeAudit = Database['public']['Tables']['change_audit']['Row']
 export type DestinationChanges = Partial<
   Pick<
@@ -23,7 +29,9 @@ export type Tab = 'activos' | 'nuevo' | 'historial'
 export type GroupActivity = {
   destinations: Destination[]
   loads: Load[]
+  fields: Field[]
   lots: Lot[]
+  workMembers: WorkMember[]
   audits: ChangeAudit[]
   profileNames: Record<string, string>
 }

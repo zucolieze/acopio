@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { formatDate, formatKilos } from '../../../utils/format'
-import type { Load } from '../types'
+import type { Load, WorkMember } from '../types'
 
 type LoadListProps = {
   entries: Load[]
   profileNames: Record<string, string>
   canEdit?: boolean
+  canChangeAuthor?: boolean
+  workMembers?: WorkMember[]
   busyId?: string
   onEdit?: (load: Load, kilos: string, date: string) => void
+  onChangeAuthor?: (load: Load, userId: string | null) => void
   onDelete?: (load: Load) => void
 }
 
@@ -15,8 +18,11 @@ export function LoadList({
   entries,
   profileNames,
   canEdit = false,
+  canChangeAuthor = false,
+  workMembers = [],
   busyId = '',
   onEdit,
+  onChangeAuthor,
   onDelete,
 }: LoadListProps) {
   if (entries.length === 0) {
@@ -35,8 +41,11 @@ export function LoadList({
               : 'Integrante del grupo'
           }
           canEdit={canEdit}
+          canChangeAuthor={canChangeAuthor}
+          workMembers={workMembers}
           busy={busyId === entry.id}
           onEdit={onEdit}
+          onChangeAuthor={onChangeAuthor}
           onDelete={onDelete}
         />
       ))}
@@ -48,15 +57,21 @@ function LoadRow({
   entry,
   profileName,
   canEdit,
+  canChangeAuthor,
+  workMembers,
   busy,
   onEdit,
+  onChangeAuthor,
   onDelete,
 }: {
   entry: Load
   profileName: string
   canEdit: boolean
+  canChangeAuthor: boolean
+  workMembers: WorkMember[]
   busy: boolean
   onEdit?: LoadListProps['onEdit']
+  onChangeAuthor?: LoadListProps['onChangeAuthor']
   onDelete?: LoadListProps['onDelete']
 }) {
   const [editing, setEditing] = useState(false)
@@ -76,6 +91,25 @@ function LoadRow({
         <span>Cargó {profileName}</span>
       </div>
       <strong>{formatKilos(entry.kg)} kg</strong>
+      {canChangeAuthor && (
+        <label className="load-list__author">
+          Responsable de la descarga
+          <select
+            value={entry.created_by ?? ''}
+            disabled={busy}
+            onChange={(event) =>
+              onChangeAuthor?.(entry, event.target.value || null)
+            }
+          >
+            <option value="">Sin asignar</option>
+            {workMembers.map((member) => (
+              <option key={member.userId} value={member.userId}>
+                {member.fullName} · {roleLabel(member.role)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {canEdit && (
         <div className="load-list__actions">
           <button
@@ -130,6 +164,12 @@ function LoadRow({
       )}
     </li>
   )
+}
+
+function roleLabel(role: WorkMember['role']) {
+  if (role === 'proveedor') return 'Carrero'
+  if (role === 'cliente') return 'Observador'
+  return 'Admin'
 }
 
 function toLocalInputValue(value: string) {

@@ -86,12 +86,25 @@ export function DestinationManagement({
       {editing && (
         <form className="destination-edit-form" onSubmit={handleSubmit}>
           <label>
-            Nombre
+            {type === 'camion' ? 'Patente' : 'Nombre'}
             <input
-              maxLength={120}
+              autoCapitalize={type === 'camion' ? 'characters' : undefined}
+              maxLength={type === 'camion' ? 7 : 120}
+              minLength={type === 'camion' ? 6 : undefined}
+              pattern={
+                type === 'camion'
+                  ? '(?:[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2})'
+                  : undefined
+              }
               required
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) =>
+                setName(
+                  type === 'camion'
+                    ? event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7)
+                    : event.target.value,
+                )
+              }
             />
           </label>
           <label>
@@ -112,7 +125,15 @@ export function DestinationManagement({
             Tipo de destino
             <select
               value={type}
-              onChange={(event) => setType(event.target.value as DestinationType)}
+              onChange={(event) => {
+                const nextType = event.target.value as DestinationType
+                setType(nextType)
+                if (nextType === 'camion') {
+                  setName((current) =>
+                    current.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7),
+                  )
+                }
+              }}
             >
               {(Object.keys(destinationLabels) as DestinationType[]).map((value) => (
                 <option key={value} value={value}>{destinationLabels[value]}</option>

@@ -3,7 +3,14 @@ import { LoadList } from './LoadList'
 import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { AuditList } from './AuditList'
-import type { ChangeAudit, Destination, DestinationChanges, Load, Lot } from '../types'
+import type {
+  ChangeAudit,
+  Destination,
+  DestinationChanges,
+  Load,
+  Lot,
+  WorkMember,
+} from '../types'
 import { formatKilos } from '../../../utils/format'
 
 type DestinationCardProps = {
@@ -12,6 +19,7 @@ type DestinationCardProps = {
   lots: Lot[]
   entries: Load[]
   auditEntries: ChangeAudit[]
+  workMembers: WorkMember[]
   profileNames: Record<string, string>
   isProvider: boolean
   busy: boolean
@@ -23,6 +31,7 @@ type DestinationCardProps = {
   onAddLoad: (kilos: string) => void
   onClose: (humidity: string) => void
   onEditLoad: (load: Load, kilos: string, date: string) => void
+  onChangeLoadAuthor: (load: Load, userId: string | null) => void
   onDeleteLoad: (load: Load) => void
   onEditDestination: (changes: DestinationChanges) => void
   onDeleteDestination: () => void
@@ -34,6 +43,7 @@ export function DestinationCard({
   lots,
   entries,
   auditEntries,
+  workMembers,
   profileNames,
   isProvider,
   busy,
@@ -45,6 +55,7 @@ export function DestinationCard({
   onAddLoad,
   onClose,
   onEditLoad,
+  onChangeLoadAuthor,
   onDeleteLoad,
   onEditDestination,
   onDeleteDestination,
@@ -65,12 +76,6 @@ export function DestinationCard({
     <article className="destination-card">
       <DestinationHeading destination={destination} entries={entries} />
       <p className="destination-card__lot">Lote: {lotName}</p>
-      {destination.destination_type === 'camion' && (
-        <CapacitySummary destination={destination} total={total} />
-      )}
-      {destination.destination_type !== 'camion' && (
-        <HumiditySummary destination={destination} />
-      )}
       {isProvider && (
         <>
           <form className="load-form" onSubmit={handleAddLoad}>
@@ -91,25 +96,79 @@ export function DestinationCard({
               {busy ? 'Guardando…' : 'Guardar pesada'}
             </button>
           </form>
-          <DestinationManagement
-            destination={destination}
-            lots={lots}
-            busy={busy}
-            onSave={onEditDestination}
-            onDelete={onDeleteDestination}
-          />
         </>
       )}
-      <LoadList
-        entries={isProvider ? entries : entries.slice(0, 3)}
-        profileNames={profileNames}
-        canEdit={isProvider}
-        busyId={busyId}
-        onEdit={onEditLoad}
-        onDelete={onDeleteLoad}
-      />
-      {!isProvider && entries.length > 3 && (
-        <p className="muted small-copy">Se muestran las últimas 3 pesadas.</p>
+      {destination.destination_type === 'camion' ? (
+        <CapacitySummary destination={destination} total={total} />
+      ) : (
+        <HumiditySummary destination={destination} />
+      )}
+      {isProvider && destination.destination_type !== 'camion' && (
+        <form className="destination-card__close-form" onSubmit={handleClose}>
+          <label>
+            Humedad de cierre (%)
+            <input
+              inputMode="decimal"
+              max="100"
+              min="0"
+              placeholder="Ej.: 13.2"
+              required
+              step="0.01"
+              type="number"
+              value={closingHumidity}
+              onChange={(event) => onClosingHumidityChange(event.target.value)}
+            />
+          </label>
+          <button
+            className="button button--secondary"
+            type="submit"
+            disabled={
+              busy ||
+              !closingHumidity.trim() ||
+              !Number.isFinite(Number(closingHumidity.replace(',', '.'))) ||
+              Number(closingHumidity.replace(',', '.')) < 0 ||
+              Number(closingHumidity.replace(',', '.')) > 100
+            }
+          >
+            Cerrar silo con humedad
+          </button>
+        </form>
+      )}
+      {isProvider && destination.destination_type === 'camion' && (
+        <button
+          className="link-button destination-card__close"
+          type="button"
+          disabled={busy}
+          onClick={() => onClose('')}
+        >
+          Cerrar camión
+        </button>
+      )}
+      <details className="load-history">
+        <summary>
+          Historial de cargas ({entries.length})
+          {!isProvider && entries.length > 3 ? ' · últimas 3' : ''}
+        </summary>
+        <LoadList
+          entries={isProvider ? entries : entries.slice(0, 3)}
+          profileNames={profileNames}
+          canEdit={isProvider}
+          canChangeAuthor={!isProvider}
+          workMembers={workMembers}
+          busyId={busyId}
+          onEdit={onEditLoad}
+          onChangeAuthor={onChangeLoadAuthor}
+          onDelete={onDeleteLoad}
+        />
+      </details>
+      {isProvider && (
+        <DestinationManagement
+          destination={destination}
+          lots={lots}
+          busy={busy}
+          onSave={onEditDestination}
+          onDelete={onDeleteDestination}
+        />
       )}
       {auditEntries.length > 0 && (
         <details className="audit-history-details">
@@ -121,33 +180,6 @@ export function DestinationCard({
             destinationName={destination.name}
           />
         </details>
-      )}
-      {isProvider && (
-        <form className="destination-card__close-form" onSubmit={handleClose}>
-          {destination.destination_type !== 'camion' && (
-            <label>
-              Humedad de cierre (%)
-              <input
-                inputMode="decimal"
-                max="100"
-                min="0"
-                placeholder="Ej.: 13.2"
-                required
-                step="0.01"
-                type="number"
-                value={closingHumidity}
-                onChange={(event) => onClosingHumidityChange(event.target.value)}
-              />
-            </label>
-          )}
-          <button
-            className="link-button destination-card__close"
-            type="submit"
-            disabled={busy}
-          >
-            Cerrar destino
-          </button>
-        </form>
       )}
     </article>
   )

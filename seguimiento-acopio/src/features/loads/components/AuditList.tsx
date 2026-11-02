@@ -8,6 +8,7 @@ const fieldLabels: Record<string, string> = {
   lot_id: 'Lote',
   destination_type: 'Tipo de destino',
   capacity_kg: 'Límite del camión',
+  created_by: 'Responsable de la descarga',
   opening_humidity: 'Humedad inicial',
   opening_humidity_at: 'Fecha de humedad inicial',
   closing_humidity: 'Humedad de cierre',
@@ -58,8 +59,9 @@ export function AuditList({
             <ul className="audit-history__changes">
               {Object.entries(entry.changes).map(([field, values]) => (
                 <li key={field}>
-                  {fieldLabels[field] ?? field}: {displayValue(field, values.antes, lots)} →{' '}
-                  {displayValue(field, values.despues, lots)}
+                  {fieldLabels[field] ?? field}:{' '}
+                  {displayValue(field, values.antes, lots, profileNames)} →{' '}
+                  {displayValue(field, values.despues, lots, profileNames)}
                 </li>
               ))}
             </ul>
@@ -80,6 +82,8 @@ function entityLabel(entity: ChangeAudit['entity_type']) {
   switch (entity) {
     case 'carga':
       return 'pesada'
+    case 'campo':
+      return 'campo'
     case 'destino':
       return 'destino'
     case 'lote':
@@ -89,8 +93,16 @@ function entityLabel(entity: ChangeAudit['entity_type']) {
   }
 }
 
-function displayValue(field: string, value: unknown, lots: Lot[]) {
+function displayValue(
+  field: string,
+  value: unknown,
+  lots: Lot[],
+  profileNames: Record<string, string>,
+) {
   if (value === null || value === undefined) return 'vacío'
+  if (field === 'created_by') {
+    return profileNames[String(value)] ?? 'Integrante del grupo'
+  }
   if (field.endsWith('_at') || field === 'date') {
     const parsed = new Date(String(value))
     return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString('es-AR')

@@ -341,9 +341,12 @@ export default function AppController() {
       loadKilos={loads.loadKilos}
       expandedHistory={loads.expandedHistory}
       deletedDestinations={loads.deletedDestinations}
+      fields={loads.fields}
       lots={loads.lots}
-      activeLots={loads.activeLots}
+      workMembers={loads.workMembers}
+      activeFieldId={loads.activeFieldId}
       activeLotId={loads.activeLotId}
+      newFieldName={loads.newFieldName}
       newLotName={loads.newLotName}
       audits={loads.audits}
       truckCapacity={loads.truckCapacity}
@@ -381,9 +384,13 @@ export default function AppController() {
         )
       }}
       onCopyInviteCode={() => void handleCopyInviteCode()}
+      onActiveFieldChange={loads.selectField}
       onActiveLotChange={loads.setActiveLotId}
+      onNewFieldNameChange={loads.setNewFieldName}
       onNewLotNameChange={loads.setNewLotName}
+      onCreateField={() => void loads.createField()}
       onCreateLot={() => void loads.createLot()}
+      onRenameField={(field, name) => void loads.editField(field, name)}
       onRenameLot={(lot, name) => void loads.editLot(lot, name)}
       onDeleteLot={handleDeleteLot}
       onRenameGroup={(name) => {
@@ -412,6 +419,9 @@ export default function AppController() {
         loads.setClosingHumidity((values) => ({ ...values, [destinationId]: value }))
       }
       onEditLoad={(load, kilos, date) => void loads.editLoad(load, kilos, date)}
+      onChangeLoadAuthor={(load, userId) =>
+        void loads.updateLoadOwner(load, userId)
+      }
       onDeleteLoad={handleDeleteLoad}
       onEditDestination={(destination, changes) =>
         void loads.editDestination(destination, changes)

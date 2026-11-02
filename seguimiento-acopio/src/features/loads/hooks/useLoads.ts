@@ -5,6 +5,7 @@ import { messageFromError } from '../../../utils/errors'
 import {
   addLoad as addLoadToRepository,
   closeDestination as closeDestinationInRepository,
+  createField as createFieldInRepository,
   createDestination as createDestinationInRepository,
   createLot as createLotInRepository,
   fetchGroupActivity,
@@ -12,10 +13,12 @@ import {
   softDeleteLoad,
   softDeleteLot,
   updateDestination as updateDestinationInRepository,
+  updateField as updateFieldInRepository,
   updateLoad as updateLoadInRepository,
+  updateLoadAttribution,
   updateLot as updateLotInRepository,
 } from '../model/loadsRepository'
-import type { Destination, Load, Lot, Tab } from '../types'
+import type { Destination, Field, Load, Lot, Tab, WorkMember } from '../types'
 
 type Client = SupabaseClient<Database>
 
@@ -26,10 +29,14 @@ export function useLoads(
 ) {
   const [destinations, setDestinations] = useState<Destination[]>([])
   const [loads, setLoads] = useState<Load[]>([])
+  const [fields, setFields] = useState<Field[]>([])
   const [lots, setLots] = useState<Lot[]>([])
+  const [workMembers, setWorkMembers] = useState<WorkMember[]>([])
   const [audits, setAudits] = useState<Awaited<ReturnType<typeof fetchGroupActivity>>['audits']>([])
   const [profileNames, setProfileNames] = useState<Record<string, string>>({})
   const [activeLotId, setActiveLotId] = useState('')
+  const [activeFieldId, setActiveFieldId] = useState('')
+  const [newFieldName, setNewFieldName] = useState('')
   const [newLotName, setNewLotName] = useState('')
   const [tab, setTab] = useState<Tab>('activos')
   const [destinationType, setDestinationType] =
@@ -52,7 +59,9 @@ export function useLoads(
       const activity = await fetchGroupActivity(client, groupId)
       setDestinations(activity.destinations)
       setLoads(activity.loads)
+      setFields(activity.fields)
       setLots(activity.lots)
+      setWorkMembers(activity.workMembers)
       setAudits(activity.audits)
       setProfileNames(activity.profileNames)
       setActiveLotId((current) =>
@@ -70,10 +79,14 @@ export function useLoads(
   useEffect(() => {
     setDestinations([])
     setLoads([])
+    setFields([])
     setLots([])
+    setWorkMembers([])
     setAudits([])
     setProfileNames({})
+    setActiveFieldId('')
     setActiveLotId('')
+    setNewFieldName('')
     setTab('activos')
     setLoading(false)
     setError('')
@@ -87,12 +100,17 @@ export function useLoads(
         if (!mounted) return
         setDestinations(activity.destinations)
         setLoads(activity.loads)
+        setFields(activity.fields)
         setLots(activity.lots)
+        setWorkMembers(activity.workMembers)
         setAudits(activity.audits)
         setProfileNames(activity.profileNames)
-        setActiveLotId(
-          activity.lots.find((lot) => lot.deleted_at === null)?.id ?? '',
+        const firstField = activity.fields[0]
+        const firstLot = activity.lots.find(
+          (lot) => lot.deleted_at === null && lot.field_id === firstField?.id,
         )
+        setActiveFieldId(firstField?.id ?? '')
+        setActiveLotId(firstLot?.id ?? '')
         setLoading(false)
       })
       .catch((loadError: unknown) => {
@@ -134,6 +152,11 @@ export function useLoads(
         { event: '*', schema: 'public', table: 'lots' },
         () => void refresh().catch(() => undefined),
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'fields' },
+        () => void refresh().catch(() => undefined),
+      )
       .subscribe((status) => {
         if (mounted) setLive(status === 'SUBSCRIBED')
       })
@@ -147,9 +170,8 @@ export function useLoads(
 
   const createLot = useCallback(async () => {
     if (!client) return
-    const selectedLot = lots.find((lot) => lot.id === activeLotId)
-    if (!selectedLot) {
-      setError('No se encontró un lote del trabajo para crear otro.')
+    if (!activeFieldId || !fields.some((field) => field.id === activeFieldId)) {
+      setError('Elegí un campo antes de crear un lote.')
       return
     }
     const name = newLotName.trim()
@@ -162,7 +184,7 @@ export function useLoads(
     setError('')
     setNotice('')
     try {
-      const lotId = await createLotInRepository(client, selectedLot.field_id, name)
+      const lotId = await createLotInRepository(client, activeFieldId, name)
       setNewLotName('')
       await refresh()
       setActiveLotId(lotId)
@@ -172,7 +194,69 @@ export function useLoads(
     } finally {
       setBusy('')
     }
-  }, [activeLotId, client, lots, newLotName, refresh])
+  }, [activeFieldId, client, fields, newLotName, refresh])
+
+  const createField = useCallback(async () => {
+    if (!client || !groupId) return
+    const name = newFieldName.trim()
+    const seasonId = fields[0]?.season_id
+    if (!name) {
+      setError('Ingresá el nombre del campo.')
+      return
+    }
+    if (!seasonId) {
+      setError('No se encontró una campaña para crear el campo.')
+      return
+    }
+    setBusy('field')
+    setError('')
+    setNotice('')
+    try {
+      const field = await createFieldInRepository(client, groupId, seasonId, name)
+      setFields((current) => [...current, field])
+      setActiveFieldId(field.id)
+      setActiveLotId('')
+      setNewFieldName('')
+      setNotice(`Campo “${name}” creado. Ahora agregá un lote.`)
+    } catch (createError) {
+      setError(messageFromError(createError))
+    } finally {
+      setBusy('')
+    }
+  }, [client, fields, groupId, newFieldName])
+
+  const selectField = useCallback(
+    (fieldId: string) => {
+      setActiveFieldId(fieldId)
+      setActiveLotId(
+        lots.find((lot) => lot.field_id === fieldId && lot.deleted_at === null)?.id ?? '',
+      )
+    },
+    [lots],
+  )
+
+  const editField = useCallback(
+    async (field: Field, name: string) => {
+      if (!client) return
+      const trimmedName = name.trim()
+      if (!trimmedName) {
+        setError('Ingresá el nombre del campo.')
+        return
+      }
+      setBusy(field.id)
+      setError('')
+      try {
+        await updateFieldInRepository(client, field.id, trimmedName)
+        setNotice('Campo actualizado. El cambio quedó registrado.')
+        await refresh()
+      } catch (editError) {
+        setError(messageFromError(editError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
 
   const create = useCallback(
     async (
@@ -182,6 +266,17 @@ export function useLoads(
       humidity: string,
     ) => {
       if (!client || !userId || !groupId) return
+      const destinationLabel =
+        type === 'camion'
+          ? name.toUpperCase().replace(/[^A-Z0-9]/g, '')
+          : name.trim()
+      if (
+        type === 'camion' &&
+        !/^(?:[A-Z]{3}\d{3}|[A-Z]{2}\d{3}[A-Z]{2})$/.test(destinationLabel)
+      ) {
+        setError('Ingresá una patente válida: ABC123 o AA123BB, sin espacios.')
+        return
+      }
       if (!activeLotId) {
         setError('Elegí un lote antes de abrir un destino.')
         return
@@ -216,7 +311,7 @@ export function useLoads(
           userId,
           activeLotId,
           type,
-          name,
+          destinationLabel,
           capacity,
           initialHumidity,
         )
@@ -261,14 +356,24 @@ export function useLoads(
   const deleteLot = useCallback(
     async (lot: Lot) => {
       if (!client) return
-      if (lots.filter((item) => item.deleted_at === null).length <= 1) {
-        setError('El trabajo debe conservar al menos un lote activo.')
+      if (
+        lots.filter(
+          (item) => item.field_id === lot.field_id && item.deleted_at === null,
+        ).length <= 1
+      ) {
+        setError('El campo debe conservar al menos un lote activo.')
         return
       }
       setBusy(lot.id)
       setError('')
       try {
         await softDeleteLot(client, lot.id)
+        if (lot.id === activeLotId) {
+          const replacement = lots.find(
+            (item) => item.id !== lot.id && item.field_id === activeFieldId && item.deleted_at === null,
+          )
+          setActiveLotId(replacement?.id ?? '')
+        }
         setNotice('Lote eliminado del selector. El historial queda conservado.')
         await refresh()
       } catch (deleteError) {
@@ -277,7 +382,26 @@ export function useLoads(
         setBusy('')
       }
     },
-    [client, lots, refresh],
+    [activeFieldId, activeLotId, client, lots, refresh],
+  )
+
+  const updateLoadOwner = useCallback(
+    async (load: Load, ownerId: string | null) => {
+      if (!client) return
+      if (load.created_by === ownerId) return
+      setBusy(load.id)
+      setError('')
+      try {
+        await updateLoadAttribution(client, load.id, ownerId)
+        setNotice('Responsable actualizado. El cambio quedó registrado.')
+        await refresh()
+      } catch (updateError) {
+        setError(messageFromError(updateError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
   )
 
   const add = useCallback(
@@ -442,7 +566,9 @@ export function useLoads(
   return {
     destinations,
     loads,
+    fields,
     lots,
+    workMembers,
     lotsById,
     audits,
     profileNames,
@@ -463,6 +589,10 @@ export function useLoads(
     setTab,
     activeLotId,
     setActiveLotId,
+    activeFieldId,
+    selectField,
+    newFieldName,
+    setNewFieldName,
     newLotName,
     setNewLotName,
     destinationType,
@@ -487,12 +617,15 @@ export function useLoads(
     setNotice,
     live,
     createLot,
+    createField,
+    editField,
     editLot,
     deleteLot,
     create,
     add,
     close,
     editLoad,
+    updateLoadOwner,
     deleteLoad,
     editDestination,
     deleteDestination,

@@ -4,9 +4,11 @@ import type {
   ChangeAudit,
   Destination,
   DestinationChanges,
+  Field,
   GroupActivity,
   Load,
   Lot,
+  WorkMember,
 } from '../types'
 
 type Client = SupabaseClient<Database>
@@ -15,13 +17,14 @@ export async function fetchGroupActivity(
   client: Client,
   groupId: string,
 ): Promise<GroupActivity> {
-  const [destinationsResult, fieldsResult, auditResult] = await Promise.all([
+  const [destinationsResult, fieldsResult, membersResult, auditResult] = await Promise.all([
     client
       .from('destinations')
       .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false }),
-    client.from('fields').select('id').eq('group_id', groupId),
+    client.from('fields').select('*').eq('group_id', groupId).order('created_at'),
+    client.from('members').select('user_id, role').eq('group_id', groupId),
     client
       .from('change_audit')
       .select('*')
@@ -32,9 +35,11 @@ export async function fetchGroupActivity(
 
   if (destinationsResult.error) throw destinationsResult.error
   if (fieldsResult.error) throw fieldsResult.error
+  if (membersResult.error) throw membersResult.error
   if (auditResult.error) throw auditResult.error
 
-  const fieldIds = fieldsResult.data.map((field) => field.id)
+  const fields: Field[] = fieldsResult.data
+  const fieldIds = fields.map((field) => field.id)
   let lots: Lot[] = []
   if (fieldIds.length > 0) {
     const { data, error } = await client
@@ -65,6 +70,7 @@ export async function fetchGroupActivity(
         ...loads.map((load) => load.created_by),
         ...destinations.map((destination) => destination.created_by),
         ...audits.map((entry) => entry.actor_id),
+        ...membersResult.data.map((member) => member.user_id),
       ].filter((userId): userId is string => userId !== null),
     ),
   ]
@@ -84,13 +90,47 @@ export async function fetchGroupActivity(
     )
   }
 
+  const workMembers: WorkMember[] = membersResult.data.map((member) => ({
+    userId: member.user_id,
+    role: member.role,
+    fullName: profileNames[member.user_id] ?? 'Integrante del grupo',
+  }))
+
   return {
     destinations,
     loads,
+    fields,
     lots,
     audits,
+    workMembers,
     profileNames,
   }
+}
+
+export async function createField(
+  client: Client,
+  groupId: string,
+  seasonId: string,
+  name: string,
+) {
+  const { data, error } = await client
+    .from('fields')
+    .insert({ group_id: groupId, season_id: seasonId, name })
+    .select('*')
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function updateField(client: Client, fieldId: string, name: string) {
+  const { data, error } = await client
+    .from('fields')
+    .update({ name })
+    .eq('id', fieldId)
+    .select('id')
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error('No se encontró el campo o no tenés permiso para editarlo.')
 }
 
 export async function createLot(client: Client, fieldId: string, name: string) {
@@ -225,6 +265,18 @@ export async function updateLoad(
     .maybeSingle()
   if (error) throw error
   if (!data) throw new Error('No se encontró la pesada o no tenés permiso para editarla.')
+}
+
+export async function updateLoadAttribution(
+  client: Client,
+  loadId: string,
+  userId: string | null,
+) {
+  const { error } = await client.rpc('set_load_attribution', {
+    p_load_id: loadId,
+    p_created_by: userId,
+  })
+  if (error) throw error
 }
 
 export async function softDeleteLoad(client: Client, loadId: string) {

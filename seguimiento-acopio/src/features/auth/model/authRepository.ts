@@ -1,4 +1,9 @@
-import type { Session, SupabaseClient } from '@supabase/supabase-js'
+import {
+  isAuthError,
+  isAuthRetryableFetchError,
+  type Session,
+  type SupabaseClient,
+} from '@supabase/supabase-js'
 import type { Database } from '../../../lib/database.types'
 
 type Client = SupabaseClient<Database>
@@ -51,6 +56,9 @@ export async function signUp(
   })
 
   if (error) throw error
+  if (data.user && data.user.identities?.length === 0) {
+    throw new Error('Ya existe una cuenta con ese correo. Iniciá sesión.')
+  }
   if (!data.session) return null
 
   const { error: profileError } = await client
@@ -65,5 +73,37 @@ export async function signUp(
 
 export async function signOut(client: Client) {
   const { error } = await client.auth.signOut()
-  if (error) throw error
+  if (!error) return
+
+  const { error: localError } = await client.auth.signOut({ scope: 'local' })
+  if (localError) throw localError
+}
+
+const authErrorMessages: Record<string, string> = {
+  invalid_credentials: 'El correo o la contraseña no son correctos.',
+  email_not_confirmed: 'Confirmá tu correo antes de iniciar sesión.',
+  user_already_exists: 'Ya existe una cuenta con ese correo. Iniciá sesión.',
+  email_exists: 'Ya existe una cuenta con ese correo. Iniciá sesión.',
+  weak_password: 'La contraseña es muy débil. Usá al menos 8 caracteres.',
+  signup_disabled: 'El registro de cuentas nuevas está deshabilitado.',
+  validation_failed: 'Revisá que el correo y la contraseña sean válidos.',
+  over_request_rate_limit: 'Hiciste demasiados intentos. Esperá un momento y probá de nuevo.',
+  over_email_send_rate_limit: 'Se enviaron demasiados correos. Esperá un momento y probá de nuevo.',
+  user_banned: 'Esta cuenta está suspendida.',
+}
+
+export function authErrorMessage(error: unknown) {
+  if (isAuthRetryableFetchError(error)) {
+    return 'No hay conexión con el servidor. Revisá tu internet y probá de nuevo.'
+  }
+
+  if (isAuthError(error)) {
+    const known = error.code ? authErrorMessages[error.code] : undefined
+    if (known) return known
+    if (error.status === 429) return authErrorMessages.over_request_rate_limit
+  }
+
+  return error instanceof Error
+    ? error.message
+    : 'Ocurrió un error inesperado. Probá de nuevo.'
 }

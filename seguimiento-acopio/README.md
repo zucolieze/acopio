@@ -22,10 +22,13 @@ activo → pesadas → cierre → historial**. Se inspira en el flujo de “Acti
   cerrar sesión. La autorización de administración también se valida en Supabase.
 - Vista mobile-first con secciones Activos, Nuevo e Historial.
 - Cada trabajo tiene un lote inicial; el carrero puede crear, renombrar y
-  seleccionar otros lotes sin cerrar los destinos abiertos. Un lote admite
-  varios destinos.
+  seleccionar otros lotes sin cerrar los destinos abiertos. El observador
+  también puede corregir nombres de campos y lotes. Un lote admite varios
+  destinos.
 - El proveedor puede abrir un camión, silo o silobolsa con nombre o número,
   registrar pesadas en kilos y cerrar el destino.
+- Las patentes de camión se normalizan a mayúsculas, sin espacios, y aceptan
+  los formatos `ABC123` y `AA123BB`.
 - Los camiones requieren un límite configurable. Las pesadas que lo excedan se
   aceptan; la diferencia se muestra en rojo si faltan kilos y en amarillo si se
   supera el límite. El límite puede editarse luego.
@@ -34,10 +37,13 @@ activo → pesadas → cierre → historial**. Se inspira en el flujo de “Acti
 - Cada pesada guarda fecha y hora y el usuario que la registró. Se muestra el
   nombre del integrante y el acumulado por destino y grupo.
 - Carreros pueden corregir kilos y fecha/hora de las pesadas, editar los datos
-  de destinos y lotes y cambiar el nombre del trabajo.
+  de destinos y cambiar el nombre del trabajo. Los observadores pueden corregir
+  quién realizó una pesada y cambiar los nombres de campos y lotes.
 - Pesadas, destinos, lotes y trabajos se eliminan de forma lógica. Las
   modificaciones y eliminaciones se conservan en una bitácora visible para el
-  grupo; los cambios de kilos muestran la diferencia.
+  grupo; los cambios de kilos muestran la diferencia. La selección y gestión de
+  campos y lotes queda al final del tablero, y el historial de pesadas se
+  mantiene plegado inicialmente.
 - Los destinos cerrados y eliminados y sus pesadas permanecen en el historial.
 - El cliente puede consultar destinos y pesadas, pero no cargarlos. RLS aplica
   los permisos en la base de datos; la interfaz por sí sola no es una barrera de
@@ -58,7 +64,8 @@ El flujo solicita lote, tipo y nombre o número del destino. Para camiones se
 registra el límite; para silos y silobolsas, la humedad inicial y de cierre.
 Cada pesada registra kilos, fecha y hora y quién la cargó. La estructura
 existente crea automáticamente una campaña, un campo y un lote iniciales para
-cada trabajo; todavía no hay pantallas para administrar campañas ni campos.
+cada trabajo. Los campos y lotes se pueden administrar desde el final del
+tablero; todavía no hay pantallas para administrar campañas.
 Siguen pendientes el tipo de cereal, la variedad, volumen, exportación CSV y
 otros datos de la operación agrícola.
 
@@ -188,6 +195,10 @@ Las migraciones en `supabase/migrations/` son la fuente de verdad:
   auditado de elementos dados de baja y bloquea invitaciones a trabajos borrados.
 - `20261017130000_realtime_work_structure.sql`: habilita Realtime para cambios
   de trabajos y lotes.
+- `20261018100000_observer_work_corrections.sql`: habilita correcciones de
+  campos y lotes para observadores, auditoría de campos, reasignación del
+  responsable de una pesada, validación de patentes y actualizaciones Realtime
+  de campos.
 
 El cliente tipado está en `src/lib/supabase.ts` y los tipos en
 `src/lib/database.types.ts`. El acceso a datos está separado por feature en

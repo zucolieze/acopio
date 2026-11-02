@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import type { Database } from '../../../lib/database.types'
 import { getSupabaseClient } from '../../../lib/supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { messageFromError } from '../../../utils/errors'
 import {
+  authErrorMessage,
   fetchFullName,
   signIn as signInAccount,
   signOut as signOutAccount,
@@ -32,6 +33,8 @@ export function useAuth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [signUpName, setSignUpName] = useState('')
+  const loadedUserId = useRef<string | null>(null)
   const [authMode, setAuthMode] = useState<AuthMode>('entrar')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -40,12 +43,15 @@ export function useAuth() {
   const loadAccount = useCallback(
     async (currentSession: Session) => {
       if (!client) return
+      if (loadedUserId.current === currentSession.user.id) return
+      loadedUserId.current = currentSession.user.id
       setAccountLoading(true)
 
       try {
         const name = await fetchFullName(client, currentSession)
         setFullName(name)
       } catch (loadError) {
+        loadedUserId.current = null
         setError(messageFromError(loadError))
         throw loadError
       } finally {
@@ -64,11 +70,11 @@ export function useAuth() {
     } = client.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return
       setSession(nextSession)
-      setError('')
-      setNotice('')
 
       if (!nextSession) {
+        loadedUserId.current = null
         setFullName('')
+        setPassword('')
         return
       }
 
@@ -110,9 +116,10 @@ export function useAuth() {
     try {
       const nextSession = await signInAccount(client, email.trim(), password)
       setSession(nextSession)
+      setPassword('')
       await loadAccount(nextSession)
     } catch (authError) {
-      setError(messageFromError(authError))
+      setError(authErrorMessage(authError))
     } finally {
       setBusy('')
     }
@@ -130,8 +137,10 @@ export function useAuth() {
         client,
         email.trim(),
         password,
-        fullName.trim(),
+        signUpName.trim(),
       )
+      setPassword('')
+      setSignUpName('')
 
       if (nextSession) {
         setSession(nextSession)
@@ -142,7 +151,7 @@ export function useAuth() {
         setNotice('Cuenta creada. Iniciá sesión con tu correo y contraseña.')
       }
     } catch (authError) {
-      setError(messageFromError(authError))
+      setError(authErrorMessage(authError))
     } finally {
       setBusy('')
     }
@@ -155,7 +164,7 @@ export function useAuth() {
     try {
       await signOutAccount(client)
     } catch (authError) {
-      setError(messageFromError(authError))
+      setError(authErrorMessage(authError))
     } finally {
       setBusy('')
     }
@@ -178,8 +187,8 @@ export function useAuth() {
     setEmail,
     password,
     setPassword,
-    fullNameInput: fullName,
-    setFullName,
+    fullNameInput: signUpName,
+    setFullName: setSignUpName,
     authMode,
     setAuthMode,
     busy,

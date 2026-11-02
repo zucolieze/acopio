@@ -92,7 +92,7 @@ type ChangeAudit = {
   id: string
   group_id: string
   destination_id: string | null
-  entity_type: 'trabajo' | 'lote' | 'destino' | 'carga'
+  entity_type: 'trabajo' | 'campo' | 'lote' | 'destino' | 'carga'
   entity_id: string
   action: 'editar' | 'eliminar'
   actor_id: string | null
@@ -131,6 +131,10 @@ export type Database = {
       join_group: {
         Args: { p_invite_code: string; p_role: MemberRole }
         Returns: string
+      }
+      set_load_attribution: {
+        Args: { p_load_id: string; p_created_by: string | null }
+        Returns: undefined
       }
     }
     Enums: {

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
 import type { DestinationType } from '../../../lib/database.types'
 import { Brand } from '../../../components/ui/Brand'
 import { EmptyState } from '../../../components/ui/EmptyState'
@@ -10,9 +9,11 @@ import type {
   ChangeAudit,
   Destination,
   DestinationChanges,
+  Field,
   Load,
   Lot,
   Tab,
+  WorkMember,
 } from '../types'
 import { AuditList } from './AuditList'
 import {
@@ -23,8 +24,8 @@ import {
 import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
-import { LotManagement } from './LotManagement'
 import { NewDestinationForm } from './NewDestinationForm'
+import { WorkStructureManagement } from './WorkStructureManagement'
 
 type DashboardPageProps = {
   membership: Membership
@@ -34,9 +35,12 @@ type DashboardPageProps = {
   closedDestinations: Destination[]
   deletedDestinations: Destination[]
   loadsByDestination: Map<string, Load[]>
+  fields: Field[]
   lots: Lot[]
-  activeLots: Lot[]
+  workMembers: WorkMember[]
+  activeFieldId: string
   activeLotId: string
+  newFieldName: string
   newLotName: string
   audits: ChangeAudit[]
   profileNames: Record<string, string>
@@ -63,9 +67,13 @@ type DashboardPageProps = {
   onAdminModeToggle: () => void
   onCopyInviteCode: () => void
   onTabChange: (tab: Tab) => void
+  onActiveFieldChange: (fieldId: string) => void
   onActiveLotChange: (lotId: string) => void
+  onNewFieldNameChange: (value: string) => void
   onNewLotNameChange: (value: string) => void
+  onCreateField: () => void
   onCreateLot: () => void
+  onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
   onDeleteLot: (lot: Lot) => void
   onRenameGroup: (name: string) => void
@@ -85,6 +93,7 @@ type DashboardPageProps = {
   onAddLoad: (destinationId: string, kilos: string) => void
   onCloseDestination: (destination: Destination, humidity: string) => void
   onEditLoad: (load: Load, kilos: string, date: string) => void
+  onChangeLoadAuthor: (load: Load, userId: string | null) => void
   onDeleteLoad: (load: Load) => void
   onEditDestination: (destination: Destination, changes: DestinationChanges) => void
   onDeleteDestination: (destination: Destination) => void
@@ -155,8 +164,11 @@ export function DashboardPage(props: DashboardPageProps) {
               entries={entries}
               profileNames={props.profileNames}
               canEdit={props.isProvider && !deleted}
+              canChangeAuthor={!props.isProvider && !deleted}
+              workMembers={props.workMembers}
               busyId={props.busy}
               onEdit={props.onEditLoad}
+              onChangeAuthor={props.onChangeLoadAuthor}
               onDelete={props.onDeleteLoad}
             />
             <AuditList
@@ -169,11 +181,6 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
       </article>
     )
-  }
-
-  function handleCreateLot(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    props.onCreateLot()
   }
 
   return (
@@ -222,50 +229,121 @@ export function DashboardPage(props: DashboardPageProps) {
           </div>
         </div>
 
-        <section className="lot-selection panel" aria-label="Lote activo">
-          <label>
-            Lote seleccionado para nuevos destinos
-            <select
-              value={props.activeLotId}
-              onChange={(event) => props.onActiveLotChange(event.target.value)}
-              disabled={props.loading || props.activeLots.length === 0}
+        <Feedback error={props.error} notice={props.notice} />
+        <nav className="tabs" aria-label="Secciones">
+          {tabs.map((item) => (
+            <button
+              key={item.id}
+              className={props.tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
+              type="button"
+              aria-current={props.tab === item.id ? 'page' : undefined}
+              onClick={() => props.onTabChange(item.id)}
             >
-              {props.activeLots.map((lot) => (
-                <option key={lot.id} value={lot.id}>{lot.name}</option>
-              ))}
-            </select>
-          </label>
-          {props.isProvider && (
-            <form className="create-lot-form" onSubmit={handleCreateLot}>
-              <label>
-                Crear otro lote
-                <input
-                  maxLength={120}
-                  placeholder="Ej.: Lote 2"
-                  required
-                  value={props.newLotName}
-                  onChange={(event) => props.onNewLotNameChange(event.target.value)}
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {props.tab === 'nuevo' && props.isProvider && (
+          <NewDestinationForm
+            destinationType={props.destinationType}
+            destinationName={props.destinationName}
+            truckCapacity={props.truckCapacity}
+            openingHumidity={props.openingHumidity}
+            busy={props.busy === 'destination'}
+            loading={props.loading}
+            canOpen={Boolean(props.activeLotId)}
+            onDestinationTypeChange={props.onDestinationTypeChange}
+            onDestinationNameChange={props.onDestinationNameChange}
+            onTruckCapacityChange={props.onTruckCapacityChange}
+            onOpeningHumidityChange={props.onOpeningHumidityChange}
+            onSubmit={props.onCreateDestination}
+          />
+        )}
+
+        {props.tab === 'activos' && (
+          <section className="destination-list" aria-live="polite">
+            {props.activeDestinations.length === 0 ? (
+              <EmptyState
+                title="Todavía no hay destinos activos"
+                description={props.isProvider ? 'Tocá “Nuevo” para abrir un camión, silo o silobolsa.' : 'Cuando el proveedor abra un destino, va a aparecer acá.'}
+              />
+            ) : (
+              props.activeDestinations.map((destination) => (
+                <DestinationCard
+                  key={destination.id}
+                  destination={destination}
+                  lotName={lotNames.get(destination.lot_id) ?? 'Lote no disponible'}
+                  lots={props.lots.filter((lot) => lot.deleted_at === null)}
+                  entries={props.loadsByDestination.get(destination.id) ?? []}
+                  auditEntries={auditForDestination(destination.id)}
+                  workMembers={props.workMembers}
+                  profileNames={props.profileNames}
+                  isProvider={props.isProvider}
+                  busy={props.busy === destination.id}
+                  busyId={props.busy}
+                  kilos={props.loadKilos[destination.id] ?? ''}
+                  closingHumidity={props.closingHumidity[destination.id] ?? ''}
+                  onKilosChange={(value) => props.onKilosChange(destination.id, value)}
+                  onClosingHumidityChange={(value) => props.onClosingHumidityChange(destination.id, value)}
+                  onAddLoad={(kilos) => props.onAddLoad(destination.id, kilos)}
+                  onClose={(humidity) => props.onCloseDestination(destination, humidity)}
+                  onEditLoad={props.onEditLoad}
+                  onChangeLoadAuthor={props.onChangeLoadAuthor}
+                  onDeleteLoad={props.onDeleteLoad}
+                  onEditDestination={(changes) => props.onEditDestination(destination, changes)}
+                  onDeleteDestination={() => props.onDeleteDestination(destination)}
                 />
-              </label>
-              <button className="button button--secondary" type="submit" disabled={props.loading || props.busy === 'lot'}>
-                {props.busy === 'lot' ? 'Creando…' : 'Crear lote'}
-              </button>
-            </form>
-          )}
-          {props.isProvider && (
-            <LotManagement
-              lots={props.activeLots}
-              destinations={props.activeDestinations}
-              busy={props.busy}
-              onRename={props.onRenameLot}
-              onDelete={props.onDeleteLot}
-            />
-          )}
-          {props.loading && <p className="muted" role="status">Cargando lotes y destinos…</p>}
-          {!props.loading && props.activeLots.length === 0 && (
-            <p className="muted">No hay lotes disponibles para este trabajo.</p>
-          )}
-        </section>
+              ))
+            )}
+          </section>
+        )}
+
+        {props.tab === 'historial' && (
+          <section className="destination-list" aria-live="polite">
+            {historyDestinations.length === 0 ? (
+              <EmptyState
+                title="Todavía no hay destinos en el historial"
+                description="Los destinos cerrados y eliminados quedan registrados acá."
+              />
+            ) : (
+              historyDestinations.map((destination) =>
+                renderHistoryDestination(destination, destination.deleted_at !== null),
+              )
+            )}
+          </section>
+        )}
+
+        {props.loading && (
+          <p className="muted" role="status">Cargando campos y lotes…</p>
+        )}
+        {!props.loading && (
+          <WorkStructureManagement
+            fields={props.fields}
+            lots={props.lots}
+            destinations={props.activeDestinations}
+            activeFieldId={props.activeFieldId}
+            activeLotId={props.activeLotId}
+            newFieldName={props.newFieldName}
+            newLotName={props.newLotName}
+            busy={props.busy}
+            hasAnyDestinations={
+              props.activeDestinations.length +
+                props.closedDestinations.length +
+                props.deletedDestinations.length >
+              0
+            }
+            onFieldChange={props.onActiveFieldChange}
+            onLotChange={props.onActiveLotChange}
+            onNewFieldNameChange={props.onNewFieldNameChange}
+            onNewLotNameChange={props.onNewLotNameChange}
+            onCreateField={props.onCreateField}
+            onCreateLot={props.onCreateLot}
+            onRenameField={props.onRenameField}
+            onRenameLot={props.onRenameLot}
+            onDeleteLot={props.onDeleteLot}
+          />
+        )}
 
         <details className="work-summary">
           <summary>Información del trabajo</summary>
@@ -340,94 +418,12 @@ export function DashboardPage(props: DashboardPageProps) {
             )}
             {workAudits.length > 0 && (
               <details className="audit-history-details">
-                <summary>Cambios en el trabajo y los lotes ({workAudits.length})</summary>
+                <summary>Cambios en el trabajo, campos y lotes ({workAudits.length})</summary>
                 <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
               </details>
             )}
           </div>
         </details>
-
-        <Feedback error={props.error} notice={props.notice} />
-        <nav className="tabs" aria-label="Secciones">
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              className={props.tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
-              type="button"
-              aria-current={props.tab === item.id ? 'page' : undefined}
-              onClick={() => props.onTabChange(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        {props.tab === 'nuevo' && props.isProvider && (
-          <NewDestinationForm
-            destinationType={props.destinationType}
-            destinationName={props.destinationName}
-            truckCapacity={props.truckCapacity}
-            openingHumidity={props.openingHumidity}
-            busy={props.busy === 'destination'}
-            loading={props.loading}
-            onDestinationTypeChange={props.onDestinationTypeChange}
-            onDestinationNameChange={props.onDestinationNameChange}
-            onTruckCapacityChange={props.onTruckCapacityChange}
-            onOpeningHumidityChange={props.onOpeningHumidityChange}
-            onSubmit={props.onCreateDestination}
-          />
-        )}
-
-        {props.tab === 'activos' && (
-          <section className="destination-list" aria-live="polite">
-            {props.activeDestinations.length === 0 ? (
-              <EmptyState
-                title="Todavía no hay destinos activos"
-                description={props.isProvider ? 'Tocá “Nuevo” para abrir un camión, silo o silobolsa.' : 'Cuando el proveedor abra un destino, va a aparecer acá.'}
-              />
-            ) : (
-              props.activeDestinations.map((destination) => (
-                <DestinationCard
-                  key={destination.id}
-                  destination={destination}
-                  lotName={lotNames.get(destination.lot_id) ?? 'Lote no disponible'}
-                  lots={props.activeLots}
-                  entries={props.loadsByDestination.get(destination.id) ?? []}
-                  auditEntries={auditForDestination(destination.id)}
-                  profileNames={props.profileNames}
-                  isProvider={props.isProvider}
-                  busy={props.busy === destination.id}
-                  busyId={props.busy}
-                  kilos={props.loadKilos[destination.id] ?? ''}
-                  closingHumidity={props.closingHumidity[destination.id] ?? ''}
-                  onKilosChange={(value) => props.onKilosChange(destination.id, value)}
-                  onClosingHumidityChange={(value) => props.onClosingHumidityChange(destination.id, value)}
-                  onAddLoad={(kilos) => props.onAddLoad(destination.id, kilos)}
-                  onClose={(humidity) => props.onCloseDestination(destination, humidity)}
-                  onEditLoad={props.onEditLoad}
-                  onDeleteLoad={props.onDeleteLoad}
-                  onEditDestination={(changes) => props.onEditDestination(destination, changes)}
-                  onDeleteDestination={() => props.onDeleteDestination(destination)}
-                />
-              ))
-            )}
-          </section>
-        )}
-
-        {props.tab === 'historial' && (
-          <section className="destination-list" aria-live="polite">
-            {historyDestinations.length === 0 ? (
-              <EmptyState
-                title="Todavía no hay destinos en el historial"
-                description="Los destinos cerrados y eliminados quedan registrados acá."
-              />
-            ) : (
-              historyDestinations.map((destination) =>
-                renderHistoryDestination(destination, destination.deleted_at !== null),
-              )
-            )}
-          </section>
-        )}
       </section>
       <footer className="app-footer">
         {props.fullName
