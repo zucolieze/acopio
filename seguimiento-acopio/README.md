@@ -440,6 +440,21 @@ y sus contraseñas débiles son solo para uso local; no las crees en el remoto.
 4. **Plantilla**: en Authentication > Email Templates podés traducir los
    correos "Magic Link" y "Reset Password" al español.
 
+#### Cuentas de prueba del proyecto remoto
+
+Se crearon con confirmación de correo ya hecha, para poder probar sin enviar
+correos. Las contraseñas **no** se guardan en el repositorio (es público): están
+en `seguimiento-acopio/CREDENCIALES.local.md`, un archivo local ignorado por git.
+
+| Cuenta | Correo | Uso |
+|---|---|---|
+| Admin | `admin-acopio@example.com` | Modalidad oculta (ver más abajo) |
+| Carrero | `carrero-acopio@example.com` | Elegir "Carrero": crea el trabajo y carga pesadas |
+| Observador | `observador-acopio@example.com` | Elegir "Observador": se suma con el código de invitación |
+
+Ingresar con "Prefiero entrar con contraseña". El rol (carrero u observador) no
+es de la cuenta: se elige en la pantalla de modalidades al entrar.
+
 #### Admin de prueba (solo para el dueño)
 
 La modalidad admin no figura en ninguna lista: aparece únicamente si la cuenta

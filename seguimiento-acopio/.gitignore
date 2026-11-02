@@ -3,3 +3,6 @@ dist/
 .env.local
 .env.*.local
 supabase/.temp/
+
+# Credenciales de prueba
+CREDENCIALES.local.md
