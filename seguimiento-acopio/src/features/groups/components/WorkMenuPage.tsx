@@ -62,9 +62,6 @@ export function WorkMenuPage({
           <button className="button button--quiet button--small" type="button" onClick={onChangeMode}>
             Cambiar modalidad
           </button>
-          <button className="button button--quiet button--small" type="button" disabled={busy} onClick={onSignOut}>
-            Cerrar sesión
-          </button>
         </div>
       </header>
       <section className="onboarding">
@@ -172,6 +169,16 @@ export function WorkMenuPage({
           </form>
         )}
       </section>
+      <footer className="app-footer app-footer--end">
+        <button
+          className="button button--quiet button--small"
+          type="button"
+          disabled={busy}
+          onClick={onSignOut}
+        >
+          Cerrar sesión
+        </button>
+      </footer>
     </main>
   )
 }

@@ -42,6 +42,7 @@ type DashboardPageProps = {
   activeLotId: string
   newFieldName: string
   newLotName: string
+  newLotCereal: string
   audits: ChangeAudit[]
   profileNames: Record<string, string>
   totalKilos: number
@@ -71,6 +72,7 @@ type DashboardPageProps = {
   onActiveLotChange: (lotId: string) => void
   onNewFieldNameChange: (value: string) => void
   onNewLotNameChange: (value: string) => void
+  onNewLotCerealChange: (value: string) => void
   onCreateField: () => void
   onCreateLot: () => void
   onRenameField: (field: Field, name: string) => void
@@ -108,8 +110,11 @@ export function DashboardPage(props: DashboardPageProps) {
     ...(props.isProvider ? [{ id: 'nuevo' as const, label: 'Nuevo' }] : []),
     { id: 'historial', label: 'Historial' },
   ]
-  const lotNames = new Map(props.lots.map((lot) => [lot.id, lot.name]))
+  const lotNames = new Map(
+    props.lots.map((lot) => [lot.id, lot.cereal ? `${lot.name} · ${lot.cereal}` : lot.name]),
+  )
   const historyDestinations = [
+    ...props.activeDestinations,
     ...props.closedDestinations,
     ...props.deletedDestinations,
   ]
@@ -210,24 +215,11 @@ export function DashboardPage(props: DashboardPageProps) {
               Ver como {props.adminMode === 'observador' ? 'carrero' : 'observador'}
             </button>
           )}
-          <button className="button button--quiet button--small" type="button" disabled={props.busy === 'signout'} onClick={props.onSignOut}>
-            Cerrar sesión
-          </button>
         </div>
       </header>
 
       <section className="dashboard">
-        <div className="dashboard__intro">
-          <div>
-            <p className="eyebrow">Registro de kilos</p>
-            <h1>{props.membership.groupName}</h1>
-            <p className="muted">
-              {props.isProvider
-                ? 'Cargá las pesadas; tu equipo ve los kilos al instante.'
-                : 'Seguimiento de las pesadas cargadas por tu equipo.'}
-            </p>
-          </div>
-        </div>
+        <h1 className="sr-only">{props.membership.groupName}</h1>
 
         <Feedback error={props.error} notice={props.notice} />
         <nav className="tabs" aria-label="Secciones">
@@ -245,6 +237,39 @@ export function DashboardPage(props: DashboardPageProps) {
         </nav>
 
         {props.tab === 'nuevo' && props.isProvider && (
+          <>
+        {props.loading && (
+          <p className="muted" role="status">Cargando campos y lotes…</p>
+        )}
+        {!props.loading && (
+          <WorkStructureManagement
+            fields={props.fields}
+            lots={props.lots}
+            destinations={props.activeDestinations}
+            activeFieldId={props.activeFieldId}
+            activeLotId={props.activeLotId}
+            newFieldName={props.newFieldName}
+            newLotName={props.newLotName}
+            newLotCereal={props.newLotCereal}
+            busy={props.busy}
+            hasAnyDestinations={
+              props.activeDestinations.length +
+                props.closedDestinations.length +
+                props.deletedDestinations.length >
+              0
+            }
+            onFieldChange={props.onActiveFieldChange}
+            onLotChange={props.onActiveLotChange}
+            onNewFieldNameChange={props.onNewFieldNameChange}
+            onNewLotNameChange={props.onNewLotNameChange}
+            onNewLotCerealChange={props.onNewLotCerealChange}
+            onCreateField={props.onCreateField}
+            onCreateLot={props.onCreateLot}
+            onRenameField={props.onRenameField}
+            onRenameLot={props.onRenameLot}
+            onDeleteLot={props.onDeleteLot}
+          />
+        )}
           <NewDestinationForm
             destinationType={props.destinationType}
             destinationName={props.destinationName}
@@ -259,6 +284,7 @@ export function DashboardPage(props: DashboardPageProps) {
             onOpeningHumidityChange={props.onOpeningHumidityChange}
             onSubmit={props.onCreateDestination}
           />
+          </>
         )}
 
         {props.tab === 'activos' && (
@@ -274,25 +300,16 @@ export function DashboardPage(props: DashboardPageProps) {
                   key={destination.id}
                   destination={destination}
                   lotName={lotNames.get(destination.lot_id) ?? 'Lote no disponible'}
-                  lots={props.lots.filter((lot) => lot.deleted_at === null)}
                   entries={props.loadsByDestination.get(destination.id) ?? []}
-                  auditEntries={auditForDestination(destination.id)}
-                  workMembers={props.workMembers}
-                  profileNames={props.profileNames}
                   isProvider={props.isProvider}
                   busy={props.busy === destination.id}
-                  busyId={props.busy}
                   kilos={props.loadKilos[destination.id] ?? ''}
                   closingHumidity={props.closingHumidity[destination.id] ?? ''}
                   onKilosChange={(value) => props.onKilosChange(destination.id, value)}
                   onClosingHumidityChange={(value) => props.onClosingHumidityChange(destination.id, value)}
                   onAddLoad={(kilos) => props.onAddLoad(destination.id, kilos)}
                   onClose={(humidity) => props.onCloseDestination(destination, humidity)}
-                  onEditLoad={props.onEditLoad}
-                  onChangeLoadAuthor={props.onChangeLoadAuthor}
-                  onDeleteLoad={props.onDeleteLoad}
-                  onEditDestination={(changes) => props.onEditDestination(destination, changes)}
-                  onDeleteDestination={() => props.onDeleteDestination(destination)}
+                  onDelete={() => props.onDeleteDestination(destination)}
                 />
               ))
             )}
@@ -304,7 +321,7 @@ export function DashboardPage(props: DashboardPageProps) {
             {historyDestinations.length === 0 ? (
               <EmptyState
                 title="Todavía no hay destinos en el historial"
-                description="Los destinos cerrados y eliminados quedan registrados acá."
+                description="Acá vas a ver las cargas de todos los destinos, activos, cerrados y eliminados."
               />
             ) : (
               historyDestinations.map((destination) =>
@@ -314,37 +331,8 @@ export function DashboardPage(props: DashboardPageProps) {
           </section>
         )}
 
-        {props.loading && (
-          <p className="muted" role="status">Cargando campos y lotes…</p>
-        )}
-        {!props.loading && (
-          <WorkStructureManagement
-            fields={props.fields}
-            lots={props.lots}
-            destinations={props.activeDestinations}
-            activeFieldId={props.activeFieldId}
-            activeLotId={props.activeLotId}
-            newFieldName={props.newFieldName}
-            newLotName={props.newLotName}
-            busy={props.busy}
-            hasAnyDestinations={
-              props.activeDestinations.length +
-                props.closedDestinations.length +
-                props.deletedDestinations.length >
-              0
-            }
-            onFieldChange={props.onActiveFieldChange}
-            onLotChange={props.onActiveLotChange}
-            onNewFieldNameChange={props.onNewFieldNameChange}
-            onNewLotNameChange={props.onNewLotNameChange}
-            onCreateField={props.onCreateField}
-            onCreateLot={props.onCreateLot}
-            onRenameField={props.onRenameField}
-            onRenameLot={props.onRenameLot}
-            onDeleteLot={props.onDeleteLot}
-          />
-        )}
-
+        {props.tab === 'historial' && (
+          <>
         <details className="work-summary">
           <summary>Información del trabajo</summary>
           <div className="work-summary__content">
@@ -424,11 +412,24 @@ export function DashboardPage(props: DashboardPageProps) {
             )}
           </div>
         </details>
+          </>
+        )}
+
       </section>
       <footer className="app-footer">
-        {props.fullName
-          ? `Ingresaste como ${props.fullName}.`
-          : 'Seguimiento de cosecha'}
+        <span>
+          {props.fullName
+            ? `Ingresaste como ${props.fullName}.`
+            : 'Seguimiento de cosecha'}
+        </span>
+        <button
+          className="button button--quiet button--small"
+          type="button"
+          disabled={props.busy === 'signout'}
+          onClick={props.onSignOut}
+        >
+          Cerrar sesión
+        </button>
       </footer>
     </main>
   )

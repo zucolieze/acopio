@@ -29,14 +29,6 @@ export function ModeSelectionPage({
     <main className="center-page center-page--top">
       <header className="simple-header">
         <Brand />
-        <button
-          className="button button--quiet"
-          type="button"
-          disabled={busy}
-          onClick={onSignOut}
-        >
-          Cerrar sesión
-        </button>
       </header>
       <section className="mode-selection">
         <p className="eyebrow" onClick={() => setTaps((count) => count + 1)}>
@@ -78,6 +70,16 @@ export function ModeSelectionPage({
           )}
         </div>
       </section>
+      <footer className="app-footer app-footer--end">
+        <button
+          className="button button--quiet button--small"
+          type="button"
+          disabled={busy}
+          onClick={onSignOut}
+        >
+          Cerrar sesión
+        </button>
+      </footer>
     </main>
   )
 }

@@ -38,6 +38,7 @@ export function useLoads(
   const [activeFieldId, setActiveFieldId] = useState('')
   const [newFieldName, setNewFieldName] = useState('')
   const [newLotName, setNewLotName] = useState('')
+  const [newLotCereal, setNewLotCereal] = useState('')
   const [tab, setTab] = useState<Tab>('activos')
   const [destinationType, setDestinationType] =
     useState<DestinationType>('camion')
@@ -180,21 +181,28 @@ export function useLoads(
       return
     }
 
+    if (!newLotCereal) {
+      setError('Elegí el cereal del lote.')
+      return
+    }
+
     setBusy('lot')
     setError('')
     setNotice('')
     try {
-      const lotId = await createLotInRepository(client, activeFieldId, name)
+      const lotId = await createLotInRepository(client, activeFieldId, name, newLotCereal)
       setNewLotName('')
+      setNewLotCereal('')
       await refresh()
       setActiveLotId(lotId)
-      setNotice(`Lote “${name}” creado y seleccionado.`)
+      setTab('nuevo')
+      setNotice(`Lote “${name}” creado. Ahora abrí el primer destino.`)
     } catch (createError) {
       setError(messageFromError(createError))
     } finally {
       setBusy('')
     }
-  }, [activeFieldId, client, fields, newLotName, refresh])
+  }, [activeFieldId, client, fields, newLotCereal, newLotName, refresh])
 
   const createField = useCallback(async () => {
     if (!client || !groupId) return
@@ -595,6 +603,8 @@ export function useLoads(
     setNewFieldName,
     newLotName,
     setNewLotName,
+    newLotCereal,
+    setNewLotCereal,
     destinationType,
     setDestinationType,
     destinationName,

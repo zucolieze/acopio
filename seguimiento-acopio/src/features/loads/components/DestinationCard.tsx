@@ -1,66 +1,41 @@
 import type { FormEvent } from 'react'
-import { LoadList } from './LoadList'
 import { DestinationHeading } from './DestinationHeading'
-import { DestinationManagement } from './DestinationManagement'
-import { AuditList } from './AuditList'
-import type {
-  ChangeAudit,
-  Destination,
-  DestinationChanges,
-  Load,
-  Lot,
-  WorkMember,
-} from '../types'
+import type { Destination, Load } from '../types'
 import { formatKilos } from '../../../utils/format'
 
 type DestinationCardProps = {
   destination: Destination
   lotName: string
-  lots: Lot[]
   entries: Load[]
-  auditEntries: ChangeAudit[]
-  workMembers: WorkMember[]
-  profileNames: Record<string, string>
   isProvider: boolean
   busy: boolean
-  busyId: string
   kilos: string
   closingHumidity: string
   onKilosChange: (value: string) => void
   onClosingHumidityChange: (value: string) => void
   onAddLoad: (kilos: string) => void
   onClose: (humidity: string) => void
-  onEditLoad: (load: Load, kilos: string, date: string) => void
-  onChangeLoadAuthor: (load: Load, userId: string | null) => void
-  onDeleteLoad: (load: Load) => void
-  onEditDestination: (changes: DestinationChanges) => void
-  onDeleteDestination: () => void
+  onDelete: () => void
 }
 
 export function DestinationCard({
   destination,
   lotName,
-  lots,
   entries,
-  auditEntries,
-  workMembers,
-  profileNames,
   isProvider,
   busy,
-  busyId,
   kilos,
   closingHumidity,
   onKilosChange,
   onClosingHumidityChange,
   onAddLoad,
   onClose,
-  onEditLoad,
-  onChangeLoadAuthor,
-  onDeleteLoad,
-  onEditDestination,
-  onDeleteDestination,
+  onDelete,
 }: DestinationCardProps) {
   const total = entries.reduce((sum, entry) => sum + entry.kg, 0)
+  const isEmpty = entries.length === 0
+  const limitReached =
+    destination.capacity_kg !== null && total >= destination.capacity_kg
 
   function handleAddLoad(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -98,12 +73,21 @@ export function DestinationCard({
           </form>
         </>
       )}
-      {destination.destination_type === 'camion' ? (
+      {destination.destination_type === 'camion' && (
         <CapacitySummary destination={destination} total={total} />
-      ) : (
-        <HumiditySummary destination={destination} />
       )}
-      {isProvider && destination.destination_type !== 'camion' && (
+      {isProvider && isEmpty && (
+        <button
+          className="button button--danger"
+          type="button"
+          disabled={busy}
+          onClick={onDelete}
+        >
+          Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'} (no
+          tiene cargas)
+        </button>
+      )}
+      {isProvider && !isEmpty && destination.destination_type !== 'camion' && (
         <form className="destination-card__close-form" onSubmit={handleClose}>
           <label>
             Humedad de cierre (%)
@@ -120,7 +104,7 @@ export function DestinationCard({
             />
           </label>
           <button
-            className="button button--secondary"
+            className="button button--danger"
             type="submit"
             disabled={
               busy ||
@@ -134,52 +118,19 @@ export function DestinationCard({
           </button>
         </form>
       )}
-      {isProvider && destination.destination_type === 'camion' && (
+      {isProvider && !isEmpty && destination.destination_type === 'camion' && (
         <button
-          className="link-button destination-card__close"
+          className={
+            limitReached
+              ? 'button button--danger button--large destination-card__close is-urgent'
+              : 'link-button destination-card__close'
+          }
           type="button"
           disabled={busy}
           onClick={() => onClose('')}
         >
           Cerrar camión
         </button>
-      )}
-      <details className="load-history">
-        <summary>
-          Historial de cargas ({entries.length})
-          {!isProvider && entries.length > 3 ? ' · últimas 3' : ''}
-        </summary>
-        <LoadList
-          entries={isProvider ? entries : entries.slice(0, 3)}
-          profileNames={profileNames}
-          canEdit={isProvider}
-          canChangeAuthor={!isProvider}
-          workMembers={workMembers}
-          busyId={busyId}
-          onEdit={onEditLoad}
-          onChangeAuthor={onChangeLoadAuthor}
-          onDelete={onDeleteLoad}
-        />
-      </details>
-      {isProvider && (
-        <DestinationManagement
-          destination={destination}
-          lots={lots}
-          busy={busy}
-          onSave={onEditDestination}
-          onDelete={onDeleteDestination}
-        />
-      )}
-      {auditEntries.length > 0 && (
-        <details className="audit-history-details">
-          <summary>Ver cambios registrados ({auditEntries.length})</summary>
-          <AuditList
-            entries={auditEntries}
-            profileNames={profileNames}
-            lots={lots}
-            destinationName={destination.name}
-          />
-        </details>
       )}
     </article>
   )

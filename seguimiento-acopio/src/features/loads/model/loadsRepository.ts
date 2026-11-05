@@ -133,10 +133,15 @@ export async function updateField(client: Client, fieldId: string, name: string)
   if (!data) throw new Error('No se encontró el campo o no tenés permiso para editarlo.')
 }
 
-export async function createLot(client: Client, fieldId: string, name: string) {
+export async function createLot(
+  client: Client,
+  fieldId: string,
+  name: string,
+  cereal: string,
+) {
   const { data, error } = await client
     .from('lots')
-    .insert({ field_id: fieldId, name })
+    .insert({ field_id: fieldId, name, cereal })
     .select('id')
     .single()
   if (error) throw error

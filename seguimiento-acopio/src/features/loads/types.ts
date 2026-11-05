@@ -36,6 +36,16 @@ export type GroupActivity = {
   profileNames: Record<string, string>
 }
 
+export const cerealOptions = [
+  'Soja',
+  'Maíz',
+  'Trigo',
+  'Girasol',
+  'Sorgo',
+  'Cebada',
+  'Otro',
+]
+
 export const destinationLabels: Record<DestinationType, string> = {
   camion: 'Camión',
   silo: 'Silo',

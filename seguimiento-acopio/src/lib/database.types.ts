@@ -48,6 +48,7 @@ type Lot = {
   id: string
   field_id: string
   name: string
+  cereal: string | null
   created_at: string
   deleted_at: string | null
 }
@@ -109,7 +110,7 @@ export type Database = {
       members: TableDefinition<Member, 'group_id' | 'user_id' | 'role'>
       seasons: TableDefinition<Season, 'group_id' | 'name' | 'year'>
       fields: TableDefinition<Field, 'group_id' | 'season_id' | 'name'>
-      lots: TableDefinition<Lot, 'field_id' | 'name'>
+      lots: TableDefinition<Lot, 'field_id' | 'name', { cereal: string | null }>
       destinations: TableDefinition<
         Destination,
         'group_id' | 'destination_type' | 'name' | 'lot_id',

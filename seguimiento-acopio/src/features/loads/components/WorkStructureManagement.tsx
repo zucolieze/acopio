@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { cerealOptions } from '../types'
 import type { Destination, Field, Lot } from '../types'
 import { LotManagement } from './LotManagement'
 
@@ -10,12 +11,14 @@ type WorkStructureManagementProps = {
   activeLotId: string
   newFieldName: string
   newLotName: string
+  newLotCereal: string
   busy: string
   hasAnyDestinations: boolean
   onFieldChange: (fieldId: string) => void
   onLotChange: (lotId: string) => void
   onNewFieldNameChange: (value: string) => void
   onNewLotNameChange: (value: string) => void
+  onNewLotCerealChange: (value: string) => void
   onCreateField: () => void
   onCreateLot: () => void
   onRenameField: (field: Field, name: string) => void
@@ -29,6 +32,12 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     (lot) => lot.field_id === props.activeFieldId && lot.deleted_at === null,
   )
   const selectedField = activeFields.find((field) => field.id === props.activeFieldId)
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null)
+  const open = manualOpen ?? !props.activeLotId
+
+  useEffect(() => {
+    setManualOpen(null)
+  }, [props.activeLotId])
 
   function submitField(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -40,11 +49,37 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     props.onCreateLot()
   }
 
+  const fieldForm = (
+    <form className="create-lot-form" onSubmit={submitField}>
+        <label>
+          Agregar campo
+          <input
+            maxLength={120}
+            placeholder="Ej.: Campo Norte"
+            required
+            value={props.newFieldName}
+            onChange={(event) => props.onNewFieldNameChange(event.target.value)}
+          />
+        </label>
+        <button
+          className="button button--secondary"
+          type="submit"
+          disabled={props.busy === 'field' || activeFields.length === 0}
+        >
+          {props.busy === 'field' ? 'Creando…' : 'Crear campo'}
+        </button>
+    </form>
+  )
+
   return (
-    <details className="work-structure panel" open={!props.hasAnyDestinations}>
-      <summary>{props.hasAnyDestinations ? 'Campos y lotes' : 'Elegí el campo y lote de trabajo'}</summary>
+    <details
+      className="work-structure panel"
+      open={open}
+      onToggle={(event) => setManualOpen(event.currentTarget.open)}
+    >
+      <summary>{props.activeLotId ? 'Campos y lotes' : 'Elegí el campo y lote de trabajo'}</summary>
       <div className="work-structure__content">
-        {activeFields.length > 0 && (
+        {activeFields.length > 1 && (
           <label>
             Campo para nuevos destinos
             <select
@@ -65,7 +100,9 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
               onChange={(event) => props.onLotChange(event.target.value)}
             >
               {activeLots.map((lot) => (
-                <option key={lot.id} value={lot.id}>{lot.name}</option>
+                <option key={lot.id} value={lot.id}>
+                  {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
+                </option>
               ))}
             </select>
           </label>
@@ -77,25 +114,14 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
             onRename={props.onRenameField}
           />
         )}
-        <form className="create-lot-form" onSubmit={submitField}>
-          <label>
-            Agregar campo
-            <input
-              maxLength={120}
-              placeholder="Ej.: Campo Norte"
-              required
-              value={props.newFieldName}
-              onChange={(event) => props.onNewFieldNameChange(event.target.value)}
-            />
-          </label>
-          <button
-            className="button button--secondary"
-            type="submit"
-            disabled={props.busy === 'field' || activeFields.length === 0}
-          >
-            {props.busy === 'field' ? 'Creando…' : 'Crear campo'}
-          </button>
-        </form>
+        {activeFields.length > 0 ? (
+          <details className="field-management">
+            <summary>Agregar otro campo</summary>
+            {fieldForm}
+          </details>
+        ) : (
+          fieldForm
+        )}
         <form className="create-lot-form" onSubmit={submitLot}>
           <label>
             Agregar lote{selectedField ? ` en ${selectedField.name}` : ''}
@@ -106,6 +132,20 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
               value={props.newLotName}
               onChange={(event) => props.onNewLotNameChange(event.target.value)}
             />
+          </label>
+          <label>
+            Cereal del lote
+            <select
+              required
+              value={props.newLotCereal}
+              onChange={(event) => props.onNewLotCerealChange(event.target.value)}
+            >
+              <option value="">Elegí un cereal</option>
+              {cerealOptions.map((cereal) => (
+                <option key={cereal} value={cereal}>{cereal}</option>
+              ))}
+            </select>
+            <span className="muted small-copy">Después no se puede cambiar.</span>
           </label>
           <button
             className="button button--secondary"

@@ -38,7 +38,7 @@
 
 .panel {
   padding: 1.25rem;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 1rem;
   background: #fff;
   box-shadow: 0 0.75rem 2rem rgb(23 63 53 / 5%);
@@ -101,7 +101,7 @@ select {
   width: 100%;
   min-height: 3.25rem;
   padding: 0.75rem 0.85rem;
-  border: 1px solid #d7dfd7;
+  border: 1px solid #6f7d75;
   border-radius: 0.7rem;
   background: #fff;
   color: #1c302a;
@@ -111,7 +111,7 @@ select {
 input:focus,
 select:focus,
 button:focus-visible {
-  outline: 3px solid rgb(58 138 92 / 28%);
+  outline: 3px solid #173f35;
   outline-offset: 2px;
 }
 
@@ -151,12 +151,13 @@ button:focus-visible {
 }
 
 .button--secondary {
-  border-color: #c8d7ca;
+  border-color: #8b998f;
   background: #eef4ec;
   color: var(--color-green);
 }
 
 .button--quiet {
+  border-color: #8b998f;
   background: transparent;
   color: var(--color-green);
 }
@@ -270,7 +271,7 @@ button:focus-visible {
   align-items: flex-start;
   gap: 0.45rem;
   padding: 1rem;
-  border: 1px solid #dfe5dc;
+  border: 1px solid #aebbb2;
   border-radius: 1rem;
   background: #fff;
   color: #31443c;
@@ -315,7 +316,7 @@ button:focus-visible {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.9rem 1rem;
-  border: 1px solid #dfe5dc;
+  border: 1px solid #aebbb2;
   border-radius: 0.9rem;
   background: #fff;
   color: #31443c;
@@ -362,7 +363,7 @@ button:focus-visible {
 
 .work-summary {
   margin: 1.2rem 0;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 0.85rem;
   background: #fff;
 }
@@ -455,7 +456,7 @@ button:focus-visible {
   align-items: center;
   gap: 0.1rem 0.75rem;
   padding: 0.8rem 0.9rem;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 0.8rem;
   background: #fff;
 }
@@ -494,7 +495,7 @@ button:focus-visible {
   justify-content: center;
   gap: 0.2rem;
   padding: 0.8rem;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 0.8rem;
   background: #fff;
 }
@@ -580,7 +581,7 @@ button:focus-visible {
 .type-choice {
   min-height: 3.1rem;
   padding: 0.5rem;
-  border: 1px solid #d7dfd7;
+  border: 1px solid #6f7d75;
   border-radius: 0.7rem;
   background: #fff;
   color: #43544b;
@@ -598,7 +599,7 @@ button:focus-visible {
 
 .destination-card {
   padding: 1.05rem;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 1rem;
   background: #fff;
   box-shadow: 0 0.4rem 1.3rem rgb(23 63 53 / 4%);
@@ -728,7 +729,7 @@ button:focus-visible {
   flex: 0 0 2rem;
   aspect-ratio: 1;
   place-items: center;
-  border: 1px solid #dfe5dc;
+  border: 1px solid #aebbb2;
   border-radius: 50%;
   color: var(--color-green);
   font-size: 1.3rem;
@@ -742,7 +743,7 @@ button:focus-visible {
   display: grid;
   justify-items: center;
   padding: 3rem 1rem;
-  border: 1px dashed #d4ddd2;
+  border: 1px dashed #8b998f;
   border-radius: 1rem;
   background: rgb(255 255 255 / 55%);
   text-align: center;
@@ -772,7 +773,12 @@ button:focus-visible {
   padding: 1rem 0 1.5rem;
   border-top: 1px solid #e4e9df;
   color: var(--color-muted);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .sr-only {
@@ -926,7 +932,7 @@ button:focus-visible {
 
 .lot-management li {
   padding: 0.7rem;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 0.7rem;
   background: #fff;
 }
@@ -1147,7 +1153,7 @@ button:focus-visible {
 
 .field-management li {
   padding: 0.65rem;
-  border: 1px solid #e4e9df;
+  border: 1px solid #aebbb2;
   border-radius: 0.7rem;
   background: #fff;
 }
@@ -1246,4 +1252,25 @@ button:focus-visible {
 .field-error {
   color: #8e2b1e;
   font-size: 0.85rem;
+}
+
+.destination-card__close.is-urgent {
+  width: 100%;
+  min-height: 4rem;
+  margin-top: 0.75rem;
+  font-size: 1.15rem;
+}
+
+.app-footer--end {
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.button--danger {
+  background: #8e2b1e;
+  color: #fff;
+}
+
+.button--danger:hover:not(:disabled) {
+  background: #6f2016;
 }

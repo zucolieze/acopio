@@ -381,6 +381,7 @@ export default function AppController() {
       activeLotId={loads.activeLotId}
       newFieldName={loads.newFieldName}
       newLotName={loads.newLotName}
+      newLotCereal={loads.newLotCereal}
       audits={loads.audits}
       truckCapacity={loads.truckCapacity}
       openingHumidity={loads.openingHumidity}
@@ -421,6 +422,7 @@ export default function AppController() {
       onActiveLotChange={loads.setActiveLotId}
       onNewFieldNameChange={loads.setNewFieldName}
       onNewLotNameChange={loads.setNewLotName}
+      onNewLotCerealChange={loads.setNewLotCereal}
       onCreateField={() => void loads.createField()}
       onCreateLot={() => void loads.createLot()}
       onRenameField={(field, name) => void loads.editField(field, name)}
