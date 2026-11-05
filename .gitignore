@@ -1,2 +1,5 @@
 .vercel
 .env*
+
+# Notas personales
+notas.txt

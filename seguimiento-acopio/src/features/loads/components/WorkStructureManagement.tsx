@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { cerealOptions } from '../types'
 import type { Destination, Field, Lot } from '../types'
 import { LotManagement } from './LotManagement'
@@ -23,6 +23,7 @@ type WorkStructureManagementProps = {
   onCreateLot: () => void
   onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
+  onChangeLotCereal: (lot: Lot, cereal: string) => void
   onDeleteLot: (lot: Lot) => void
 }
 
@@ -31,12 +32,17 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
   const activeLots = props.lots.filter(
     (lot) => lot.field_id === props.activeFieldId && lot.deleted_at === null,
   )
+  const allLots = props.lots.filter(
+    (lot) => lot.deleted_at === null && activeFields.some((field) => field.id === lot.field_id),
+  )
+  const fieldNames = new Map(activeFields.map((field) => [field.id, field.name]))
   const selectedField = activeFields.find((field) => field.id === props.activeFieldId)
-  const [manualOpen, setManualOpen] = useState<boolean | null>(null)
-  const open = manualOpen ?? !props.activeLotId
+  const [open, setOpen] = useState(!props.activeLotId)
+  const previousLotId = useRef(props.activeLotId)
 
   useEffect(() => {
-    setManualOpen(null)
+    if (!previousLotId.current && props.activeLotId) setOpen(false)
+    previousLotId.current = props.activeLotId
   }, [props.activeLotId])
 
   function submitField(event: FormEvent<HTMLFormElement>) {
@@ -75,34 +81,35 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     <details
       className="work-structure panel"
       open={open}
-      onToggle={(event) => setManualOpen(event.currentTarget.open)}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary>{props.activeLotId ? 'Campos y lotes' : 'Elegí el campo y lote de trabajo'}</summary>
       <div className="work-structure__content">
+        {allLots.length > 0 && (
+          <label>
+            Lote de trabajo
+            <select
+              value={props.activeLotId}
+              onChange={(event) => props.onLotChange(event.target.value)}
+            >
+              {allLots.map((lot) => (
+                <option key={lot.id} value={lot.id}>
+                  {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
+                  {activeFields.length > 1 ? ` (${fieldNames.get(lot.field_id) ?? ''})` : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {activeFields.length > 1 && (
           <label>
-            Campo para nuevos destinos
+            Campo (para agregar lotes)
             <select
               value={props.activeFieldId}
               onChange={(event) => props.onFieldChange(event.target.value)}
             >
               {activeFields.map((field) => (
                 <option key={field.id} value={field.id}>{field.name}</option>
-              ))}
-            </select>
-          </label>
-        )}
-        {activeLots.length > 0 && (
-          <label>
-            Lote para nuevos destinos
-            <select
-              value={props.activeLotId}
-              onChange={(event) => props.onLotChange(event.target.value)}
-            >
-              {activeLots.map((lot) => (
-                <option key={lot.id} value={lot.id}>
-                  {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
-                </option>
               ))}
             </select>
           </label>
@@ -145,7 +152,6 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
                 <option key={cereal} value={cereal}>{cereal}</option>
               ))}
             </select>
-            <span className="muted small-copy">Después no se puede cambiar.</span>
           </label>
           <button
             className="button button--secondary"
@@ -167,6 +173,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
             destinations={props.destinations}
             busy={props.busy}
             onRename={props.onRenameLot}
+            onChangeCereal={props.onChangeLotCereal}
             onDelete={props.onDeleteLot}
           />
         )}

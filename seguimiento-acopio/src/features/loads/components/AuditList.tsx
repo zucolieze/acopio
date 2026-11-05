@@ -16,6 +16,7 @@ const fieldLabels: Record<string, string> = {
   closed_at: 'Fecha de cierre',
   status: 'Estado',
   deleted_at: 'Eliminación',
+  cereal: 'Cereal',
 }
 
 type AuditListProps = {
@@ -31,20 +32,19 @@ export function AuditList({
   lots = [],
   destinationName,
 }: AuditListProps) {
-  if (entries.length === 0) {
-    return <p className="muted small-copy">Todavía no hay cambios registrados.</p>
-  }
+  const deletions = entries.filter((entry) => entry.action === 'eliminar')
+  if (deletions.length === 0) return null
 
   return (
-    <section className="audit-history">
-      <h3>Ediciones y eliminaciones</h3>
+    <details className="audit-history-details">
+      <summary>Eliminaciones ({deletions.length})</summary>
+      <section className="audit-history">
       <ul>
-        {entries.map((entry) => (
+        {deletions.map((entry) => (
           <li key={entry.id}>
             <div>
               <strong>
-                {entry.action === 'eliminar' ? 'Se eliminó' : 'Se editó'}{' '}
-                {entityLabel(entry.entity_type)}
+                Se eliminó {entityLabel(entry.entity_type)}
                 {entry.entity_type === 'carga' && destinationName
                   ? ` de ${destinationName}`
                   : ''}
@@ -60,7 +60,6 @@ export function AuditList({
               {Object.entries(entry.changes).map(([field, values]) => (
                 <li key={field}>
                   {fieldLabels[field] ?? field}:{' '}
-                  {displayValue(field, values.antes, lots, profileNames)} →{' '}
                   {displayValue(field, values.despues, lots, profileNames)}
                 </li>
               ))}
@@ -74,7 +73,8 @@ export function AuditList({
           </li>
         ))}
       </ul>
-    </section>
+      </section>
+    </details>
   )
 }
 

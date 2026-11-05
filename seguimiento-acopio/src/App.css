@@ -1274,3 +1274,228 @@ button:focus-visible {
 .button--danger:hover:not(:disabled) {
   background: #6f2016;
 }
+
+/* Espaciado más compacto: menos scroll en el celular */
+.app-shell {
+  padding: 0.6rem 0.75rem 0;
+}
+
+.app-header {
+  padding-bottom: 0.5rem;
+}
+
+.dashboard {
+  padding: 0.75rem 0 1.5rem;
+}
+
+.panel {
+  padding: 0.9rem;
+}
+
+.tabs {
+  margin-bottom: 0.75rem;
+}
+
+.destination-list {
+  gap: 0.65rem;
+}
+
+.destination-card {
+  padding: 0.85rem;
+}
+
+.new-destination {
+  margin-top: 0;
+}
+
+.work-structure {
+  margin: 0.75rem 0 0.5rem;
+}
+
+.work-structure__content {
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.form-stack {
+  gap: 0.75rem;
+}
+
+.center-page {
+  gap: 1rem;
+  padding: 0.9rem;
+}
+
+@media (min-width: 40rem) {
+  .app-shell {
+    padding: 0.9rem 1.5rem 0;
+  }
+
+  .panel {
+    padding: 1.1rem;
+  }
+
+  .destination-card {
+    padding: 1rem;
+  }
+}
+
+/* Desplegable de campos y lotes con flecha a la derecha */
+.work-structure > summary {
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.work-structure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.work-structure > summary::after {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  flex: none;
+  border-right: 3px solid var(--color-green);
+  border-bottom: 3px solid var(--color-green);
+  transform: translateY(-25%) rotate(45deg);
+  transition: transform 0.15s;
+}
+
+.work-structure[open] > summary::after {
+  transform: translateY(25%) rotate(-135deg);
+}
+
+.new-destination__lot {
+  margin: 0 0 0.75rem;
+  color: var(--color-green);
+  font-size: 1.05rem;
+}
+
+.cereal-editor {
+  display: flex;
+  align-items: end;
+  gap: 0.6rem;
+  margin: 0.5rem 0;
+}
+
+.cereal-editor label {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+/* Pantallas de inicio: más compactas y pegadas al encabezado */
+.center-page,
+.center-page--top {
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.simple-header {
+  padding-bottom: 0;
+}
+
+.mode-selection,
+.onboarding {
+  margin: 0.5rem auto 0;
+}
+
+.mode-selection > .muted,
+.onboarding > .muted {
+  margin: 0.4rem 0 0.75rem;
+}
+
+.mode-selection > h1,
+.onboarding > h1 {
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
+}
+
+.mode-selection .eyebrow {
+  margin: 0 0 0.3rem;
+}
+
+.mode-cards {
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.mode-card {
+  min-height: 0;
+  gap: 0.25rem;
+  padding: 1.1rem 1.25rem;
+  border-width: 2px;
+}
+
+.mode-card strong {
+  font-size: 1.25rem;
+}
+
+.mode-card--carrero {
+  border-color: #7fae8e;
+  background: #e9f4ec;
+}
+
+.mode-card--carrero:hover,
+.mode-card--carrero:focus-visible {
+  border-color: #2f6f4c;
+  background: #dcede1;
+}
+
+.mode-card--observador {
+  border-color: #d3b45e;
+  background: #fbf3d9;
+}
+
+.mode-card--observador:hover,
+.mode-card--observador:focus-visible {
+  border-color: #9a7414;
+  background: #f6ebc3;
+}
+
+.work-actions {
+  gap: 0.6rem;
+  margin: 0.75rem 0;
+}
+
+.work-action-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.work-action {
+  min-height: 0;
+  padding: 0.75rem 1rem;
+}
+
+.work-form {
+  margin: 0 auto;
+}
+
+.destination-card__delete {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.deleted-destinations {
+  margin-top: 1rem;
+}
+
+.deleted-destinations > summary {
+  min-height: 2.5rem;
+  color: var(--color-green);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.deleted-destinations .destination-list {
+  margin-top: 0.65rem;
+}
+
+.deleted-destination {
+  display: grid;
+  gap: 0.5rem;
+}

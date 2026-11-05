@@ -78,7 +78,7 @@ export function DestinationCard({
       )}
       {isProvider && isEmpty && (
         <button
-          className="button button--danger"
+          className="button button--danger button--large destination-card__delete"
           type="button"
           disabled={busy}
           onClick={onDelete}

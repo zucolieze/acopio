@@ -159,6 +159,17 @@ export async function updateLot(client: Client, lotId: string, name: string) {
   if (!data) throw new Error('No se encontró el lote o no tenés permiso para editarlo.')
 }
 
+export async function updateLotCereal(client: Client, lotId: string, cereal: string) {
+  const { data, error } = await client
+    .from('lots')
+    .update({ cereal })
+    .eq('id', lotId)
+    .select('id')
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error('No se encontró el lote o no tenés permiso para editarlo.')
+}
+
 export async function softDeleteLot(client: Client, lotId: string) {
   const { data, error } = await client
     .from('lots')
@@ -280,6 +291,13 @@ export async function updateLoadAttribution(
   const { error } = await client.rpc('set_load_attribution', {
     p_load_id: loadId,
     p_created_by: userId,
+  })
+  if (error) throw error
+}
+
+export async function restoreDestination(client: Client, destinationId: string) {
+  const { error } = await client.rpc('restore_destination', {
+    p_destination_id: destinationId,
   })
   if (error) throw error
 }

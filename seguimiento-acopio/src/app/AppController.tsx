@@ -45,7 +45,7 @@ export default function AppController() {
   const isAdminWork =
     auth.isDebugAdmin && selectedMembership?.role === 'admin'
   const isProvider =
-    selectedMembership?.role === 'proveedor' ||
+    (selectedMembership?.role === 'proveedor' && selectedMode !== 'observador') ||
     (isAdminWork && adminMode === 'carrero')
 
   function clearNotices() {
@@ -169,7 +169,7 @@ export default function AppController() {
   function handleDeleteDestination(destination: Parameters<typeof loads.deleteDestination>[0]) {
     if (
       window.confirm(
-        `¿Eliminar ${destinationLabels[destination.destination_type]} ${destination.name}? El dato se ocultará del trabajo, pero quedará auditado.`,
+        `¿Eliminar ${destinationLabels[destination.destination_type]} ${destination.name}? El dato se ocultará del trabajo, pero quedará guardado.`,
       )
     ) {
       void loads.deleteDestination(destination)
@@ -228,7 +228,7 @@ export default function AppController() {
   if (auth.configurationError) {
     return (
       <main className="center-page">
-        <Brand />
+        <Brand iconOnly />
         <section className="panel">
           <h1>Falta conectar la base</h1>
           <p>{auth.configurationError}</p>
@@ -244,7 +244,7 @@ export default function AppController() {
   if (auth.starting || !auth.client) {
     return (
       <main className="center-page">
-        <Brand />
+        <Brand iconOnly />
         <p role="status">Cargando Acopio…</p>
       </main>
     )
@@ -302,7 +302,7 @@ export default function AppController() {
   ) {
     return (
       <main className="center-page">
-        <Brand />
+        <Brand iconOnly />
         <p role="status">Cargando tus trabajos…</p>
         <Feedback error={auth.error || groups.error} notice={auth.notice || groups.notice} />
       </main>
@@ -419,7 +419,7 @@ export default function AppController() {
       }}
       onCopyInviteCode={() => void handleCopyInviteCode()}
       onActiveFieldChange={loads.selectField}
-      onActiveLotChange={loads.setActiveLotId}
+      onActiveLotChange={loads.selectLot}
       onNewFieldNameChange={loads.setNewFieldName}
       onNewLotNameChange={loads.setNewLotName}
       onNewLotCerealChange={loads.setNewLotCereal}
@@ -427,6 +427,7 @@ export default function AppController() {
       onCreateLot={() => void loads.createLot()}
       onRenameField={(field, name) => void loads.editField(field, name)}
       onRenameLot={(lot, name) => void loads.editLot(lot, name)}
+      onChangeLotCereal={(lot, cereal) => void loads.editLotCereal(lot, cereal)}
       onDeleteLot={handleDeleteLot}
       onRenameGroup={(name) => {
         if (selectedMembership) void groups.rename(selectedMembership.groupId, name)
@@ -462,6 +463,7 @@ export default function AppController() {
         void loads.editDestination(destination, changes)
       }
       onDeleteDestination={handleDeleteDestination}
+      onRestoreDestination={(destination) => void loads.restoreDestination(destination)}
       onHistoryToggle={loads.setExpandedHistory}
     />
   )

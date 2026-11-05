@@ -24,6 +24,7 @@ import {
 import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
+import { LotCerealEditor } from './LotCerealEditor'
 import { NewDestinationForm } from './NewDestinationForm'
 import { WorkStructureManagement } from './WorkStructureManagement'
 
@@ -78,6 +79,7 @@ type DashboardPageProps = {
   onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
   onDeleteLot: (lot: Lot) => void
+  onChangeLotCereal: (lot: Lot, cereal: string) => void
   onRenameGroup: (name: string) => void
   onDeleteGroup: () => void
   onDestinationTypeChange: (type: DestinationType) => void
@@ -99,12 +101,14 @@ type DashboardPageProps = {
   onDeleteLoad: (load: Load) => void
   onEditDestination: (destination: Destination, changes: DestinationChanges) => void
   onDeleteDestination: (destination: Destination) => void
+  onRestoreDestination: (destination: Destination) => void
   onHistoryToggle: (destinationId: string | null) => void
 }
 
 export function DashboardPage(props: DashboardPageProps) {
   const [editingGroup, setEditingGroup] = useState(false)
   const [groupName, setGroupName] = useState(props.membership.groupName)
+  const tab: Tab = props.tab === 'nuevo' && !props.isProvider ? 'activos' : props.tab
   const tabs: { id: Tab; label: string }[] = [
     { id: 'activos', label: 'Activos' },
     ...(props.isProvider ? [{ id: 'nuevo' as const, label: 'Nuevo' }] : []),
@@ -116,7 +120,6 @@ export function DashboardPage(props: DashboardPageProps) {
   const historyDestinations = [
     ...props.activeDestinations,
     ...props.closedDestinations,
-    ...props.deletedDestinations,
   ]
   const workAudits = props.audits.filter((entry) => entry.destination_id === null)
 
@@ -151,6 +154,17 @@ export function DashboardPage(props: DashboardPageProps) {
         {expanded && (
           <div className="destination-history">
             <p className="destination-card__lot">Lote: {lotName}</p>
+            {props.isProvider && !deleted && (() => {
+              const lot = props.lots.find((item) => item.id === destination.lot_id)
+              return lot ? (
+                <LotCerealEditor
+                  key={`${lot.id}-${lot.cereal ?? ''}`}
+                  lot={lot}
+                  busy={props.busy === lot.id}
+                  onSave={props.onChangeLotCereal}
+                />
+              ) : null
+            })()}
             {destination.destination_type === 'camion' ? (
               <CapacitySummary destination={destination} total={total} />
             ) : (
@@ -191,7 +205,7 @@ export function DashboardPage(props: DashboardPageProps) {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <Brand />
+        <Brand iconOnly />
         <div className="app-header__actions">
           <label className="group-picker">
             <span className="sr-only">Grupo de trabajo</span>
@@ -226,9 +240,9 @@ export function DashboardPage(props: DashboardPageProps) {
           {tabs.map((item) => (
             <button
               key={item.id}
-              className={props.tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
+              className={tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
               type="button"
-              aria-current={props.tab === item.id ? 'page' : undefined}
+              aria-current={tab === item.id ? 'page' : undefined}
               onClick={() => props.onTabChange(item.id)}
             >
               {item.label}
@@ -236,8 +250,23 @@ export function DashboardPage(props: DashboardPageProps) {
           ))}
         </nav>
 
-        {props.tab === 'nuevo' && props.isProvider && (
+        {tab === 'nuevo' && props.isProvider && (
           <>
+          <NewDestinationForm
+            destinationType={props.destinationType}
+            destinationName={props.destinationName}
+            truckCapacity={props.truckCapacity}
+            openingHumidity={props.openingHumidity}
+            busy={props.busy === 'destination'}
+            loading={props.loading}
+            canOpen={Boolean(props.activeLotId)}
+            lotLabel={props.activeLotId ? lotNames.get(props.activeLotId) ?? '' : ''}
+            onDestinationTypeChange={props.onDestinationTypeChange}
+            onDestinationNameChange={props.onDestinationNameChange}
+            onTruckCapacityChange={props.onTruckCapacityChange}
+            onOpeningHumidityChange={props.onOpeningHumidityChange}
+            onSubmit={props.onCreateDestination}
+          />
         {props.loading && (
           <p className="muted" role="status">Cargando campos y lotes…</p>
         )}
@@ -267,27 +296,14 @@ export function DashboardPage(props: DashboardPageProps) {
             onCreateLot={props.onCreateLot}
             onRenameField={props.onRenameField}
             onRenameLot={props.onRenameLot}
+            onChangeLotCereal={props.onChangeLotCereal}
             onDeleteLot={props.onDeleteLot}
           />
         )}
-          <NewDestinationForm
-            destinationType={props.destinationType}
-            destinationName={props.destinationName}
-            truckCapacity={props.truckCapacity}
-            openingHumidity={props.openingHumidity}
-            busy={props.busy === 'destination'}
-            loading={props.loading}
-            canOpen={Boolean(props.activeLotId)}
-            onDestinationTypeChange={props.onDestinationTypeChange}
-            onDestinationNameChange={props.onDestinationNameChange}
-            onTruckCapacityChange={props.onTruckCapacityChange}
-            onOpeningHumidityChange={props.onOpeningHumidityChange}
-            onSubmit={props.onCreateDestination}
-          />
           </>
         )}
 
-        {props.tab === 'activos' && (
+        {tab === 'activos' && (
           <section className="destination-list" aria-live="polite">
             {props.activeDestinations.length === 0 ? (
               <EmptyState
@@ -316,22 +332,43 @@ export function DashboardPage(props: DashboardPageProps) {
           </section>
         )}
 
-        {props.tab === 'historial' && (
+        {tab === 'historial' && (
           <section className="destination-list" aria-live="polite">
             {historyDestinations.length === 0 ? (
               <EmptyState
                 title="Todavía no hay destinos en el historial"
-                description="Acá vas a ver las cargas de todos los destinos, activos, cerrados y eliminados."
+                description="Acá vas a ver las cargas de todos los destinos, activos y cerrados."
               />
             ) : (
               historyDestinations.map((destination) =>
-                renderHistoryDestination(destination, destination.deleted_at !== null),
+                renderHistoryDestination(destination, false),
               )
             )}
           </section>
         )}
 
-        {props.tab === 'historial' && (
+        {tab === 'historial' && !props.isProvider && props.deletedDestinations.length > 0 && (
+          <details className="deleted-destinations">
+            <summary>Destinos eliminados ({props.deletedDestinations.length})</summary>
+            <div className="destination-list">
+              {props.deletedDestinations.map((destination) => (
+                <div className="deleted-destination" key={destination.id}>
+                  {renderHistoryDestination(destination, true)}
+                  <button
+                    className="button button--secondary"
+                    type="button"
+                    disabled={props.busy === destination.id}
+                    onClick={() => props.onRestoreDestination(destination)}
+                  >
+                    {props.busy === destination.id ? 'Restaurando…' : 'Restaurar destino'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {tab === 'historial' && (
           <>
         <details className="work-summary">
           <summary>Información del trabajo</summary>
@@ -405,10 +442,7 @@ export function DashboardPage(props: DashboardPageProps) {
               </section>
             )}
             {workAudits.length > 0 && (
-              <details className="audit-history-details">
-                <summary>Cambios en el trabajo, campos y lotes ({workAudits.length})</summary>
-                <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
-              </details>
+              <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
             )}
           </div>
         </details>

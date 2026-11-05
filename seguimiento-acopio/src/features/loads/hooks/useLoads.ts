@@ -10,6 +10,7 @@ import {
   createLot as createLotInRepository,
   fetchGroupActivity,
   softDeleteDestination,
+  restoreDestination as restoreDestinationInRepository,
   softDeleteLoad,
   softDeleteLot,
   updateDestination as updateDestinationInRepository,
@@ -17,6 +18,7 @@ import {
   updateLoad as updateLoadInRepository,
   updateLoadAttribution,
   updateLot as updateLotInRepository,
+  updateLotCereal as updateLotCerealInRepository,
 } from '../model/loadsRepository'
 import type { Destination, Field, Load, Lot, Tab, WorkMember } from '../types'
 
@@ -243,6 +245,15 @@ export function useLoads(
     [lots],
   )
 
+  const selectLot = useCallback(
+    (lotId: string) => {
+      const lot = lots.find((item) => item.id === lotId)
+      if (lot) setActiveFieldId(lot.field_id)
+      setActiveLotId(lotId)
+    },
+    [lots],
+  )
+
   const editField = useCallback(
     async (field: Field, name: string) => {
       if (!client) return
@@ -351,6 +362,24 @@ export function useLoads(
       try {
         await updateLotInRepository(client, lot.id, trimmedName)
         setNotice('Lote actualizado. El cambio quedó registrado.')
+        await refresh()
+      } catch (editError) {
+        setError(messageFromError(editError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
+
+  const editLotCereal = useCallback(
+    async (lot: Lot, cereal: string) => {
+      if (!client || !cereal || cereal === lot.cereal) return
+      setBusy(lot.id)
+      setError('')
+      try {
+        await updateLotCerealInRepository(client, lot.id, cereal)
+        setNotice('Cereal actualizado. El cambio quedó registrado.')
         await refresh()
       } catch (editError) {
         setError(messageFromError(editError))
@@ -506,7 +535,7 @@ export function useLoads(
       setError('')
       try {
         await softDeleteLoad(client, load.id)
-        setNotice('Pesada eliminada del historial; el movimiento quedó auditado.')
+        setNotice('Pesada eliminada del historial; el movimiento quedó guardado.')
         await refresh()
       } catch (deleteError) {
         setError(messageFromError(deleteError))
@@ -545,10 +574,28 @@ export function useLoads(
       setError('')
       try {
         await softDeleteDestination(client, destination.id)
-        setNotice('Destino eliminado del trabajo; el movimiento quedó auditado.')
+        setNotice('Destino eliminado del trabajo; el movimiento quedó guardado.')
         await refresh()
       } catch (deleteError) {
         setError(messageFromError(deleteError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
+
+  const restoreDestination = useCallback(
+    async (destination: Destination) => {
+      if (!client) return
+      setBusy(destination.id)
+      setError('')
+      try {
+        await restoreDestinationInRepository(client, destination.id)
+        setNotice('Destino restaurado.')
+        await refresh()
+      } catch (restoreError) {
+        setError(messageFromError(restoreError))
       } finally {
         setBusy('')
       }
@@ -630,6 +677,8 @@ export function useLoads(
     createField,
     editField,
     editLot,
+    selectLot,
+    editLotCereal,
     deleteLot,
     create,
     add,
@@ -639,5 +688,6 @@ export function useLoads(
     deleteLoad,
     editDestination,
     deleteDestination,
+    restoreDestination,
   }
 }
