@@ -1474,3 +1474,28 @@ button:focus-visible {
 .work-form {
   margin: 0 auto;
 }
+
+.destination-card__delete {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.deleted-destinations {
+  margin-top: 1rem;
+}
+
+.deleted-destinations > summary {
+  min-height: 2.5rem;
+  color: var(--color-green);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.deleted-destinations .destination-list {
+  margin-top: 0.65rem;
+}
+
+.deleted-destination {
+  display: grid;
+  gap: 0.5rem;
+}

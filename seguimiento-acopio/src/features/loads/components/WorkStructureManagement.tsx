@@ -23,6 +23,7 @@ type WorkStructureManagementProps = {
   onCreateLot: () => void
   onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
+  onChangeLotCereal: (lot: Lot, cereal: string) => void
   onDeleteLot: (lot: Lot) => void
 }
 
@@ -151,7 +152,6 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
                 <option key={cereal} value={cereal}>{cereal}</option>
               ))}
             </select>
-            <span className="muted small-copy">Después no se puede cambiar.</span>
           </label>
           <button
             className="button button--secondary"
@@ -173,6 +173,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
             destinations={props.destinations}
             busy={props.busy}
             onRename={props.onRenameLot}
+            onChangeCereal={props.onChangeLotCereal}
             onDelete={props.onDeleteLot}
           />
         )}

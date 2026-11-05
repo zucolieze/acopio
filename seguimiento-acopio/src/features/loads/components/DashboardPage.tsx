@@ -101,6 +101,7 @@ type DashboardPageProps = {
   onDeleteLoad: (load: Load) => void
   onEditDestination: (destination: Destination, changes: DestinationChanges) => void
   onDeleteDestination: (destination: Destination) => void
+  onRestoreDestination: (destination: Destination) => void
   onHistoryToggle: (destinationId: string | null) => void
 }
 
@@ -119,7 +120,6 @@ export function DashboardPage(props: DashboardPageProps) {
   const historyDestinations = [
     ...props.activeDestinations,
     ...props.closedDestinations,
-    ...props.deletedDestinations,
   ]
   const workAudits = props.audits.filter((entry) => entry.destination_id === null)
 
@@ -296,6 +296,7 @@ export function DashboardPage(props: DashboardPageProps) {
             onCreateLot={props.onCreateLot}
             onRenameField={props.onRenameField}
             onRenameLot={props.onRenameLot}
+            onChangeLotCereal={props.onChangeLotCereal}
             onDeleteLot={props.onDeleteLot}
           />
         )}
@@ -336,14 +337,35 @@ export function DashboardPage(props: DashboardPageProps) {
             {historyDestinations.length === 0 ? (
               <EmptyState
                 title="Todavía no hay destinos en el historial"
-                description="Acá vas a ver las cargas de todos los destinos, activos, cerrados y eliminados."
+                description="Acá vas a ver las cargas de todos los destinos, activos y cerrados."
               />
             ) : (
               historyDestinations.map((destination) =>
-                renderHistoryDestination(destination, destination.deleted_at !== null),
+                renderHistoryDestination(destination, false),
               )
             )}
           </section>
+        )}
+
+        {tab === 'historial' && !props.isProvider && props.deletedDestinations.length > 0 && (
+          <details className="deleted-destinations">
+            <summary>Destinos eliminados ({props.deletedDestinations.length})</summary>
+            <div className="destination-list">
+              {props.deletedDestinations.map((destination) => (
+                <div className="deleted-destination" key={destination.id}>
+                  {renderHistoryDestination(destination, true)}
+                  <button
+                    className="button button--secondary"
+                    type="button"
+                    disabled={props.busy === destination.id}
+                    onClick={() => props.onRestoreDestination(destination)}
+                  >
+                    {props.busy === destination.id ? 'Restaurando…' : 'Restaurar destino'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </details>
         )}
 
         {tab === 'historial' && (

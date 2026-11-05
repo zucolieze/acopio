@@ -133,6 +133,10 @@ export type Database = {
         Args: { p_invite_code: string; p_role: MemberRole }
         Returns: string
       }
+      restore_destination: {
+        Args: { p_destination_id: string }
+        Returns: undefined
+      }
       set_load_attribution: {
         Args: { p_load_id: string; p_created_by: string | null }
         Returns: undefined

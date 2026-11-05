@@ -10,6 +10,7 @@ import {
   createLot as createLotInRepository,
   fetchGroupActivity,
   softDeleteDestination,
+  restoreDestination as restoreDestinationInRepository,
   softDeleteLoad,
   softDeleteLot,
   updateDestination as updateDestinationInRepository,
@@ -584,6 +585,24 @@ export function useLoads(
     [client, refresh],
   )
 
+  const restoreDestination = useCallback(
+    async (destination: Destination) => {
+      if (!client) return
+      setBusy(destination.id)
+      setError('')
+      try {
+        await restoreDestinationInRepository(client, destination.id)
+        setNotice('Destino restaurado.')
+        await refresh()
+      } catch (restoreError) {
+        setError(messageFromError(restoreError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
+
   const loadsByDestination = useMemo(() => {
     const byDestination = new Map<string, Load[]>()
     for (const load of loads) {
@@ -669,5 +688,6 @@ export function useLoads(
     deleteLoad,
     editDestination,
     deleteDestination,
+    restoreDestination,
   }
 }

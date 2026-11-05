@@ -463,6 +463,7 @@ export default function AppController() {
         void loads.editDestination(destination, changes)
       }
       onDeleteDestination={handleDeleteDestination}
+      onRestoreDestination={(destination) => void loads.restoreDestination(destination)}
       onHistoryToggle={loads.setExpandedHistory}
     />
   )

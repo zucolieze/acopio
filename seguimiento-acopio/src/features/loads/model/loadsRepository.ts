@@ -295,6 +295,13 @@ export async function updateLoadAttribution(
   if (error) throw error
 }
 
+export async function restoreDestination(client: Client, destinationId: string) {
+  const { error } = await client.rpc('restore_destination', {
+    p_destination_id: destinationId,
+  })
+  if (error) throw error
+}
+
 export async function softDeleteLoad(client: Client, loadId: string) {
   const { data, error } = await client
     .from('loads')

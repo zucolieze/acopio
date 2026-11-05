@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { cerealOptions } from '../types'
 import type { Destination, Lot } from '../types'
 
 type LotManagementProps = {
@@ -7,6 +8,7 @@ type LotManagementProps = {
   destinations: Destination[]
   busy: string
   onRename: (lot: Lot, name: string) => void
+  onChangeCereal: (lot: Lot, cereal: string) => void
   onDelete: (lot: Lot) => void
 }
 
@@ -15,6 +17,7 @@ export function LotManagement({
   destinations,
   busy,
   onRename,
+  onChangeCereal,
   onDelete,
 }: LotManagementProps) {
   if (lots.length === 0) return null
@@ -36,6 +39,7 @@ export function LotManagement({
             isLastActiveLot={lots.length === 1}
             busy={busy === lot.id}
             onRename={onRename}
+            onChangeCereal={onChangeCereal}
             onDelete={onDelete}
           />
         ))}
@@ -50,6 +54,7 @@ function LotRow({
   isLastActiveLot,
   busy,
   onRename,
+  onChangeCereal,
   onDelete,
 }: {
   lot: Lot
@@ -57,14 +62,17 @@ function LotRow({
   isLastActiveLot: boolean
   busy: boolean
   onRename: LotManagementProps['onRename']
+  onChangeCereal: LotManagementProps['onChangeCereal']
   onDelete: LotManagementProps['onDelete']
 }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(lot.name)
+  const [cereal, setCereal] = useState(lot.cereal ?? '')
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onRename(lot, name)
+    if (name.trim() !== lot.name) onRename(lot, name)
+    if (cereal && cereal !== lot.cereal) onChangeCereal(lot, cereal)
     setEditing(false)
   }
 
@@ -79,13 +87,23 @@ function LotRow({
             onChange={(event) => setName(event.target.value)}
             aria-label={`Nombre del lote ${lot.name}`}
           />
+          <select
+            value={cereal}
+            aria-label="Cereal del lote"
+            onChange={(event) => setCereal(event.target.value)}
+          >
+            {!lot.cereal && <option value="">Sin cereal</option>}
+            {cerealOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
           <button className="button button--secondary button--small" type="submit" disabled={busy}>
             Guardar
           </button>
         </form>
       ) : (
         <>
-          <span>{lot.name}</span>
+          <span>{lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}</span>
           <div className="lot-management__actions">
             <button
               className="link-button"
@@ -93,6 +111,7 @@ function LotRow({
               disabled={busy}
               onClick={() => {
                 setName(lot.name)
+                setCereal(lot.cereal ?? '')
                 setEditing(true)
               }}
             >
