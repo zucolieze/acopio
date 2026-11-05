@@ -34,26 +34,25 @@ export function ModeSelectionPage({
         <p className="eyebrow" onClick={() => setTaps((count) => count + 1)}>
           Bienvenido {welcomeName}
         </p>
-        <p className="eyebrow">Elegí cómo vas a usar Acopio</p>
         <h1>¿Qué necesitás hacer?</h1>
         <p className="muted">Después podés elegir un trabajo para continuar.</p>
         <Feedback error={error} notice={notice} />
         <div className="mode-cards">
           <button
-            className="mode-card"
-            type="button"
-            onClick={() => onChooseMode('observador')}
-          >
-            <strong>Observador</strong>
-            <span>Solo veo los kilos y el historial.</span>
-          </button>
-          <button
-            className="mode-card"
+            className="mode-card mode-card--carrero"
             type="button"
             onClick={() => onChooseMode('carrero')}
           >
             <strong>Carrero</strong>
             <span>Abro destinos y cargo las pesadas.</span>
+          </button>
+          <button
+            className="mode-card mode-card--observador"
+            type="button"
+            onClick={() => onChooseMode('observador')}
+          >
+            <strong>Observador</strong>
+            <span>Solo veo los kilos y el historial.</span>
           </button>
           {adminUnlocked && (
             <button

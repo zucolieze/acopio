@@ -76,38 +76,15 @@ export function WorkMenuPage({
 
         <div className="work-actions">
           {canCreateWork && (
-            <button
-              className={action === 'crear' ? 'work-action is-selected' : 'work-action'}
-              type="button"
-              onClick={() => onActionChange(action === 'crear' ? null : 'crear')}
-            >
-              <strong>Crear un nuevo trabajo</strong>
-              <span>Empezá a registrar kilos en un trabajo nuevo.</span>
-            </button>
-          )}
-          <button
-            className={action === 'elegir' ? 'work-action is-selected' : 'work-action'}
-            type="button"
-            disabled={memberships.length === 0}
-            onClick={() => onActionChange(action === 'elegir' ? null : 'elegir')}
-          >
-            <strong>Entrar a un trabajo</strong>
-            <span>
-              {memberships.length
-                ? `Elegí entre tus ${memberships.length} trabajos.`
-                : 'Todavía no participás en ningún trabajo.'}
-            </span>
-          </button>
-          <button
-            className={action === 'sumarme' ? 'work-action is-selected' : 'work-action'}
-            type="button"
-            onClick={() => onActionChange(action === 'sumarme' ? null : 'sumarme')}
-          >
-            <strong>Sumarme a un trabajo</strong>
-            <span>Ingresá el código de invitación que te compartieron.</span>
-          </button>
-        </div>
-
+            <div className="work-action-group">
+                <button
+                  className={action === 'crear' ? 'work-action is-selected' : 'work-action'}
+                  type="button"
+                  onClick={() => onActionChange(action === 'crear' ? null : 'crear')}
+                >
+                  <strong>Crear un nuevo trabajo</strong>
+                  <span>Empezá a registrar kilos en un trabajo nuevo.</span>
+                </button>
         {action === 'crear' && canCreateWork && (
           <form className="panel form-stack work-form" onSubmit={onCreate}>
             <h2>Crear trabajo</h2>
@@ -127,7 +104,22 @@ export function WorkMenuPage({
             </button>
           </form>
         )}
-
+            </div>
+          )}
+          <div className="work-action-group">
+            <button
+              className={action === 'elegir' ? 'work-action is-selected' : 'work-action'}
+              type="button"
+              disabled={memberships.length === 0}
+              onClick={() => onActionChange(action === 'elegir' ? null : 'elegir')}
+            >
+              <strong>Entrar a un trabajo</strong>
+              <span>
+                {memberships.length
+                  ? `Elegí entre tus ${memberships.length} trabajos.`
+                  : 'Todavía no participás en ningún trabajo.'}
+              </span>
+            </button>
         {action === 'elegir' && (
           <div className="panel form-stack work-form">
             <h2>Elegir un trabajo</h2>
@@ -146,7 +138,16 @@ export function WorkMenuPage({
             </button>
           </div>
         )}
-
+          </div>
+          <div className="work-action-group">
+            <button
+              className={action === 'sumarme' ? 'work-action is-selected' : 'work-action'}
+              type="button"
+              onClick={() => onActionChange(action === 'sumarme' ? null : 'sumarme')}
+            >
+              <strong>Sumarme a un trabajo</strong>
+              <span>Ingresá el código de invitación que te compartieron.</span>
+            </button>
         {action === 'sumarme' && (
           <form className="panel form-stack work-form" onSubmit={onJoin}>
             <h2>Sumarme con un código</h2>
@@ -168,6 +169,8 @@ export function WorkMenuPage({
             </button>
           </form>
         )}
+          </div>
+        </div>
       </section>
       <footer className="app-footer app-footer--end">
         <button

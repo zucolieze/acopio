@@ -244,6 +244,15 @@ export function useLoads(
     [lots],
   )
 
+  const selectLot = useCallback(
+    (lotId: string) => {
+      const lot = lots.find((item) => item.id === lotId)
+      if (lot) setActiveFieldId(lot.field_id)
+      setActiveLotId(lotId)
+    },
+    [lots],
+  )
+
   const editField = useCallback(
     async (field: Field, name: string) => {
       if (!client) return
@@ -525,7 +534,7 @@ export function useLoads(
       setError('')
       try {
         await softDeleteLoad(client, load.id)
-        setNotice('Pesada eliminada del historial; el movimiento quedó auditado.')
+        setNotice('Pesada eliminada del historial; el movimiento quedó guardado.')
         await refresh()
       } catch (deleteError) {
         setError(messageFromError(deleteError))
@@ -564,7 +573,7 @@ export function useLoads(
       setError('')
       try {
         await softDeleteDestination(client, destination.id)
-        setNotice('Destino eliminado del trabajo; el movimiento quedó auditado.')
+        setNotice('Destino eliminado del trabajo; el movimiento quedó guardado.')
         await refresh()
       } catch (deleteError) {
         setError(messageFromError(deleteError))
@@ -649,6 +658,7 @@ export function useLoads(
     createField,
     editField,
     editLot,
+    selectLot,
     editLotCereal,
     deleteLot,
     create,

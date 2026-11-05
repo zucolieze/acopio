@@ -107,6 +107,7 @@ type DashboardPageProps = {
 export function DashboardPage(props: DashboardPageProps) {
   const [editingGroup, setEditingGroup] = useState(false)
   const [groupName, setGroupName] = useState(props.membership.groupName)
+  const tab: Tab = props.tab === 'nuevo' && !props.isProvider ? 'activos' : props.tab
   const tabs: { id: Tab; label: string }[] = [
     { id: 'activos', label: 'Activos' },
     ...(props.isProvider ? [{ id: 'nuevo' as const, label: 'Nuevo' }] : []),
@@ -239,9 +240,9 @@ export function DashboardPage(props: DashboardPageProps) {
           {tabs.map((item) => (
             <button
               key={item.id}
-              className={props.tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
+              className={tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
               type="button"
-              aria-current={props.tab === item.id ? 'page' : undefined}
+              aria-current={tab === item.id ? 'page' : undefined}
               onClick={() => props.onTabChange(item.id)}
             >
               {item.label}
@@ -249,7 +250,7 @@ export function DashboardPage(props: DashboardPageProps) {
           ))}
         </nav>
 
-        {props.tab === 'nuevo' && props.isProvider && (
+        {tab === 'nuevo' && props.isProvider && (
           <>
           <NewDestinationForm
             destinationType={props.destinationType}
@@ -301,7 +302,7 @@ export function DashboardPage(props: DashboardPageProps) {
           </>
         )}
 
-        {props.tab === 'activos' && (
+        {tab === 'activos' && (
           <section className="destination-list" aria-live="polite">
             {props.activeDestinations.length === 0 ? (
               <EmptyState
@@ -330,7 +331,7 @@ export function DashboardPage(props: DashboardPageProps) {
           </section>
         )}
 
-        {props.tab === 'historial' && (
+        {tab === 'historial' && (
           <section className="destination-list" aria-live="polite">
             {historyDestinations.length === 0 ? (
               <EmptyState
@@ -345,7 +346,7 @@ export function DashboardPage(props: DashboardPageProps) {
           </section>
         )}
 
-        {props.tab === 'historial' && (
+        {tab === 'historial' && (
           <>
         <details className="work-summary">
           <summary>Información del trabajo</summary>

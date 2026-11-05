@@ -31,6 +31,10 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
   const activeLots = props.lots.filter(
     (lot) => lot.field_id === props.activeFieldId && lot.deleted_at === null,
   )
+  const allLots = props.lots.filter(
+    (lot) => lot.deleted_at === null && activeFields.some((field) => field.id === lot.field_id),
+  )
+  const fieldNames = new Map(activeFields.map((field) => [field.id, field.name]))
   const selectedField = activeFields.find((field) => field.id === props.activeFieldId)
   const [open, setOpen] = useState(!props.activeLotId)
   const previousLotId = useRef(props.activeLotId)
@@ -80,30 +84,31 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     >
       <summary>{props.activeLotId ? 'Campos y lotes' : 'Elegí el campo y lote de trabajo'}</summary>
       <div className="work-structure__content">
+        {allLots.length > 0 && (
+          <label>
+            Lote de trabajo
+            <select
+              value={props.activeLotId}
+              onChange={(event) => props.onLotChange(event.target.value)}
+            >
+              {allLots.map((lot) => (
+                <option key={lot.id} value={lot.id}>
+                  {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
+                  {activeFields.length > 1 ? ` (${fieldNames.get(lot.field_id) ?? ''})` : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {activeFields.length > 1 && (
           <label>
-            Campo para nuevos destinos
+            Campo (para agregar lotes)
             <select
               value={props.activeFieldId}
               onChange={(event) => props.onFieldChange(event.target.value)}
             >
               {activeFields.map((field) => (
                 <option key={field.id} value={field.id}>{field.name}</option>
-              ))}
-            </select>
-          </label>
-        )}
-        {activeLots.length > 0 && (
-          <label>
-            Lote para nuevos destinos
-            <select
-              value={props.activeLotId}
-              onChange={(event) => props.onLotChange(event.target.value)}
-            >
-              {activeLots.map((lot) => (
-                <option key={lot.id} value={lot.id}>
-                  {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
-                </option>
               ))}
             </select>
           </label>

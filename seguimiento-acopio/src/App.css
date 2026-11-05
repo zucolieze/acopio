@@ -1387,3 +1387,90 @@ button:focus-visible {
   font-size: 0.85rem;
   font-weight: 650;
 }
+
+/* Pantallas de inicio: más compactas y pegadas al encabezado */
+.center-page,
+.center-page--top {
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.simple-header {
+  padding-bottom: 0;
+}
+
+.mode-selection,
+.onboarding {
+  margin: 0.5rem auto 0;
+}
+
+.mode-selection > .muted,
+.onboarding > .muted {
+  margin: 0.4rem 0 0.75rem;
+}
+
+.mode-selection > h1,
+.onboarding > h1 {
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
+}
+
+.mode-selection .eyebrow {
+  margin: 0 0 0.3rem;
+}
+
+.mode-cards {
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.mode-card {
+  min-height: 0;
+  gap: 0.25rem;
+  padding: 1.1rem 1.25rem;
+  border-width: 2px;
+}
+
+.mode-card strong {
+  font-size: 1.25rem;
+}
+
+.mode-card--carrero {
+  border-color: #7fae8e;
+  background: #e9f4ec;
+}
+
+.mode-card--carrero:hover,
+.mode-card--carrero:focus-visible {
+  border-color: #2f6f4c;
+  background: #dcede1;
+}
+
+.mode-card--observador {
+  border-color: #d3b45e;
+  background: #fbf3d9;
+}
+
+.mode-card--observador:hover,
+.mode-card--observador:focus-visible {
+  border-color: #9a7414;
+  background: #f6ebc3;
+}
+
+.work-actions {
+  gap: 0.6rem;
+  margin: 0.75rem 0;
+}
+
+.work-action-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.work-action {
+  min-height: 0;
+  padding: 0.75rem 1rem;
+}
+
+.work-form {
+  margin: 0 auto;
+}
