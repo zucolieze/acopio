@@ -1274,3 +1274,116 @@ button:focus-visible {
 .button--danger:hover:not(:disabled) {
   background: #6f2016;
 }
+
+/* Espaciado más compacto: menos scroll en el celular */
+.app-shell {
+  padding: 0.6rem 0.75rem 0;
+}
+
+.app-header {
+  padding-bottom: 0.5rem;
+}
+
+.dashboard {
+  padding: 0.75rem 0 1.5rem;
+}
+
+.panel {
+  padding: 0.9rem;
+}
+
+.tabs {
+  margin-bottom: 0.75rem;
+}
+
+.destination-list {
+  gap: 0.65rem;
+}
+
+.destination-card {
+  padding: 0.85rem;
+}
+
+.new-destination {
+  margin-top: 0;
+}
+
+.work-structure {
+  margin: 0.75rem 0 0.5rem;
+}
+
+.work-structure__content {
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.form-stack {
+  gap: 0.75rem;
+}
+
+.center-page {
+  gap: 1rem;
+  padding: 0.9rem;
+}
+
+@media (min-width: 40rem) {
+  .app-shell {
+    padding: 0.9rem 1.5rem 0;
+  }
+
+  .panel {
+    padding: 1.1rem;
+  }
+
+  .destination-card {
+    padding: 1rem;
+  }
+}
+
+/* Desplegable de campos y lotes con flecha a la derecha */
+.work-structure > summary {
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.work-structure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.work-structure > summary::after {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  flex: none;
+  border-right: 3px solid var(--color-green);
+  border-bottom: 3px solid var(--color-green);
+  transform: translateY(-25%) rotate(45deg);
+  transition: transform 0.15s;
+}
+
+.work-structure[open] > summary::after {
+  transform: translateY(25%) rotate(-135deg);
+}
+
+.new-destination__lot {
+  margin: 0 0 0.75rem;
+  color: var(--color-green);
+  font-size: 1.05rem;
+}
+
+.cereal-editor {
+  display: flex;
+  align-items: end;
+  gap: 0.6rem;
+  margin: 0.5rem 0;
+}
+
+.cereal-editor label {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 650;
+}

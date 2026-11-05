@@ -21,7 +21,7 @@ export function ResetPasswordPage({ busy, error, onSubmit }: SetupProps) {
 
   return (
     <main className="center-page">
-      <Brand />
+      <Brand iconOnly />
       <section className="panel auth-panel">
         <p className="eyebrow">Contraseña nueva</p>
         <h1>Elegí tu contraseña</h1>
@@ -73,7 +73,7 @@ export function ProfileNamePage({ busy, error, onSubmit }: SetupProps) {
 
   return (
     <main className="center-page">
-      <Brand />
+      <Brand iconOnly />
       <section className="panel auth-panel">
         <p className="eyebrow">Último paso</p>
         <h1>¿Cómo te llamás?</h1>

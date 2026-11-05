@@ -28,7 +28,7 @@ export function ModeSelectionPage({
   return (
     <main className="center-page center-page--top">
       <header className="simple-header">
-        <Brand />
+        <Brand iconOnly />
       </header>
       <section className="mode-selection">
         <p className="eyebrow" onClick={() => setTaps((count) => count + 1)}>
@@ -44,7 +44,6 @@ export function ModeSelectionPage({
             type="button"
             onClick={() => onChooseMode('observador')}
           >
-            <span className="mode-card__icon" aria-hidden="true">👀</span>
             <strong>Observador</strong>
             <span>Solo veo los kilos y el historial.</span>
           </button>
@@ -53,7 +52,6 @@ export function ModeSelectionPage({
             type="button"
             onClick={() => onChooseMode('carrero')}
           >
-            <span className="mode-card__icon" aria-hidden="true">🚜</span>
             <strong>Carrero</strong>
             <span>Abro destinos y cargo las pesadas.</span>
           </button>
@@ -63,7 +61,6 @@ export function ModeSelectionPage({
               type="button"
               onClick={() => onChooseMode('admin')}
             >
-              <span className="mode-card__icon" aria-hidden="true">🛠️</span>
               <strong>Admin de prueba</strong>
               <span>Puedo alternar entre observador y carrero.</span>
             </button>

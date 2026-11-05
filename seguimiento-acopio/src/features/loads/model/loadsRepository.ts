@@ -159,6 +159,17 @@ export async function updateLot(client: Client, lotId: string, name: string) {
   if (!data) throw new Error('No se encontró el lote o no tenés permiso para editarlo.')
 }
 
+export async function updateLotCereal(client: Client, lotId: string, cereal: string) {
+  const { data, error } = await client
+    .from('lots')
+    .update({ cereal })
+    .eq('id', lotId)
+    .select('id')
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error('No se encontró el lote o no tenés permiso para editarlo.')
+}
+
 export async function softDeleteLot(client: Client, lotId: string) {
   const { data, error } = await client
     .from('lots')

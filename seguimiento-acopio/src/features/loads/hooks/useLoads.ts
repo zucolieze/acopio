@@ -17,6 +17,7 @@ import {
   updateLoad as updateLoadInRepository,
   updateLoadAttribution,
   updateLot as updateLotInRepository,
+  updateLotCereal as updateLotCerealInRepository,
 } from '../model/loadsRepository'
 import type { Destination, Field, Load, Lot, Tab, WorkMember } from '../types'
 
@@ -361,6 +362,24 @@ export function useLoads(
     [client, refresh],
   )
 
+  const editLotCereal = useCallback(
+    async (lot: Lot, cereal: string) => {
+      if (!client || !cereal || cereal === lot.cereal) return
+      setBusy(lot.id)
+      setError('')
+      try {
+        await updateLotCerealInRepository(client, lot.id, cereal)
+        setNotice('Cereal actualizado. El cambio quedó registrado.')
+        await refresh()
+      } catch (editError) {
+        setError(messageFromError(editError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
+
   const deleteLot = useCallback(
     async (lot: Lot) => {
       if (!client) return
@@ -630,6 +649,7 @@ export function useLoads(
     createField,
     editField,
     editLot,
+    editLotCereal,
     deleteLot,
     create,
     add,

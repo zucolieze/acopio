@@ -57,7 +57,7 @@ export function WorkMenuPage({
   return (
     <main className="center-page center-page--top">
       <header className="simple-header">
-        <Brand />
+        <Brand iconOnly />
         <div className="app-header__actions">
           <button className="button button--quiet button--small" type="button" onClick={onChangeMode}>
             Cambiar modalidad

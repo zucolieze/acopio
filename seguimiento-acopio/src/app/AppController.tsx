@@ -228,7 +228,7 @@ export default function AppController() {
   if (auth.configurationError) {
     return (
       <main className="center-page">
-        <Brand />
+        <Brand iconOnly />
         <section className="panel">
           <h1>Falta conectar la base</h1>
           <p>{auth.configurationError}</p>
@@ -244,7 +244,7 @@ export default function AppController() {
   if (auth.starting || !auth.client) {
     return (
       <main className="center-page">
-        <Brand />
+        <Brand iconOnly />
         <p role="status">Cargando Acopio…</p>
       </main>
     )
@@ -302,7 +302,7 @@ export default function AppController() {
   ) {
     return (
       <main className="center-page">
-        <Brand />
+        <Brand iconOnly />
         <p role="status">Cargando tus trabajos…</p>
         <Feedback error={auth.error || groups.error} notice={auth.notice || groups.notice} />
       </main>
@@ -427,6 +427,7 @@ export default function AppController() {
       onCreateLot={() => void loads.createLot()}
       onRenameField={(field, name) => void loads.editField(field, name)}
       onRenameLot={(lot, name) => void loads.editLot(lot, name)}
+      onChangeLotCereal={(lot, cereal) => void loads.editLotCereal(lot, cereal)}
       onDeleteLot={handleDeleteLot}
       onRenameGroup={(name) => {
         if (selectedMembership) void groups.rename(selectedMembership.groupId, name)

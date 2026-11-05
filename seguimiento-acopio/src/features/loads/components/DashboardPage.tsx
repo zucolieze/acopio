@@ -24,6 +24,7 @@ import {
 import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
+import { LotCerealEditor } from './LotCerealEditor'
 import { NewDestinationForm } from './NewDestinationForm'
 import { WorkStructureManagement } from './WorkStructureManagement'
 
@@ -78,6 +79,7 @@ type DashboardPageProps = {
   onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
   onDeleteLot: (lot: Lot) => void
+  onChangeLotCereal: (lot: Lot, cereal: string) => void
   onRenameGroup: (name: string) => void
   onDeleteGroup: () => void
   onDestinationTypeChange: (type: DestinationType) => void
@@ -151,6 +153,17 @@ export function DashboardPage(props: DashboardPageProps) {
         {expanded && (
           <div className="destination-history">
             <p className="destination-card__lot">Lote: {lotName}</p>
+            {props.isProvider && !deleted && (() => {
+              const lot = props.lots.find((item) => item.id === destination.lot_id)
+              return lot ? (
+                <LotCerealEditor
+                  key={`${lot.id}-${lot.cereal ?? ''}`}
+                  lot={lot}
+                  busy={props.busy === lot.id}
+                  onSave={props.onChangeLotCereal}
+                />
+              ) : null
+            })()}
             {destination.destination_type === 'camion' ? (
               <CapacitySummary destination={destination} total={total} />
             ) : (
@@ -191,7 +204,7 @@ export function DashboardPage(props: DashboardPageProps) {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <Brand />
+        <Brand iconOnly />
         <div className="app-header__actions">
           <label className="group-picker">
             <span className="sr-only">Grupo de trabajo</span>
@@ -238,6 +251,21 @@ export function DashboardPage(props: DashboardPageProps) {
 
         {props.tab === 'nuevo' && props.isProvider && (
           <>
+          <NewDestinationForm
+            destinationType={props.destinationType}
+            destinationName={props.destinationName}
+            truckCapacity={props.truckCapacity}
+            openingHumidity={props.openingHumidity}
+            busy={props.busy === 'destination'}
+            loading={props.loading}
+            canOpen={Boolean(props.activeLotId)}
+            lotLabel={props.activeLotId ? lotNames.get(props.activeLotId) ?? '' : ''}
+            onDestinationTypeChange={props.onDestinationTypeChange}
+            onDestinationNameChange={props.onDestinationNameChange}
+            onTruckCapacityChange={props.onTruckCapacityChange}
+            onOpeningHumidityChange={props.onOpeningHumidityChange}
+            onSubmit={props.onCreateDestination}
+          />
         {props.loading && (
           <p className="muted" role="status">Cargando campos y lotes…</p>
         )}
@@ -270,20 +298,6 @@ export function DashboardPage(props: DashboardPageProps) {
             onDeleteLot={props.onDeleteLot}
           />
         )}
-          <NewDestinationForm
-            destinationType={props.destinationType}
-            destinationName={props.destinationName}
-            truckCapacity={props.truckCapacity}
-            openingHumidity={props.openingHumidity}
-            busy={props.busy === 'destination'}
-            loading={props.loading}
-            canOpen={Boolean(props.activeLotId)}
-            onDestinationTypeChange={props.onDestinationTypeChange}
-            onDestinationNameChange={props.onDestinationNameChange}
-            onTruckCapacityChange={props.onTruckCapacityChange}
-            onOpeningHumidityChange={props.onOpeningHumidityChange}
-            onSubmit={props.onCreateDestination}
-          />
           </>
         )}
 
@@ -405,10 +419,7 @@ export function DashboardPage(props: DashboardPageProps) {
               </section>
             )}
             {workAudits.length > 0 && (
-              <details className="audit-history-details">
-                <summary>Cambios en el trabajo, campos y lotes ({workAudits.length})</summary>
-                <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
-              </details>
+              <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
             )}
           </div>
         </details>

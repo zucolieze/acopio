@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { cerealOptions } from '../types'
 import type { Destination, Field, Lot } from '../types'
 import { LotManagement } from './LotManagement'
@@ -32,11 +32,12 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     (lot) => lot.field_id === props.activeFieldId && lot.deleted_at === null,
   )
   const selectedField = activeFields.find((field) => field.id === props.activeFieldId)
-  const [manualOpen, setManualOpen] = useState<boolean | null>(null)
-  const open = manualOpen ?? !props.activeLotId
+  const [open, setOpen] = useState(!props.activeLotId)
+  const previousLotId = useRef(props.activeLotId)
 
   useEffect(() => {
-    setManualOpen(null)
+    if (!previousLotId.current && props.activeLotId) setOpen(false)
+    previousLotId.current = props.activeLotId
   }, [props.activeLotId])
 
   function submitField(event: FormEvent<HTMLFormElement>) {
@@ -75,7 +76,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     <details
       className="work-structure panel"
       open={open}
-      onToggle={(event) => setManualOpen(event.currentTarget.open)}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary>{props.activeLotId ? 'Campos y lotes' : 'Elegí el campo y lote de trabajo'}</summary>
       <div className="work-structure__content">

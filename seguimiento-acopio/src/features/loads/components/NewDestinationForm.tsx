@@ -10,6 +10,7 @@ type NewDestinationFormProps = {
   busy: boolean
   loading: boolean
   canOpen: boolean
+  lotLabel: string
   onDestinationTypeChange: (type: DestinationType) => void
   onDestinationNameChange: (name: string) => void
   onTruckCapacityChange: (value: string) => void
@@ -30,6 +31,7 @@ export function NewDestinationForm({
   busy,
   loading,
   canOpen,
+  lotLabel,
   onDestinationTypeChange,
   onDestinationNameChange,
   onTruckCapacityChange,
@@ -50,9 +52,9 @@ export function NewDestinationForm({
 
   return (
     <section className="new-destination panel">
-      <p className="eyebrow">Abrir destino</p>
-      <h2>¿Dónde se van a juntar los kilos?</h2>
-      <p className="muted">Elegí un tipo y poné un nombre para reconocerlo.</p>
+      <p className="new-destination__lot">
+        {lotLabel ? <>Lote: <strong>{lotLabel}</strong></> : 'Elegí un lote abajo para empezar.'}
+      </p>
       <form className="form-stack" onSubmit={handleSubmit}>
         <div className="destination-types" role="group" aria-label="Tipo de destino">
           {(Object.keys(destinationLabels) as DestinationType[]).map((type) => (
