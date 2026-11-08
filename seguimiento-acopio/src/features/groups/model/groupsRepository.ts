@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, MemberRole } from '../../../lib/database.types'
+import { formatPeriod } from '../../../utils/format'
 import type { Membership } from '../types'
 
 type Client = SupabaseClient<Database>
@@ -18,7 +19,7 @@ export async function fetchMemberships(
 
   const { data: groups, error: groupsError } = await client
     .from('groups')
-    .select('id, name, invite_code, deleted_at')
+    .select('id, name, invite_code, deleted_at, created_at')
     .in('id', memberRows.map((member) => member.group_id))
 
   if (groupsError) throw groupsError
@@ -30,6 +31,7 @@ export async function fetchMemberships(
       ? [{
           groupId: group.id,
           groupName: group.name,
+          period: formatPeriod(group.created_at),
           inviteCode: group.invite_code,
           role: member.role,
         }]

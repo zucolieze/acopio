@@ -4,7 +4,7 @@ import { Brand } from '../../../components/ui/Brand'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { Feedback } from '../../../components/ui/Feedback'
 import { formatKilos } from '../../../utils/format'
-import type { Membership } from '../../groups/types'
+import { workLabel, type Membership } from '../../groups/types'
 import type {
   ChangeAudit,
   Destination,
@@ -12,6 +12,7 @@ import type {
   Field,
   Load,
   Lot,
+  LotChanges,
   Tab,
   WorkMember,
 } from '../types'
@@ -25,6 +26,7 @@ import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
 import { LotCerealEditor } from './LotCerealEditor'
+import { LotSummary } from './LotSummary'
 import { NewDestinationForm } from './NewDestinationForm'
 import { WorkStructureManagement } from './WorkStructureManagement'
 
@@ -44,6 +46,7 @@ type DashboardPageProps = {
   newFieldName: string
   newLotName: string
   newLotCereal: string
+  newLotHectares: string
   audits: ChangeAudit[]
   profileNames: Record<string, string>
   totalKilos: number
@@ -74,12 +77,13 @@ type DashboardPageProps = {
   onNewFieldNameChange: (value: string) => void
   onNewLotNameChange: (value: string) => void
   onNewLotCerealChange: (value: string) => void
+  onNewLotHectaresChange: (value: string) => void
   onCreateField: () => void
   onCreateLot: () => void
   onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
   onDeleteLot: (lot: Lot) => void
-  onChangeLotCereal: (lot: Lot, cereal: string) => void
+  onUpdateLot: (lot: Lot, changes: LotChanges) => void
   onRenameGroup: (name: string) => void
   onDeleteGroup: () => void
   onDestinationTypeChange: (type: DestinationType) => void
@@ -117,6 +121,14 @@ export function DashboardPage(props: DashboardPageProps) {
   const lotNames = new Map(
     props.lots.map((lot) => [lot.id, lot.cereal ? `${lot.name} · ${lot.cereal}` : lot.name]),
   )
+  const fieldNames = new Map(props.fields.map((field) => [field.id, field.name]))
+
+  function locationLabel(lotId: string) {
+    const lot = props.lots.find((item) => item.id === lotId)
+    if (!lot) return 'Lote no disponible'
+    const field = fieldNames.get(lot.field_id)
+    return `${field ? `Campo: ${field} · ` : ''}Lote: ${lot.name}${lot.cereal ? ` · ${lot.cereal}` : ''}`
+  }
   const historyDestinations = [
     ...props.activeDestinations,
     ...props.closedDestinations,
@@ -130,11 +142,18 @@ export function DashboardPage(props: DashboardPageProps) {
   function renderHistoryDestination(destination: Destination, deleted: boolean) {
     const entries = props.loadsByDestination.get(destination.id) ?? []
     const audits = auditForDestination(destination.id)
-    const expanded = props.expandedHistory === destination.id
+    const expanded = !props.isProvider || props.expandedHistory === destination.id
     const total = entries.reduce((sum, entry) => sum + entry.kg, 0)
-    const lotName = lotNames.get(destination.lot_id) ?? 'Lote no disponible'
     return (
       <article className={`destination-card${deleted ? ' is-deleted' : ''}`} key={destination.id}>
+        {!props.isProvider ? (
+          <DestinationHeading
+            destination={destination}
+            entries={entries}
+            closed={destination.status === 'cerrado'}
+            deleted={deleted}
+          />
+        ) : (
         <button
           className="history-toggle"
           type="button"
@@ -151,9 +170,10 @@ export function DashboardPage(props: DashboardPageProps) {
             {expanded ? '−' : '+'}
           </span>
         </button>
+        )}
         {expanded && (
           <div className="destination-history">
-            <p className="destination-card__lot">Lote: {lotName}</p>
+            <p className="destination-card__lot">{locationLabel(destination.lot_id)}</p>
             {props.isProvider && !deleted && (() => {
               const lot = props.lots.find((item) => item.id === destination.lot_id)
               return lot ? (
@@ -161,7 +181,7 @@ export function DashboardPage(props: DashboardPageProps) {
                   key={`${lot.id}-${lot.cereal ?? ''}`}
                   lot={lot}
                   busy={props.busy === lot.id}
-                  onSave={props.onChangeLotCereal}
+                  onSave={(item, cereal) => props.onUpdateLot(item, { cereal })}
                 />
               ) : null
             })()}
@@ -216,7 +236,7 @@ export function DashboardPage(props: DashboardPageProps) {
             >
               {props.memberships.map((membership) => (
                 <option key={membership.groupId} value={membership.groupId}>
-                  {membership.groupName}
+                  {workLabel(membership)}
                 </option>
               ))}
             </select>
@@ -233,7 +253,7 @@ export function DashboardPage(props: DashboardPageProps) {
       </header>
 
       <section className="dashboard">
-        <h1 className="sr-only">{props.membership.groupName}</h1>
+        <h1 className="sr-only">{workLabel(props.membership)}</h1>
 
         <Feedback error={props.error} notice={props.notice} />
         <nav className="tabs" aria-label="Secciones">
@@ -280,23 +300,19 @@ export function DashboardPage(props: DashboardPageProps) {
             newFieldName={props.newFieldName}
             newLotName={props.newLotName}
             newLotCereal={props.newLotCereal}
+            newLotHectares={props.newLotHectares}
             busy={props.busy}
-            hasAnyDestinations={
-              props.activeDestinations.length +
-                props.closedDestinations.length +
-                props.deletedDestinations.length >
-              0
-            }
             onFieldChange={props.onActiveFieldChange}
             onLotChange={props.onActiveLotChange}
             onNewFieldNameChange={props.onNewFieldNameChange}
             onNewLotNameChange={props.onNewLotNameChange}
             onNewLotCerealChange={props.onNewLotCerealChange}
+            onNewLotHectaresChange={props.onNewLotHectaresChange}
             onCreateField={props.onCreateField}
             onCreateLot={props.onCreateLot}
             onRenameField={props.onRenameField}
             onRenameLot={props.onRenameLot}
-            onChangeLotCereal={props.onChangeLotCereal}
+            onUpdateLot={props.onUpdateLot}
             onDeleteLot={props.onDeleteLot}
           />
         )}
@@ -315,7 +331,7 @@ export function DashboardPage(props: DashboardPageProps) {
                 <DestinationCard
                   key={destination.id}
                   destination={destination}
-                  lotName={lotNames.get(destination.lot_id) ?? 'Lote no disponible'}
+                  location={locationLabel(destination.lot_id)}
                   entries={props.loadsByDestination.get(destination.id) ?? []}
                   isProvider={props.isProvider}
                   busy={props.busy === destination.id}
@@ -330,6 +346,15 @@ export function DashboardPage(props: DashboardPageProps) {
               ))
             )}
           </section>
+        )}
+
+        {tab === 'historial' && (
+          <LotSummary
+            fields={props.fields}
+            lots={props.lots}
+            destinations={historyDestinations}
+            loadsByDestination={props.loadsByDestination}
+          />
         )}
 
         {tab === 'historial' && (

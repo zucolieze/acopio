@@ -3,6 +3,13 @@ import type { FormEvent } from 'react'
 import type { DestinationChanges, Destination, Lot } from '../types'
 import type { DestinationType } from '../../../lib/database.types'
 import { destinationLabels } from '../types'
+import {
+  formatHumidityInput,
+  humidityToInput,
+  HUMIDITY_ERROR,
+  HUMIDITY_PATTERN,
+  parseHumidity,
+} from '../../../utils/humidity'
 
 type DestinationManagementProps = {
   destination: Destination
@@ -27,13 +34,13 @@ export function DestinationManagement({
     destination.capacity_kg === null ? '' : String(destination.capacity_kg),
   )
   const [openingHumidity, setOpeningHumidity] = useState(
-    destination.opening_humidity === null ? '' : String(destination.opening_humidity),
+    humidityToInput(destination.opening_humidity),
   )
   const [openingAt, setOpeningAt] = useState(
     destination.opening_humidity_at ? toLocalInputValue(destination.opening_humidity_at) : '',
   )
   const [closingHumidity, setClosingHumidity] = useState(
-    destination.closing_humidity === null ? '' : String(destination.closing_humidity),
+    humidityToInput(destination.closing_humidity),
   )
   const [closingAt, setClosingAt] = useState(
     destination.closing_humidity_at ? toLocalInputValue(destination.closing_humidity_at) : '',
@@ -50,11 +57,11 @@ export function DestinationManagement({
       name: name.trim(),
       capacity_kg: type === 'camion' ? parseOptionalNumber(capacity) : null,
       opening_humidity:
-        type === 'camion' ? null : parseOptionalNumber(openingHumidity),
+        type === 'camion' ? null : parseHumidity(openingHumidity),
       opening_humidity_at:
         type === 'camion' || !openingAt ? null : new Date(openingAt).toISOString(),
       closing_humidity:
-        type === 'camion' ? null : parseOptionalNumber(closingHumidity),
+        type === 'camion' ? null : parseHumidity(closingHumidity),
       closing_humidity_at:
         type === 'camion' || !closingAt ? null : new Date(closingAt).toISOString(),
       closed_at: closedAt ? new Date(closedAt).toISOString() : null,
@@ -158,15 +165,18 @@ export function DestinationManagement({
               <label>
                 Humedad inicial (%)
                 <input
-                  inputMode="decimal"
-                  max="100"
-                  min="0"
+                  autoComplete="off"
+                  inputMode="numeric"
+                  maxLength={4}
+                  pattern={HUMIDITY_PATTERN}
+                  placeholder="Ej.: 14.5"
                   required
-                  step="0.01"
-                  type="number"
+                  title={HUMIDITY_ERROR}
+                  type="text"
                   value={openingHumidity}
-                  onChange={(event) => setOpeningHumidity(event.target.value)}
+                  onChange={(event) => setOpeningHumidity(formatHumidityInput(event.target.value))}
                 />
+                <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
               </label>
               <label>
                 Fecha y hora de humedad inicial
@@ -182,15 +192,18 @@ export function DestinationManagement({
                   <label>
                     Humedad de cierre (%)
                     <input
-                      inputMode="decimal"
-                      max="100"
-                      min="0"
+                      autoComplete="off"
+                      inputMode="numeric"
+                      maxLength={4}
+                      pattern={HUMIDITY_PATTERN}
+                      placeholder="Ej.: 13.2"
                       required
-                      step="0.01"
-                      type="number"
+                      title={HUMIDITY_ERROR}
+                      type="text"
                       value={closingHumidity}
-                      onChange={(event) => setClosingHumidity(event.target.value)}
+                      onChange={(event) => setClosingHumidity(formatHumidityInput(event.target.value))}
                     />
+                    <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
                   </label>
                   <label>
                     Fecha y hora de humedad de cierre

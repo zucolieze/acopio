@@ -1,6 +1,11 @@
 import type { FormEvent } from 'react'
 import type { DestinationType } from '../../../lib/database.types'
 import { destinationLabels } from '../types'
+import {
+  formatHumidityInput,
+  HUMIDITY_ERROR,
+  HUMIDITY_PATTERN,
+} from '../../../utils/humidity'
 
 type NewDestinationFormProps = {
   destinationType: DestinationType
@@ -53,7 +58,7 @@ export function NewDestinationForm({
   return (
     <section className="new-destination panel">
       <p className="new-destination__lot">
-        {lotLabel ? <>Lote: <strong>{lotLabel}</strong></> : 'Elegí un lote abajo para empezar.'}
+        {lotLabel ? <>Lote: <strong>{lotLabel}</strong></> : 'Primero creá el campo y el lote acá abajo.'}
       </p>
       <form className="form-stack" onSubmit={handleSubmit}>
         <div className="destination-types" role="group" aria-label="Tipo de destino">
@@ -115,16 +120,18 @@ export function NewDestinationForm({
           <label>
             Humedad inicial (%)
             <input
-              inputMode="decimal"
-              max="100"
-              min="0"
+              autoComplete="off"
+              inputMode="numeric"
+              maxLength={4}
+              pattern={HUMIDITY_PATTERN}
               placeholder="Ej.: 14.5"
               required
-              step="0.01"
-              type="number"
+              title={HUMIDITY_ERROR}
+              type="text"
               value={openingHumidity}
-              onChange={(event) => onOpeningHumidityChange(event.target.value)}
+              onChange={(event) => onOpeningHumidityChange(formatHumidityInput(event.target.value))}
             />
+            <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
           </label>
         )}
         <button className="button button--primary button--large" disabled={busy || loading || !canOpen}>

@@ -14,6 +14,15 @@ import { useGroups, WorkMenuPage } from '../features/groups'
 import { DashboardPage, destinationLabels, useLoads } from '../features/loads'
 import type { AppScreen, WorkMode } from '../types/app'
 import { messageFromError } from '../utils/errors'
+import { clearStored, readStored, writeStored } from '../utils/storage'
+
+type SavedNavigation = {
+  userId: string
+  screen: AppScreen
+  selectedMode: WorkMode | null
+  adminMode: 'observador' | 'carrero'
+  activeGroupId: string
+}
 
 function roleForMode(mode: WorkMode, isDebugAdmin: boolean): MemberRole {
   if (isDebugAdmin || mode === 'admin') return 'admin'
@@ -58,9 +67,15 @@ export default function AppController() {
   useEffect(() => {
     if (auth.session) {
       if (screen === 'login') {
-        setScreen('modalidad')
-        setSelectedMode(null)
-        setActiveGroupId('')
+        const saved = readStored<SavedNavigation>('navegacion')
+        const restore =
+          saved?.userId === auth.session.user.id && saved.screen !== 'login'
+            ? saved
+            : null
+        setScreen(restore?.screen ?? 'modalidad')
+        setSelectedMode(restore?.selectedMode ?? null)
+        setAdminMode(restore?.adminMode ?? 'observador')
+        setActiveGroupId(restore?.activeGroupId ?? '')
         setAppError('')
         setAppNotice('')
       }
@@ -82,6 +97,19 @@ export default function AppController() {
   }, [auth.session?.user.id])
 
   useEffect(() => {
+    const userId = auth.session?.user.id
+    if (!userId || screen === 'login') return
+    writeStored('navegacion', {
+      userId,
+      screen,
+      selectedMode,
+      adminMode,
+      activeGroupId,
+    } satisfies SavedNavigation)
+  }, [activeGroupId, adminMode, auth.session?.user.id, screen, selectedMode])
+
+  useEffect(() => {
+    if (groups.memberships.length === 0) return
     setMenuGroupId((current) =>
       groups.memberships.some((membership) => membership.groupId === current)
         ? current
@@ -134,6 +162,7 @@ export default function AppController() {
     setActiveGroupId(groupId)
     setMenuAction(null)
     setScreen('trabajo')
+    writeStored(`tab:${groupId}`, 'nuevo')
   }
 
   async function handleJoinGroup(event: FormEvent<HTMLFormElement>) {
@@ -222,6 +251,7 @@ export default function AppController() {
 
   function handleSignOut() {
     clearNotices()
+    clearStored()
     void auth.handleSignOut()
   }
 
@@ -382,6 +412,7 @@ export default function AppController() {
       newFieldName={loads.newFieldName}
       newLotName={loads.newLotName}
       newLotCereal={loads.newLotCereal}
+      newLotHectares={loads.newLotHectares}
       audits={loads.audits}
       truckCapacity={loads.truckCapacity}
       openingHumidity={loads.openingHumidity}
@@ -423,11 +454,12 @@ export default function AppController() {
       onNewFieldNameChange={loads.setNewFieldName}
       onNewLotNameChange={loads.setNewLotName}
       onNewLotCerealChange={loads.setNewLotCereal}
+      onNewLotHectaresChange={loads.setNewLotHectares}
       onCreateField={() => void loads.createField()}
       onCreateLot={() => void loads.createLot()}
       onRenameField={(field, name) => void loads.editField(field, name)}
       onRenameLot={(lot, name) => void loads.editLot(lot, name)}
-      onChangeLotCereal={(lot, cereal) => void loads.editLotCereal(lot, cereal)}
+      onUpdateLot={(lot, changes) => void loads.updateLotDetails(lot, changes)}
       onDeleteLot={handleDeleteLot}
       onRenameGroup={(name) => {
         if (selectedMembership) void groups.rename(selectedMembership.groupId, name)

@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { cerealOptions } from '../types'
-import type { Destination, Lot } from '../types'
+import type { Destination, Lot, LotChanges } from '../types'
 
 type LotManagementProps = {
   lots: Lot[]
   destinations: Destination[]
   busy: string
   onRename: (lot: Lot, name: string) => void
-  onChangeCereal: (lot: Lot, cereal: string) => void
+  onUpdate: (lot: Lot, changes: LotChanges) => void
   onDelete: (lot: Lot) => void
 }
 
@@ -17,7 +17,7 @@ export function LotManagement({
   destinations,
   busy,
   onRename,
-  onChangeCereal,
+  onUpdate,
   onDelete,
 }: LotManagementProps) {
   if (lots.length === 0) return null
@@ -39,7 +39,7 @@ export function LotManagement({
             isLastActiveLot={lots.length === 1}
             busy={busy === lot.id}
             onRename={onRename}
-            onChangeCereal={onChangeCereal}
+            onUpdate={onUpdate}
             onDelete={onDelete}
           />
         ))}
@@ -54,7 +54,7 @@ function LotRow({
   isLastActiveLot,
   busy,
   onRename,
-  onChangeCereal,
+  onUpdate,
   onDelete,
 }: {
   lot: Lot
@@ -62,17 +62,19 @@ function LotRow({
   isLastActiveLot: boolean
   busy: boolean
   onRename: LotManagementProps['onRename']
-  onChangeCereal: LotManagementProps['onChangeCereal']
+  onUpdate: LotManagementProps['onUpdate']
   onDelete: LotManagementProps['onDelete']
 }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(lot.name)
   const [cereal, setCereal] = useState(lot.cereal ?? '')
+  const [hectares, setHectares] = useState(lot.hectares === null ? '' : String(lot.hectares))
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (name.trim() !== lot.name) onRename(lot, name)
-    if (cereal && cereal !== lot.cereal) onChangeCereal(lot, cereal)
+    const nextHectares = hectares.trim() ? Number(hectares.replace(',', '.')) : null
+    onUpdate(lot, { cereal: cereal || undefined, hectares: nextHectares })
     setEditing(false)
   }
 
@@ -97,13 +99,27 @@ function LotRow({
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
+          <input
+            inputMode="decimal"
+            min="0.01"
+            placeholder="Hectáreas"
+            step="0.01"
+            type="number"
+            value={hectares}
+            aria-label="Hectáreas del lote"
+            onChange={(event) => setHectares(event.target.value)}
+          />
           <button className="button button--secondary button--small" type="submit" disabled={busy}>
             Guardar
           </button>
         </form>
       ) : (
         <>
-          <span>{lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}</span>
+          <span>
+            {lot.name}
+            {lot.cereal ? ` · ${lot.cereal}` : ''}
+            {lot.hectares ? ` · ${lot.hectares} ha` : ''}
+          </span>
           <div className="lot-management__actions">
             <button
               className="link-button"
@@ -112,6 +128,7 @@ function LotRow({
               onClick={() => {
                 setName(lot.name)
                 setCereal(lot.cereal ?? '')
+                setHectares(lot.hectares === null ? '' : String(lot.hectares))
                 setEditing(true)
               }}
             >
