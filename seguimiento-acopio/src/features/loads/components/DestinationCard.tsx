@@ -14,6 +14,7 @@ type DestinationCardProps = {
   destination: Destination
   location: string
   loadingLot: string
+  cerealMismatch: string
   entries: Load[]
   isProvider: boolean
   busy: boolean
@@ -30,6 +31,7 @@ export function DestinationCard({
   destination,
   location,
   loadingLot,
+  cerealMismatch,
   entries,
   isProvider,
   busy,
@@ -76,7 +78,15 @@ export function DestinationCard({
                 onChange={(event) => onKilosChange(event.target.value)}
               />
             </label>
-            <button className="button button--primary button--large" disabled={busy}>
+            {cerealMismatch && (
+              <p className="feedback feedback--error load-form__warning" role="alert">
+                {cerealMismatch}
+              </p>
+            )}
+            <button
+              className="button button--primary button--large"
+              disabled={busy || Boolean(cerealMismatch)}
+            >
               {busy ? 'Guardando…' : 'Guardar pesada'}
             </button>
           </form>

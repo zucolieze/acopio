@@ -24,6 +24,14 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
   const activeLot = lots.find((lot) => lot.id === props.activeLotId)
   const [open, setOpen] = useState(!props.activeLotId)
   const previousLotId = useRef(props.activeLotId)
+  const [addOpen, setAddOpen] = useState(false)
+  const lotCount = lots.length
+  const previousLotCount = useRef(lotCount)
+
+  useEffect(() => {
+    if (lotCount > previousLotCount.current) setAddOpen(false)
+    previousLotCount.current = lotCount
+  }, [lotCount])
 
   useEffect(() => {
     if (!previousLotId.current && props.activeLotId) setOpen(false)
@@ -108,7 +116,11 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
                 ))}
               </select>
             </label>
-            <details className="field-management">
+            <details
+              className="field-management"
+              open={addOpen}
+              onToggle={(event) => setAddOpen(event.currentTarget.open)}
+            >
               <summary>Agregar otro lote</summary>
               {lotForm('Nombre del lote')}
             </details>

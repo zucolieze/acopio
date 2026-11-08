@@ -25,7 +25,6 @@ import {
 import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
-import { LotCerealEditor } from './LotCerealEditor'
 import { LotSummary } from './LotSummary'
 import { NewDestinationForm } from './NewDestinationForm'
 import { WorkStructureManagement } from './WorkStructureManagement'
@@ -116,6 +115,16 @@ export function DashboardPage(props: DashboardPageProps) {
   )
   const availableLots = props.lots.filter((lot) => lot.deleted_at === null)
 
+  const lotsById = new Map(props.lots.map((lot) => [lot.id, lot]))
+
+  // Un destino tiene un solo cereal: el del lote con el que se abrió.
+  function cerealMismatch(destination: Destination) {
+    const destinationCereal = lotsById.get(destination.lot_id)?.cereal ?? null
+    const activeCereal = lotsById.get(props.activeLotId)?.cereal ?? null
+    if (!props.activeLotId || destinationCereal === activeCereal) return ''
+    return `Este destino es de ${destinationCereal ?? 'otro cereal'} y el lote elegido arriba es de ${activeCereal ?? 'otro cereal'}. No se pueden mezclar cereales: cambiá el lote arriba o usá otro destino.`
+  }
+
   function destinationLots(destination: Destination, entries: Load[]) {
     const lotIds = [...new Set(entries.map((entry) => entry.lot_id))]
     const ids = lotIds.length > 0 ? lotIds : [destination.lot_id]
@@ -188,17 +197,6 @@ export function DashboardPage(props: DashboardPageProps) {
         {expanded && (
           <div className="destination-history">
             <p className="destination-card__lot">Lote: {destinationLots(destination, entries)}</p>
-            {props.isProvider && !deleted && (() => {
-              const lot = props.lots.find((item) => item.id === destination.lot_id)
-              return lot ? (
-                <LotCerealEditor
-                  key={`${lot.id}-${lot.cereal ?? ''}`}
-                  lot={lot}
-                  busy={props.busy === lot.id}
-                  onSave={(item, cereal) => props.onUpdateLot(item, { cereal })}
-                />
-              ) : null
-            })()}
             {destination.destination_type === 'camion' ? (
               <CapacitySummary destination={destination} total={total} />
             ) : (
@@ -210,6 +208,7 @@ export function DashboardPage(props: DashboardPageProps) {
                 lots={props.lots}
                 busy={props.busy === destination.id}
                 onSave={(changes) => props.onEditDestination(destination, changes)}
+                onChangeLotCereal={(lot, cereal) => props.onUpdateLot(lot, { cereal })}
                 onDelete={() => props.onDeleteDestination(destination)}
               />
             )}
@@ -353,6 +352,7 @@ export function DashboardPage(props: DashboardPageProps) {
                     props.loadsByDestination.get(destination.id) ?? [],
                   )}`}
                   loadingLot={lotNames.get(props.activeLotId) ?? ''}
+                  cerealMismatch={cerealMismatch(destination)}
                   entries={props.loadsByDestination.get(destination.id) ?? []}
                   isProvider={props.isProvider}
                   busy={props.busy === destination.id}

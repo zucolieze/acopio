@@ -1672,3 +1672,9 @@ button:focus-visible {
   width: 100%;
   margin-top: 0.75rem;
 }
+
+/* Aviso de cereales mezclados en el formulario de pesada */
+.load-form__warning {
+  grid-column: 1 / -1;
+  margin: 0;
+}
