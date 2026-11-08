@@ -75,6 +75,7 @@ function LoadRow({
   onDelete?: LoadListProps['onDelete']
 }) {
   const [editing, setEditing] = useState(false)
+  const [changingAuthor, setChangingAuthor] = useState(false)
   const [kilos, setKilos] = useState(String(entry.kg))
   const [date, setDate] = useState(toLocalInputValue(entry.date))
 
@@ -91,15 +92,26 @@ function LoadRow({
         <span>Cargó {profileName}</span>
       </div>
       <strong>{formatKilos(entry.kg)} kg</strong>
-      {canChangeAuthor && (
+      {canChangeAuthor && !changingAuthor && (
+        <button
+          className="link-button load-list__author-toggle"
+          type="button"
+          disabled={busy}
+          onClick={() => setChangingAuthor(true)}
+        >
+          Cambiar responsable
+        </button>
+      )}
+      {canChangeAuthor && changingAuthor && (
         <label className="load-list__author">
           Responsable de la descarga
           <select
             value={entry.created_by ?? ''}
             disabled={busy}
-            onChange={(event) =>
+            onChange={(event) => {
               onChangeAuthor?.(entry, event.target.value || null)
-            }
+              setChangingAuthor(false)
+            }}
           >
             <option value="">Sin asignar</option>
             {workMembers.map((member) => (

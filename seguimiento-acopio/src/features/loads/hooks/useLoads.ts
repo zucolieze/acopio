@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, DestinationType } from '../../../lib/database.types'
 import { messageFromError } from '../../../utils/errors'
+import { HUMIDITY_ERROR, parseHumidity } from '../../../utils/humidity'
+import { readStored, writeStored } from '../../../utils/storage'
 import {
   addLoad as addLoadToRepository,
   closeDestination as closeDestinationInRepository,
@@ -18,9 +20,9 @@ import {
   updateLoad as updateLoadInRepository,
   updateLoadAttribution,
   updateLot as updateLotInRepository,
-  updateLotCereal as updateLotCerealInRepository,
+  updateLotDetails as updateLotDetailsInRepository,
 } from '../model/loadsRepository'
-import type { Destination, Field, Load, Lot, Tab, WorkMember } from '../types'
+import type { Destination, Field, Load, Lot, LotChanges, Tab, WorkMember } from '../types'
 
 type Client = SupabaseClient<Database>
 
@@ -41,7 +43,9 @@ export function useLoads(
   const [newFieldName, setNewFieldName] = useState('')
   const [newLotName, setNewLotName] = useState('')
   const [newLotCereal, setNewLotCereal] = useState('')
-  const [tab, setTab] = useState<Tab>('activos')
+  const [newLotHectares, setNewLotHectares] = useState('')
+  const [seasonId, setSeasonId] = useState<string | null>(null)
+  const [tab, setTabState] = useState<Tab>('activos')
   const [destinationType, setDestinationType] =
     useState<DestinationType>('camion')
   const [destinationName, setDestinationName] = useState('')
@@ -56,6 +60,14 @@ export function useLoads(
   const [notice, setNotice] = useState('')
   const [live, setLive] = useState(false)
 
+  const setTab = useCallback(
+    (next: Tab) => {
+      setTabState(next)
+      if (groupId) writeStored(`tab:${groupId}`, next)
+    },
+    [groupId],
+  )
+
   const refresh = useCallback(async () => {
     if (!client || !groupId) return
     try {
@@ -64,9 +76,15 @@ export function useLoads(
       setLoads(activity.loads)
       setFields(activity.fields)
       setLots(activity.lots)
+      setSeasonId(activity.seasonId)
       setWorkMembers(activity.workMembers)
       setAudits(activity.audits)
       setProfileNames(activity.profileNames)
+      setActiveFieldId((current) =>
+        activity.fields.some((field) => field.id === current)
+          ? current
+          : (activity.fields[0]?.id ?? ''),
+      )
       setActiveLotId((current) =>
         activity.lots.some((lot) => lot.id === current && lot.deleted_at === null)
           ? current
@@ -90,7 +108,7 @@ export function useLoads(
     setActiveFieldId('')
     setActiveLotId('')
     setNewFieldName('')
-    setTab('activos')
+    setTabState(readStored<Tab>(`tab:${groupId}`) ?? 'activos')
     setLoading(false)
     setError('')
     setNotice('')
@@ -188,13 +206,26 @@ export function useLoads(
       return
     }
 
+    const hectares = newLotHectares.trim() ? Number(newLotHectares.replace(',', '.')) : null
+    if (hectares !== null && (!Number.isFinite(hectares) || hectares <= 0)) {
+      setError('Las hectáreas tienen que ser un número mayor a cero.')
+      return
+    }
+
     setBusy('lot')
     setError('')
     setNotice('')
     try {
-      const lotId = await createLotInRepository(client, activeFieldId, name, newLotCereal)
+      const lotId = await createLotInRepository(
+        client,
+        activeFieldId,
+        name,
+        newLotCereal,
+        hectares,
+      )
       setNewLotName('')
       setNewLotCereal('')
+      setNewLotHectares('')
       await refresh()
       setActiveLotId(lotId)
       setTab('nuevo')
@@ -204,12 +235,11 @@ export function useLoads(
     } finally {
       setBusy('')
     }
-  }, [activeFieldId, client, fields, newLotCereal, newLotName, refresh])
+  }, [activeFieldId, client, fields, newLotCereal, newLotHectares, newLotName, refresh])
 
   const createField = useCallback(async () => {
     if (!client || !groupId) return
     const name = newFieldName.trim()
-    const seasonId = fields[0]?.season_id
     if (!name) {
       setError('Ingresá el nombre del campo.')
       return
@@ -227,13 +257,13 @@ export function useLoads(
       setActiveFieldId(field.id)
       setActiveLotId('')
       setNewFieldName('')
-      setNotice(`Campo “${name}” creado. Ahora agregá un lote.`)
+      setNotice(`Campo “${name}” creado. Ahora creá el primer lote.`)
     } catch (createError) {
       setError(messageFromError(createError))
     } finally {
       setBusy('')
     }
-  }, [client, fields, groupId, newFieldName])
+  }, [client, groupId, newFieldName, seasonId])
 
   const selectField = useCallback(
     (fieldId: string) => {
@@ -301,22 +331,13 @@ export function useLoads(
         return
       }
       const capacity = type === 'camion' ? Number(capacityKg.replace(',', '.')) : null
-      const initialHumidity =
-        type === 'camion' || !humidity.trim()
-          ? null
-          : Number(humidity.replace(',', '.'))
+      const initialHumidity = type === 'camion' ? null : parseHumidity(humidity)
       if (type === 'camion' && (!Number.isFinite(capacity) || (capacity ?? 0) <= 0)) {
         setError('Ingresá un límite de kilos mayor a cero para el camión.')
         return
       }
-      if (
-        type !== 'camion' &&
-        (initialHumidity === null ||
-          !Number.isFinite(initialHumidity) ||
-          (initialHumidity ?? -1) < 0 ||
-          (initialHumidity ?? 101) > 100)
-      ) {
-        setError('Ingresá una humedad inicial entre 0 y 100 %.')
+      if (type !== 'camion' && initialHumidity === null) {
+        setError(HUMIDITY_ERROR)
         return
       }
 
@@ -372,14 +393,24 @@ export function useLoads(
     [client, refresh],
   )
 
-  const editLotCereal = useCallback(
-    async (lot: Lot, cereal: string) => {
-      if (!client || !cereal || cereal === lot.cereal) return
+  const updateLotDetails = useCallback(
+    async (lot: Lot, changes: LotChanges) => {
+      if (!client) return
+      const pending: LotChanges = {}
+      if (changes.cereal && changes.cereal !== lot.cereal) pending.cereal = changes.cereal
+      if (changes.hectares !== undefined && changes.hectares !== lot.hectares) {
+        if (changes.hectares !== null && !(changes.hectares > 0)) {
+          setError('Las hectáreas tienen que ser un número mayor a cero.')
+          return
+        }
+        pending.hectares = changes.hectares
+      }
+      if (Object.keys(pending).length === 0) return
       setBusy(lot.id)
       setError('')
       try {
-        await updateLotCerealInRepository(client, lot.id, cereal)
-        setNotice('Cereal actualizado. El cambio quedó registrado.')
+        await updateLotDetailsInRepository(client, lot.id, pending)
+        setNotice('Lote actualizado. El cambio quedó registrado.')
         await refresh()
       } catch (editError) {
         setError(messageFromError(editError))
@@ -470,19 +501,9 @@ export function useLoads(
     async (destination: Destination, rawHumidity: string) => {
       if (!client) return
       const humidity =
-        destination.destination_type === 'camion'
-          ? null
-          : rawHumidity.trim()
-            ? Number(rawHumidity.replace(',', '.'))
-            : null
-      if (
-        destination.destination_type !== 'camion' &&
-        (humidity === null ||
-          !Number.isFinite(humidity) ||
-          humidity < 0 ||
-          humidity > 100)
-      ) {
-        setError('Ingresá una humedad de cierre entre 0 y 100 %.')
+        destination.destination_type === 'camion' ? null : parseHumidity(rawHumidity)
+      if (destination.destination_type !== 'camion' && humidity === null) {
+        setError(HUMIDITY_ERROR)
         return
       }
       setBusy(destination.id)
@@ -652,6 +673,8 @@ export function useLoads(
     setNewLotName,
     newLotCereal,
     setNewLotCereal,
+    newLotHectares,
+    setNewLotHectares,
     destinationType,
     setDestinationType,
     destinationName,
@@ -678,7 +701,7 @@ export function useLoads(
     editField,
     editLot,
     selectLot,
-    editLotCereal,
+    updateLotDetails,
     deleteLot,
     create,
     add,

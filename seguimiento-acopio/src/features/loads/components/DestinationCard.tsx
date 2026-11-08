@@ -2,10 +2,16 @@ import type { FormEvent } from 'react'
 import { DestinationHeading } from './DestinationHeading'
 import type { Destination, Load } from '../types'
 import { formatKilos } from '../../../utils/format'
+import {
+  formatHumidityInput,
+  HUMIDITY_ERROR,
+  HUMIDITY_PATTERN,
+  parseHumidity,
+} from '../../../utils/humidity'
 
 type DestinationCardProps = {
   destination: Destination
-  lotName: string
+  location: string
   entries: Load[]
   isProvider: boolean
   busy: boolean
@@ -20,7 +26,7 @@ type DestinationCardProps = {
 
 export function DestinationCard({
   destination,
-  lotName,
+  location,
   entries,
   isProvider,
   busy,
@@ -50,7 +56,7 @@ export function DestinationCard({
   return (
     <article className="destination-card">
       <DestinationHeading destination={destination} entries={entries} />
-      <p className="destination-card__lot">Lote: {lotName}</p>
+      <p className="destination-card__lot">{location}</p>
       {isProvider && (
         <>
           <form className="load-form" onSubmit={handleAddLoad}>
@@ -92,27 +98,23 @@ export function DestinationCard({
           <label>
             Humedad de cierre (%)
             <input
-              inputMode="decimal"
-              max="100"
-              min="0"
+              autoComplete="off"
+              inputMode="numeric"
+              maxLength={4}
+              pattern={HUMIDITY_PATTERN}
               placeholder="Ej.: 13.2"
               required
-              step="0.01"
-              type="number"
+              title={HUMIDITY_ERROR}
+              type="text"
               value={closingHumidity}
-              onChange={(event) => onClosingHumidityChange(event.target.value)}
+              onChange={(event) => onClosingHumidityChange(formatHumidityInput(event.target.value))}
             />
+            <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
           </label>
           <button
             className="button button--danger"
             type="submit"
-            disabled={
-              busy ||
-              !closingHumidity.trim() ||
-              !Number.isFinite(Number(closingHumidity.replace(',', '.'))) ||
-              Number(closingHumidity.replace(',', '.')) < 0 ||
-              Number(closingHumidity.replace(',', '.')) > 100
-            }
+            disabled={busy || parseHumidity(closingHumidity) === null}
           >
             Cerrar silo con humedad
           </button>
@@ -195,7 +197,7 @@ export function HumiditySummary({ destination }: { destination: Destination }) {
       </div>
       <div>
         <dt>Promedio</dt>
-        <dd>{average === null ? 'Pendiente' : `${average.toFixed(2)}%`}</dd>
+        <dd>{average === null ? 'Pendiente' : `${average.toFixed(1)}%`}</dd>
       </div>
     </dl>
   )

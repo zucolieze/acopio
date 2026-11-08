@@ -3,7 +3,7 @@ import { Brand } from '../../../components/ui/Brand'
 import { Feedback } from '../../../components/ui/Feedback'
 import { modeLabels, type WorkMode } from '../../../types/app'
 import type { MemberRole } from '../../../lib/database.types'
-import type { Membership, WorkMenuAction } from '../types'
+import { workLabel, type Membership, type WorkMenuAction } from '../types'
 
 const roleLabels: Record<MemberRole, string> = {
   cliente: 'Observador',
@@ -128,7 +128,7 @@ export function WorkMenuPage({
               <select value={selectedGroupId} onChange={(event) => onSelectedGroupChange(event.target.value)}>
                 {memberships.map((membership) => (
                   <option key={membership.groupId} value={membership.groupId}>
-                    {membership.groupName} · {roleLabels[membership.role]}
+                    {workLabel(membership)} · {roleLabels[membership.role]}
                   </option>
                 ))}
               </select>

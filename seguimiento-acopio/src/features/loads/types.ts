@@ -24,6 +24,7 @@ export type DestinationChanges = Partial<
     | 'closed_at'
   >
 >
+export type LotChanges = { cereal?: string; hectares?: number | null }
 export type Tab = 'activos' | 'nuevo' | 'historial'
 
 export type GroupActivity = {
@@ -31,6 +32,7 @@ export type GroupActivity = {
   loads: Load[]
   fields: Field[]
   lots: Lot[]
+  seasonId: string | null
   workMembers: WorkMember[]
   audits: ChangeAudit[]
   profileNames: Record<string, string>

@@ -1499,3 +1499,130 @@ button:focus-visible {
   display: grid;
   gap: 0.5rem;
 }
+
+/* Formulario de lote: nombre, cereal, hectáreas y botón, uno debajo del otro */
+.create-lot-form--lot {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 40rem) {
+  .create-lot-form--lot {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .create-lot-form--lot > .button {
+    grid-column: 1 / -1;
+  }
+}
+
+.field-management > .create-lot-form {
+  margin-top: 0.6rem;
+}
+
+/* Lo del campo va al final del panel, separado de los lotes */
+.work-structure__fields {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0.65rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #aebbb2;
+}
+
+.work-structure__fields > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #31443c;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.work-structure__content > .field-management,
+.work-structure__content > p {
+  grid-column: 1 / -1;
+}
+
+.lot-management__edit {
+  flex-wrap: wrap;
+}
+
+.load-list__author-toggle {
+  justify-self: start;
+  min-height: 2rem;
+  font-size: 0.85rem;
+}
+
+/* Rendimiento por lote (pestaña Historial) */
+.lot-summary {
+  margin-bottom: 0.75rem;
+}
+
+.lot-summary h2 {
+  margin: 0 0 0.6rem;
+  color: var(--color-green);
+  font-size: 1.1rem;
+}
+
+.lot-summary__list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lot-summary__item {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #aebbb2;
+  border-radius: 0.75rem;
+  background: #f6f8f4;
+}
+
+.lot-summary__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  color: #1c302a;
+  font-size: 0.92rem;
+}
+
+.lot-summary__cereal {
+  padding: 0.15rem 0.55rem;
+  border-radius: 99px;
+  background: #fbf3d9;
+  color: #5c4500;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.lot-summary__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.75rem;
+  margin: 0.55rem 0 0;
+}
+
+.lot-summary__stats dt {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.lot-summary__stats dd {
+  margin: 0;
+  color: var(--color-green);
+  font-weight: 700;
+}
+
+.lot-summary__totals {
+  margin: 0.65rem 0 0;
+  color: #31443c;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 40rem) {
+  .lot-summary__stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

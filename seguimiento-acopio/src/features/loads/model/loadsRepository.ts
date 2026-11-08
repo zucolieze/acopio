@@ -17,7 +17,7 @@ export async function fetchGroupActivity(
   client: Client,
   groupId: string,
 ): Promise<GroupActivity> {
-  const [destinationsResult, fieldsResult, membersResult, auditResult] = await Promise.all([
+  const [destinationsResult, fieldsResult, membersResult, auditResult, seasonsResult] = await Promise.all([
     client
       .from('destinations')
       .select('*')
@@ -31,12 +31,14 @@ export async function fetchGroupActivity(
       .eq('group_id', groupId)
       .order('occurred_at', { ascending: false })
       .limit(100),
+    client.from('seasons').select('id').eq('group_id', groupId).order('created_at'),
   ])
 
   if (destinationsResult.error) throw destinationsResult.error
   if (fieldsResult.error) throw fieldsResult.error
   if (membersResult.error) throw membersResult.error
   if (auditResult.error) throw auditResult.error
+  if (seasonsResult.error) throw seasonsResult.error
 
   const fields: Field[] = fieldsResult.data
   const fieldIds = fields.map((field) => field.id)
@@ -101,6 +103,7 @@ export async function fetchGroupActivity(
     loads,
     fields,
     lots,
+    seasonId: seasonsResult.data[0]?.id ?? null,
     audits,
     workMembers,
     profileNames,
@@ -138,10 +141,11 @@ export async function createLot(
   fieldId: string,
   name: string,
   cereal: string,
+  hectares: number | null,
 ) {
   const { data, error } = await client
     .from('lots')
-    .insert({ field_id: fieldId, name, cereal })
+    .insert({ field_id: fieldId, name, cereal, hectares })
     .select('id')
     .single()
   if (error) throw error
@@ -159,10 +163,14 @@ export async function updateLot(client: Client, lotId: string, name: string) {
   if (!data) throw new Error('No se encontró el lote o no tenés permiso para editarlo.')
 }
 
-export async function updateLotCereal(client: Client, lotId: string, cereal: string) {
+export async function updateLotDetails(
+  client: Client,
+  lotId: string,
+  changes: { cereal?: string; hectares?: number | null },
+) {
   const { data, error } = await client
     .from('lots')
-    .update({ cereal })
+    .update(changes)
     .eq('id', lotId)
     .select('id')
     .maybeSingle()
