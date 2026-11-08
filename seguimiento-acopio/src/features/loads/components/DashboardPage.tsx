@@ -41,9 +41,7 @@ type DashboardPageProps = {
   fields: Field[]
   lots: Lot[]
   workMembers: WorkMember[]
-  activeFieldId: string
   activeLotId: string
-  newFieldName: string
   newLotName: string
   newLotCereal: string
   newLotHectares: string
@@ -72,15 +70,11 @@ type DashboardPageProps = {
   onAdminModeToggle: () => void
   onCopyInviteCode: () => void
   onTabChange: (tab: Tab) => void
-  onActiveFieldChange: (fieldId: string) => void
   onActiveLotChange: (lotId: string) => void
-  onNewFieldNameChange: (value: string) => void
   onNewLotNameChange: (value: string) => void
   onNewLotCerealChange: (value: string) => void
   onNewLotHectaresChange: (value: string) => void
-  onCreateField: () => void
   onCreateLot: () => void
-  onRenameField: (field: Field, name: string) => void
   onRenameLot: (lot: Lot, name: string) => void
   onDeleteLot: (lot: Lot) => void
   onUpdateLot: (lot: Lot, changes: LotChanges) => void
@@ -122,6 +116,29 @@ export function DashboardPage(props: DashboardPageProps) {
     props.lots.map((lot) => [lot.id, lot.cereal ? `${lot.name} · ${lot.cereal}` : lot.name]),
   )
   const fieldNames = new Map(props.fields.map((field) => [field.id, field.name]))
+  // Mientras no haya ningún lote, crearlo es lo primero que se ve en "Nuevo".
+  const firstLotFirst = !props.loading && !props.lots.some((lot) => lot.deleted_at === null)
+  const structurePanel = props.loading ? (
+    <p className="muted" role="status">Cargando lotes…</p>
+  ) : (
+    <WorkStructureManagement
+      lots={props.lots}
+      destinations={props.activeDestinations}
+      activeLotId={props.activeLotId}
+      newLotName={props.newLotName}
+      newLotCereal={props.newLotCereal}
+      newLotHectares={props.newLotHectares}
+      busy={props.busy}
+      onLotChange={props.onActiveLotChange}
+      onNewLotNameChange={props.onNewLotNameChange}
+      onNewLotCerealChange={props.onNewLotCerealChange}
+      onNewLotHectaresChange={props.onNewLotHectaresChange}
+      onCreateLot={props.onCreateLot}
+      onRenameLot={props.onRenameLot}
+      onUpdateLot={props.onUpdateLot}
+      onDeleteLot={props.onDeleteLot}
+    />
+  )
 
   function locationLabel(lotId: string) {
     const lot = props.lots.find((item) => item.id === lotId)
@@ -272,50 +289,23 @@ export function DashboardPage(props: DashboardPageProps) {
 
         {tab === 'nuevo' && props.isProvider && (
           <>
-          <NewDestinationForm
-            destinationType={props.destinationType}
-            destinationName={props.destinationName}
-            truckCapacity={props.truckCapacity}
-            openingHumidity={props.openingHumidity}
-            busy={props.busy === 'destination'}
-            loading={props.loading}
-            canOpen={Boolean(props.activeLotId)}
-            lotLabel={props.activeLotId ? lotNames.get(props.activeLotId) ?? '' : ''}
-            onDestinationTypeChange={props.onDestinationTypeChange}
-            onDestinationNameChange={props.onDestinationNameChange}
-            onTruckCapacityChange={props.onTruckCapacityChange}
-            onOpeningHumidityChange={props.onOpeningHumidityChange}
-            onSubmit={props.onCreateDestination}
-          />
-        {props.loading && (
-          <p className="muted" role="status">Cargando campos y lotes…</p>
-        )}
-        {!props.loading && (
-          <WorkStructureManagement
-            fields={props.fields}
-            lots={props.lots}
-            destinations={props.activeDestinations}
-            activeFieldId={props.activeFieldId}
-            activeLotId={props.activeLotId}
-            newFieldName={props.newFieldName}
-            newLotName={props.newLotName}
-            newLotCereal={props.newLotCereal}
-            newLotHectares={props.newLotHectares}
-            busy={props.busy}
-            onFieldChange={props.onActiveFieldChange}
-            onLotChange={props.onActiveLotChange}
-            onNewFieldNameChange={props.onNewFieldNameChange}
-            onNewLotNameChange={props.onNewLotNameChange}
-            onNewLotCerealChange={props.onNewLotCerealChange}
-            onNewLotHectaresChange={props.onNewLotHectaresChange}
-            onCreateField={props.onCreateField}
-            onCreateLot={props.onCreateLot}
-            onRenameField={props.onRenameField}
-            onRenameLot={props.onRenameLot}
-            onUpdateLot={props.onUpdateLot}
-            onDeleteLot={props.onDeleteLot}
-          />
-        )}
+            {firstLotFirst && structurePanel}
+            <NewDestinationForm
+              destinationType={props.destinationType}
+              destinationName={props.destinationName}
+              truckCapacity={props.truckCapacity}
+              openingHumidity={props.openingHumidity}
+              busy={props.busy === 'destination'}
+              loading={props.loading}
+              canOpen={Boolean(props.activeLotId)}
+              lotLabel={props.activeLotId ? lotNames.get(props.activeLotId) ?? '' : ''}
+              onDestinationTypeChange={props.onDestinationTypeChange}
+              onDestinationNameChange={props.onDestinationNameChange}
+              onTruckCapacityChange={props.onTruckCapacityChange}
+              onOpeningHumidityChange={props.onOpeningHumidityChange}
+              onSubmit={props.onCreateDestination}
+            />
+            {!firstLotFirst && structurePanel}
           </>
         )}
 

@@ -407,9 +407,7 @@ export default function AppController() {
       fields={loads.fields}
       lots={loads.lots}
       workMembers={loads.workMembers}
-      activeFieldId={loads.activeFieldId}
       activeLotId={loads.activeLotId}
-      newFieldName={loads.newFieldName}
       newLotName={loads.newLotName}
       newLotCereal={loads.newLotCereal}
       newLotHectares={loads.newLotHectares}
@@ -449,15 +447,11 @@ export default function AppController() {
         )
       }}
       onCopyInviteCode={() => void handleCopyInviteCode()}
-      onActiveFieldChange={loads.selectField}
       onActiveLotChange={loads.selectLot}
-      onNewFieldNameChange={loads.setNewFieldName}
       onNewLotNameChange={loads.setNewLotName}
       onNewLotCerealChange={loads.setNewLotCereal}
       onNewLotHectaresChange={loads.setNewLotHectares}
-      onCreateField={() => void loads.createField()}
       onCreateLot={() => void loads.createLot()}
-      onRenameField={(field, name) => void loads.editField(field, name)}
       onRenameLot={(lot, name) => void loads.editLot(lot, name)}
       onUpdateLot={(lot, changes) => void loads.updateLotDetails(lot, changes)}
       onDeleteLot={handleDeleteLot}

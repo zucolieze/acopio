@@ -7,7 +7,6 @@ import { readStored, writeStored } from '../../../utils/storage'
 import {
   addLoad as addLoadToRepository,
   closeDestination as closeDestinationInRepository,
-  createField as createFieldInRepository,
   createDestination as createDestinationInRepository,
   createLot as createLotInRepository,
   fetchGroupActivity,
@@ -16,7 +15,6 @@ import {
   softDeleteLoad,
   softDeleteLot,
   updateDestination as updateDestinationInRepository,
-  updateField as updateFieldInRepository,
   updateLoad as updateLoadInRepository,
   updateLoadAttribution,
   updateLot as updateLotInRepository,
@@ -40,11 +38,9 @@ export function useLoads(
   const [profileNames, setProfileNames] = useState<Record<string, string>>({})
   const [activeLotId, setActiveLotId] = useState('')
   const [activeFieldId, setActiveFieldId] = useState('')
-  const [newFieldName, setNewFieldName] = useState('')
   const [newLotName, setNewLotName] = useState('')
   const [newLotCereal, setNewLotCereal] = useState('')
   const [newLotHectares, setNewLotHectares] = useState('')
-  const [seasonId, setSeasonId] = useState<string | null>(null)
   const [tab, setTabState] = useState<Tab>('activos')
   const [destinationType, setDestinationType] =
     useState<DestinationType>('camion')
@@ -76,7 +72,6 @@ export function useLoads(
       setLoads(activity.loads)
       setFields(activity.fields)
       setLots(activity.lots)
-      setSeasonId(activity.seasonId)
       setWorkMembers(activity.workMembers)
       setAudits(activity.audits)
       setProfileNames(activity.profileNames)
@@ -107,7 +102,6 @@ export function useLoads(
     setProfileNames({})
     setActiveFieldId('')
     setActiveLotId('')
-    setNewFieldName('')
     setTabState(readStored<Tab>(`tab:${groupId}`) ?? 'activos')
     setLoading(false)
     setError('')
@@ -237,44 +231,6 @@ export function useLoads(
     }
   }, [activeFieldId, client, fields, newLotCereal, newLotHectares, newLotName, refresh])
 
-  const createField = useCallback(async () => {
-    if (!client || !groupId) return
-    const name = newFieldName.trim()
-    if (!name) {
-      setError('Ingresá el nombre del campo.')
-      return
-    }
-    if (!seasonId) {
-      setError('No se encontró una campaña para crear el campo.')
-      return
-    }
-    setBusy('field')
-    setError('')
-    setNotice('')
-    try {
-      const field = await createFieldInRepository(client, groupId, seasonId, name)
-      setFields((current) => [...current, field])
-      setActiveFieldId(field.id)
-      setActiveLotId('')
-      setNewFieldName('')
-      setNotice(`Campo “${name}” creado. Ahora creá el primer lote.`)
-    } catch (createError) {
-      setError(messageFromError(createError))
-    } finally {
-      setBusy('')
-    }
-  }, [client, groupId, newFieldName, seasonId])
-
-  const selectField = useCallback(
-    (fieldId: string) => {
-      setActiveFieldId(fieldId)
-      setActiveLotId(
-        lots.find((lot) => lot.field_id === fieldId && lot.deleted_at === null)?.id ?? '',
-      )
-    },
-    [lots],
-  )
-
   const selectLot = useCallback(
     (lotId: string) => {
       const lot = lots.find((item) => item.id === lotId)
@@ -282,29 +238,6 @@ export function useLoads(
       setActiveLotId(lotId)
     },
     [lots],
-  )
-
-  const editField = useCallback(
-    async (field: Field, name: string) => {
-      if (!client) return
-      const trimmedName = name.trim()
-      if (!trimmedName) {
-        setError('Ingresá el nombre del campo.')
-        return
-      }
-      setBusy(field.id)
-      setError('')
-      try {
-        await updateFieldInRepository(client, field.id, trimmedName)
-        setNotice('Campo actualizado. El cambio quedó registrado.')
-        await refresh()
-      } catch (editError) {
-        setError(messageFromError(editError))
-      } finally {
-        setBusy('')
-      }
-    },
-    [client, refresh],
   )
 
   const create = useCallback(
@@ -666,9 +599,6 @@ export function useLoads(
     activeLotId,
     setActiveLotId,
     activeFieldId,
-    selectField,
-    newFieldName,
-    setNewFieldName,
     newLotName,
     setNewLotName,
     newLotCereal,
@@ -697,8 +627,6 @@ export function useLoads(
     setNotice,
     live,
     createLot,
-    createField,
-    editField,
     editLot,
     selectLot,
     updateLotDetails,
