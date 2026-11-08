@@ -404,6 +404,13 @@ export function useLoads(
         setError('Elegí arriba de qué lote es esta descarga.')
         return
       }
+      const destination = destinations.find((item) => item.id === destinationId)
+      const destinationCereal = lots.find((lot) => lot.id === destination?.lot_id)?.cereal ?? null
+      const loadCereal = lots.find((lot) => lot.id === activeLotId)?.cereal ?? null
+      if (destination && destinationCereal !== loadCereal) {
+        setError('No se pueden mezclar cereales en un mismo destino. Elegí arriba un lote del mismo cereal.')
+        return
+      }
       const kilos = Number(rawKilos.replace(',', '.'))
       if (!Number.isFinite(kilos) || kilos <= 0) {
         setError('Ingresá una cantidad de kilos mayor a cero.')
@@ -423,7 +430,7 @@ export function useLoads(
         setBusy('')
       }
     },
-    [activeLotId, client, refresh, userId],
+    [activeLotId, client, destinations, lots, refresh, userId],
   )
 
   const close = useCallback(

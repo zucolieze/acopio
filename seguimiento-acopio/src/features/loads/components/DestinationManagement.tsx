@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { DestinationChanges, Destination, Lot } from '../types'
 import type { DestinationType } from '../../../lib/database.types'
-import { destinationLabels } from '../types'
+import { cerealOptions, destinationLabels } from '../types'
 import {
   formatHumidityInput,
   humidityToInput,
@@ -16,6 +16,7 @@ type DestinationManagementProps = {
   lots: Lot[]
   busy: boolean
   onSave: (changes: DestinationChanges) => void
+  onChangeLotCereal: (lot: Lot, cereal: string) => void
   onDelete: () => void
 }
 
@@ -24,11 +25,15 @@ export function DestinationManagement({
   lots,
   busy,
   onSave,
+  onChangeLotCereal,
   onDelete,
 }: DestinationManagementProps) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(destination.name)
   const [lotId, setLotId] = useState(destination.lot_id)
+  const [cereal, setCereal] = useState(
+    lots.find((lot) => lot.id === destination.lot_id)?.cereal ?? '',
+  )
   const [type, setType] = useState<DestinationType>(destination.destination_type)
   const [capacity, setCapacity] = useState(
     destination.capacity_kg === null ? '' : String(destination.capacity_kg),
@@ -67,6 +72,8 @@ export function DestinationManagement({
       closed_at: closedAt ? new Date(closedAt).toISOString() : null,
     }
     onSave(changes)
+    const lot = lots.find((item) => item.id === lotId)
+    if (lot && cereal && cereal !== lot.cereal) onChangeLotCereal(lot, cereal)
     setEditing(false)
   }
 
@@ -116,17 +123,37 @@ export function DestinationManagement({
           </label>
           <label>
             Lote
-            <select required value={lotId} onChange={(event) => setLotId(event.target.value)}>
+            <select
+              required
+              value={lotId}
+              onChange={(event) => {
+                setLotId(event.target.value)
+                setCereal(lots.find((lot) => lot.id === event.target.value)?.cereal ?? '')
+              }}
+            >
               {lots.map((lot) => (
                 <option
                   key={lot.id}
                   value={lot.id}
                   disabled={lot.deleted_at !== null && lot.id !== destination.lot_id}
                 >
-                  {lot.name}{lot.deleted_at ? ' (eliminado)' : ''}
+                  {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
+                  {lot.deleted_at ? ' (eliminado)' : ''}
                 </option>
               ))}
             </select>
+          </label>
+          <label>
+            Cereal del lote
+            <select value={cereal} onChange={(event) => setCereal(event.target.value)}>
+              {!cereal && <option value="">Sin cereal</option>}
+              {cerealOptions.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+            <span className="muted small-copy">
+              Cambia el cereal de todo el lote. No se permite si quedaría mezclado en un destino.
+            </span>
           </label>
           <label>
             Tipo de destino
