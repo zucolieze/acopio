@@ -44,7 +44,6 @@ type DashboardPageProps = {
   activeLotId: string
   newLotName: string
   newLotCereal: string
-  newLotHectares: string
   audits: ChangeAudit[]
   profileNames: Record<string, string>
   totalKilos: number
@@ -73,7 +72,6 @@ type DashboardPageProps = {
   onActiveLotChange: (lotId: string) => void
   onNewLotNameChange: (value: string) => void
   onNewLotCerealChange: (value: string) => void
-  onNewLotHectaresChange: (value: string) => void
   onCreateLot: () => void
   onRenameLot: (lot: Lot, name: string) => void
   onDeleteLot: (lot: Lot) => void
@@ -100,6 +98,7 @@ type DashboardPageProps = {
   onEditDestination: (destination: Destination, changes: DestinationChanges) => void
   onDeleteDestination: (destination: Destination) => void
   onRestoreDestination: (destination: Destination) => void
+  onReopenDestination: (destination: Destination) => void
   onHistoryToggle: (destinationId: string | null) => void
 }
 
@@ -115,7 +114,13 @@ export function DashboardPage(props: DashboardPageProps) {
   const lotNames = new Map(
     props.lots.map((lot) => [lot.id, lot.cereal ? `${lot.name} · ${lot.cereal}` : lot.name]),
   )
-  const fieldNames = new Map(props.fields.map((field) => [field.id, field.name]))
+  const availableLots = props.lots.filter((lot) => lot.deleted_at === null)
+
+  function destinationLots(destination: Destination, entries: Load[]) {
+    const lotIds = [...new Set(entries.map((entry) => entry.lot_id))]
+    const ids = lotIds.length > 0 ? lotIds : [destination.lot_id]
+    return ids.map((id) => lotNames.get(id) ?? 'Lote no disponible').join(' / ')
+  }
   // Mientras no haya ningún lote, crearlo es lo primero que se ve en "Nuevo".
   const firstLotFirst = !props.loading && !props.lots.some((lot) => lot.deleted_at === null)
   const structurePanel = props.loading ? (
@@ -127,12 +132,10 @@ export function DashboardPage(props: DashboardPageProps) {
       activeLotId={props.activeLotId}
       newLotName={props.newLotName}
       newLotCereal={props.newLotCereal}
-      newLotHectares={props.newLotHectares}
       busy={props.busy}
       onLotChange={props.onActiveLotChange}
       onNewLotNameChange={props.onNewLotNameChange}
       onNewLotCerealChange={props.onNewLotCerealChange}
-      onNewLotHectaresChange={props.onNewLotHectaresChange}
       onCreateLot={props.onCreateLot}
       onRenameLot={props.onRenameLot}
       onUpdateLot={props.onUpdateLot}
@@ -140,12 +143,6 @@ export function DashboardPage(props: DashboardPageProps) {
     />
   )
 
-  function locationLabel(lotId: string) {
-    const lot = props.lots.find((item) => item.id === lotId)
-    if (!lot) return 'Lote no disponible'
-    const field = fieldNames.get(lot.field_id)
-    return `${field ? `Campo: ${field} · ` : ''}Lote: ${lot.name}${lot.cereal ? ` · ${lot.cereal}` : ''}`
-  }
   const historyDestinations = [
     ...props.activeDestinations,
     ...props.closedDestinations,
@@ -190,7 +187,7 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
         {expanded && (
           <div className="destination-history">
-            <p className="destination-card__lot">{locationLabel(destination.lot_id)}</p>
+            <p className="destination-card__lot">Lote: {destinationLots(destination, entries)}</p>
             {props.isProvider && !deleted && (() => {
               const lot = props.lots.find((item) => item.id === destination.lot_id)
               return lot ? (
@@ -218,6 +215,7 @@ export function DashboardPage(props: DashboardPageProps) {
             )}
             <LoadList
               entries={entries}
+              lotNames={lotNames}
               profileNames={props.profileNames}
               canEdit={props.isProvider && !deleted}
               canChangeAuthor={!props.isProvider && !deleted}
@@ -233,6 +231,16 @@ export function DashboardPage(props: DashboardPageProps) {
               lots={props.lots}
               destinationName={destination.name}
             />
+            {!props.isProvider && !deleted && destination.status === 'cerrado' && (
+              <button
+                className="button button--secondary destination-card__reopen"
+                type="button"
+                disabled={props.busy === destination.id}
+                onClick={() => props.onReopenDestination(destination)}
+              >
+                {props.busy === destination.id ? 'Reabriendo…' : 'Reabrir destino'}
+              </button>
+            )}
           </div>
         )}
       </article>
@@ -244,20 +252,39 @@ export function DashboardPage(props: DashboardPageProps) {
       <header className="app-header">
         <Brand iconOnly />
         <div className="app-header__actions">
-          <label className="group-picker">
-            <span className="sr-only">Grupo de trabajo</span>
-            <select
-              aria-label="Grupo de trabajo"
-              value={props.membership.groupId}
-              onChange={(event) => props.onGroupChange(event.target.value)}
-            >
-              {props.memberships.map((membership) => (
-                <option key={membership.groupId} value={membership.groupId}>
-                  {workLabel(membership)}
-                </option>
-              ))}
-            </select>
-          </label>
+          {props.isProvider ? (
+            <label className="group-picker">
+              <span className="sr-only">Lote de las descargas</span>
+              <select
+                aria-label="Lote de las descargas"
+                value={props.activeLotId}
+                disabled={availableLots.length === 0}
+                onChange={(event) => props.onActiveLotChange(event.target.value)}
+              >
+                {availableLots.length === 0 && <option value="">Sin lotes</option>}
+                {availableLots.map((lot) => (
+                  <option key={lot.id} value={lot.id}>
+                    {lotNames.get(lot.id)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label className="group-picker">
+              <span className="sr-only">Trabajo</span>
+              <select
+                aria-label="Trabajo"
+                value={props.membership.groupId}
+                onChange={(event) => props.onGroupChange(event.target.value)}
+              >
+                {props.memberships.map((membership) => (
+                  <option key={membership.groupId} value={membership.groupId}>
+                    {workLabel(membership)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <button className="button button--quiet button--small" type="button" onClick={props.onReturnToMenu}>
             Trabajos
           </button>
@@ -321,7 +348,11 @@ export function DashboardPage(props: DashboardPageProps) {
                 <DestinationCard
                   key={destination.id}
                   destination={destination}
-                  location={locationLabel(destination.lot_id)}
+                  location={`Lote: ${destinationLots(
+                    destination,
+                    props.loadsByDestination.get(destination.id) ?? [],
+                  )}`}
+                  loadingLot={lotNames.get(props.activeLotId) ?? ''}
                   entries={props.loadsByDestination.get(destination.id) ?? []}
                   isProvider={props.isProvider}
                   busy={props.busy === destination.id}
@@ -336,15 +367,6 @@ export function DashboardPage(props: DashboardPageProps) {
               ))
             )}
           </section>
-        )}
-
-        {tab === 'historial' && (
-          <LotSummary
-            fields={props.fields}
-            lots={props.lots}
-            destinations={historyDestinations}
-            loadsByDestination={props.loadsByDestination}
-          />
         )}
 
         {tab === 'historial' && (
@@ -385,31 +407,56 @@ export function DashboardPage(props: DashboardPageProps) {
 
         {tab === 'historial' && (
           <>
-        <details className="work-summary">
-          <summary>Información del trabajo</summary>
-          <div className="work-summary__content">
-            <div className="summary-row">
-              <div className="summary-card">
-                <span>Kilos registrados</span>
-                <strong>{formatKilos(props.totalKilos)} kg</strong>
+        {!props.isProvider && (
+          <details className="work-summary">
+            <summary>Información del trabajo</summary>
+            <div className="work-summary__content">
+              <div className="summary-row">
+                <div className="summary-card">
+                  <span>Kilos registrados</span>
+                  <strong>{formatKilos(props.totalKilos)} kg</strong>
+                </div>
+                <div className="summary-card">
+                  <span>Destinos activos</span>
+                  <strong>{props.activeDestinations.length}</strong>
+                </div>
+                <div className="connection-state" role="status">
+                  <span className={props.live ? 'connection-state__dot is-live' : 'connection-state__dot'} />
+                  {props.live ? 'En línea' : 'Conectando'}
+                </div>
               </div>
-              <div className="summary-card">
-                <span>Destinos activos</span>
-                <strong>{props.activeDestinations.length}</strong>
+              <LotSummary
+                lots={props.lots}
+                destinations={historyDestinations}
+                loadsByDestination={props.loadsByDestination}
+                canEditHectares
+                busy={props.busy}
+                onUpdateLot={props.onUpdateLot}
+              />
+              <div className="group-code">
+                <span>Código para invitar</span>
+                <strong>{props.membership.inviteCode}</strong>
+                <button className="link-button" type="button" onClick={props.onCopyInviteCode}>
+                  Copiar código
+                </button>
               </div>
-              <div className="connection-state" role="status">
-                <span className={props.live ? 'connection-state__dot is-live' : 'connection-state__dot'} />
-                {props.live ? 'En línea' : 'Conectando'}
-              </div>
+              {workAudits.length > 0 && (
+                <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
+              )}
             </div>
-            <div className="group-code">
-              <span>Código para invitar</span>
-              <strong>{props.membership.inviteCode}</strong>
-              <button className="link-button" type="button" onClick={props.onCopyInviteCode}>
-                Copiar código
-              </button>
-            </div>
-            {props.isProvider && (
+          </details>
+        )}
+        {props.isProvider && (
+          <details className="work-summary">
+            <summary>Opciones del trabajo</summary>
+            <div className="work-summary__content">
+              <div className="group-code">
+                <span>Código para invitar</span>
+                <strong>{props.membership.inviteCode}</strong>
+                <button className="link-button" type="button" onClick={props.onCopyInviteCode}>
+                  Copiar código
+                </button>
+              </div>
               <section className="work-management">
                 <div className="destination-management__actions">
                   <button
@@ -455,12 +502,9 @@ export function DashboardPage(props: DashboardPageProps) {
                   </form>
                 )}
               </section>
-            )}
-            {workAudits.length > 0 && (
-              <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
-            )}
-          </div>
-        </details>
+            </div>
+          </details>
+        )}
           </>
         )}
 

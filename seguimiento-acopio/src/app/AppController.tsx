@@ -410,7 +410,6 @@ export default function AppController() {
       activeLotId={loads.activeLotId}
       newLotName={loads.newLotName}
       newLotCereal={loads.newLotCereal}
-      newLotHectares={loads.newLotHectares}
       audits={loads.audits}
       truckCapacity={loads.truckCapacity}
       openingHumidity={loads.openingHumidity}
@@ -450,7 +449,6 @@ export default function AppController() {
       onActiveLotChange={loads.selectLot}
       onNewLotNameChange={loads.setNewLotName}
       onNewLotCerealChange={loads.setNewLotCereal}
-      onNewLotHectaresChange={loads.setNewLotHectares}
       onCreateLot={() => void loads.createLot()}
       onRenameLot={(lot, name) => void loads.editLot(lot, name)}
       onUpdateLot={(lot, changes) => void loads.updateLotDetails(lot, changes)}
@@ -490,6 +488,15 @@ export default function AppController() {
       }
       onDeleteDestination={handleDeleteDestination}
       onRestoreDestination={(destination) => void loads.restoreDestination(destination)}
+      onReopenDestination={(destination) => {
+        if (
+          window.confirm(
+            `¿Reabrir ${destinationLabels[destination.destination_type]} ${destination.name}? Va a volver a Activos y se borra la humedad de cierre.`,
+          )
+        ) {
+          void loads.reopenDestination(destination)
+        }
+      }}
       onHistoryToggle={loads.setExpandedHistory}
     />
   )

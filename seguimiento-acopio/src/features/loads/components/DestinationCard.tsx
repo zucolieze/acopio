@@ -6,12 +6,14 @@ import {
   formatHumidityInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
+  formatHumidity,
   parseHumidity,
 } from '../../../utils/humidity'
 
 type DestinationCardProps = {
   destination: Destination
   location: string
+  loadingLot: string
   entries: Load[]
   isProvider: boolean
   busy: boolean
@@ -27,6 +29,7 @@ type DestinationCardProps = {
 export function DestinationCard({
   destination,
   location,
+  loadingLot,
   entries,
   isProvider,
   busy,
@@ -61,7 +64,7 @@ export function DestinationCard({
         <>
           <form className="load-form" onSubmit={handleAddLoad}>
             <label>
-              Kilos de esta pesada
+              Kilos de esta pesada{loadingLot ? ` · ${loadingLot}` : ''}
               <input
                 inputMode="decimal"
                 min="0.01"
@@ -99,7 +102,7 @@ export function DestinationCard({
             Humedad de cierre (%)
             <input
               autoComplete="off"
-              inputMode="numeric"
+              inputMode="decimal"
               maxLength={4}
               pattern={HUMIDITY_PATTERN}
               placeholder="Ej.: 13.2"
@@ -109,7 +112,6 @@ export function DestinationCard({
               value={closingHumidity}
               onChange={(event) => onClosingHumidityChange(formatHumidityInput(event.target.value))}
             />
-            <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
           </label>
           <button
             className="button button--danger"
@@ -178,7 +180,7 @@ export function HumiditySummary({ destination }: { destination: Destination }) {
         <dd>
           {destination.opening_humidity === null
             ? 'Sin dato'
-            : `${destination.opening_humidity}%`}
+            : formatHumidity(destination.opening_humidity)}
           {destination.opening_humidity_at
             ? ` · ${new Date(destination.opening_humidity_at).toLocaleString('es-AR')}`
             : ''}
@@ -189,7 +191,7 @@ export function HumiditySummary({ destination }: { destination: Destination }) {
         <dd>
           {destination.closing_humidity === null
             ? 'Pendiente'
-            : `${destination.closing_humidity}%`}
+            : formatHumidity(destination.closing_humidity)}
           {destination.closing_humidity_at
             ? ` · ${new Date(destination.closing_humidity_at).toLocaleString('es-AR')}`
             : ''}
@@ -197,7 +199,7 @@ export function HumiditySummary({ destination }: { destination: Destination }) {
       </div>
       <div>
         <dt>Promedio</dt>
-        <dd>{average === null ? 'Pendiente' : `${average.toFixed(1)}%`}</dd>
+        <dd>{average === null ? 'Pendiente' : formatHumidity(average)}</dd>
       </div>
     </dl>
   )

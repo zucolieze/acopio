@@ -1626,3 +1626,49 @@ button:focus-visible {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* Resumen por lote dentro de "Información del trabajo" */
+.lot-summary h3 {
+  margin: 0.25rem 0 0.6rem;
+  color: var(--color-green);
+  font-size: 1rem;
+}
+
+.work-summary .lot-summary {
+  margin: 0.75rem 0;
+}
+
+.lot-summary__edit {
+  min-height: 2rem;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.lot-summary__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.lot-summary__form label {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+/* Lote de cada descarga en el historial */
+.load-list__lot {
+  color: #5c4500;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.destination-card__reopen {
+  width: 100%;
+  margin-top: 0.75rem;
+}

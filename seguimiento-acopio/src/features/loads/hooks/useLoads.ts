@@ -12,6 +12,7 @@ import {
   fetchGroupActivity,
   softDeleteDestination,
   restoreDestination as restoreDestinationInRepository,
+  reopenDestination as reopenDestinationInRepository,
   softDeleteLoad,
   softDeleteLot,
   updateDestination as updateDestinationInRepository,
@@ -40,7 +41,6 @@ export function useLoads(
   const [activeFieldId, setActiveFieldId] = useState('')
   const [newLotName, setNewLotName] = useState('')
   const [newLotCereal, setNewLotCereal] = useState('')
-  const [newLotHectares, setNewLotHectares] = useState('')
   const [tab, setTabState] = useState<Tab>('activos')
   const [destinationType, setDestinationType] =
     useState<DestinationType>('camion')
@@ -200,12 +200,6 @@ export function useLoads(
       return
     }
 
-    const hectares = newLotHectares.trim() ? Number(newLotHectares.replace(',', '.')) : null
-    if (hectares !== null && (!Number.isFinite(hectares) || hectares <= 0)) {
-      setError('Las hectáreas tienen que ser un número mayor a cero.')
-      return
-    }
-
     setBusy('lot')
     setError('')
     setNotice('')
@@ -215,11 +209,9 @@ export function useLoads(
         activeFieldId,
         name,
         newLotCereal,
-        hectares,
       )
       setNewLotName('')
       setNewLotCereal('')
-      setNewLotHectares('')
       await refresh()
       setActiveLotId(lotId)
       setTab('nuevo')
@@ -229,7 +221,7 @@ export function useLoads(
     } finally {
       setBusy('')
     }
-  }, [activeFieldId, client, fields, newLotCereal, newLotHectares, newLotName, refresh])
+  }, [activeFieldId, client, fields, newLotCereal, newLotName, refresh])
 
   const selectLot = useCallback(
     (lotId: string) => {
@@ -408,6 +400,10 @@ export function useLoads(
   const add = useCallback(
     async (destinationId: string, rawKilos: string) => {
       if (!client || !userId) return
+      if (!activeLotId) {
+        setError('Elegí arriba de qué lote es esta descarga.')
+        return
+      }
       const kilos = Number(rawKilos.replace(',', '.'))
       if (!Number.isFinite(kilos) || kilos <= 0) {
         setError('Ingresá una cantidad de kilos mayor a cero.')
@@ -417,7 +413,7 @@ export function useLoads(
       setBusy(destinationId)
       setError('')
       try {
-        await addLoadToRepository(client, destinationId, userId, kilos)
+        await addLoadToRepository(client, destinationId, userId, kilos, activeLotId)
         setLoadKilos((values) => ({ ...values, [destinationId]: '' }))
         setNotice('Pesada guardada.')
         await refresh()
@@ -427,7 +423,7 @@ export function useLoads(
         setBusy('')
       }
     },
-    [client, refresh, userId],
+    [activeLotId, client, refresh, userId],
   )
 
   const close = useCallback(
@@ -539,6 +535,24 @@ export function useLoads(
     [client, refresh],
   )
 
+  const reopenDestination = useCallback(
+    async (destination: Destination) => {
+      if (!client) return
+      setBusy(destination.id)
+      setError('')
+      try {
+        await reopenDestinationInRepository(client, destination.id)
+        setNotice('Destino reabierto. Ya aparece de nuevo en Activos.')
+        await refresh()
+      } catch (reopenError) {
+        setError(messageFromError(reopenError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
+
   const restoreDestination = useCallback(
     async (destination: Destination) => {
       if (!client) return
@@ -603,8 +617,6 @@ export function useLoads(
     setNewLotName,
     newLotCereal,
     setNewLotCereal,
-    newLotHectares,
-    setNewLotHectares,
     destinationType,
     setDestinationType,
     destinationName,
@@ -640,5 +652,6 @@ export function useLoads(
     editDestination,
     deleteDestination,
     restoreDestination,
+    reopenDestination,
   }
 }

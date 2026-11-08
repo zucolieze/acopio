@@ -1,4 +1,5 @@
 import { formatKilos } from '../../../utils/format'
+import { formatHumidity } from '../../../utils/humidity'
 import type { ChangeAudit, Lot } from '../types'
 
 const fieldLabels: Record<string, string> = {
@@ -108,7 +109,7 @@ function displayValue(
     return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString('es-AR')
   }
   if (field === 'kg' || field === 'capacity_kg') return formatKilos(Number(value))
-  if (field.includes('humidity')) return `${value}%`
+  if (field.includes('humidity')) return formatHumidity(Number(value))
   if (field === 'destination_type') {
     return value === 'camion' ? 'Camión' : value === 'silo' ? 'Silo' : 'Silobolsa'
   }

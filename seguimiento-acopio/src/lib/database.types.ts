@@ -83,6 +83,7 @@ type Destination = {
 type Load = {
   id: string
   destination_id: string
+  lot_id: string
   date: string
   kg: number
   created_by: string | null
@@ -114,7 +115,7 @@ export type Database = {
       lots: TableDefinition<
         Lot,
         'field_id' | 'name',
-        { cereal: string | null; hectares: number | null }
+        { cereal: string | null }
       >
       destinations: TableDefinition<
         Destination,
@@ -139,6 +140,10 @@ export type Database = {
         Returns: string
       }
       restore_destination: {
+        Args: { p_destination_id: string }
+        Returns: undefined
+      }
+      reopen_destination: {
         Args: { p_destination_id: string }
         Returns: undefined
       }

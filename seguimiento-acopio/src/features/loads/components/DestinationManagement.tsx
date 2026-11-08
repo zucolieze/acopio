@@ -166,7 +166,7 @@ export function DestinationManagement({
                 Humedad inicial (%)
                 <input
                   autoComplete="off"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   maxLength={4}
                   pattern={HUMIDITY_PATTERN}
                   placeholder="Ej.: 14.5"
@@ -176,7 +176,6 @@ export function DestinationManagement({
                   value={openingHumidity}
                   onChange={(event) => setOpeningHumidity(formatHumidityInput(event.target.value))}
                 />
-                <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
               </label>
               <label>
                 Fecha y hora de humedad inicial
@@ -193,7 +192,7 @@ export function DestinationManagement({
                     Humedad de cierre (%)
                     <input
                       autoComplete="off"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       maxLength={4}
                       pattern={HUMIDITY_PATTERN}
                       placeholder="Ej.: 13.2"
@@ -203,7 +202,6 @@ export function DestinationManagement({
                       value={closingHumidity}
                       onChange={(event) => setClosingHumidity(formatHumidityInput(event.target.value))}
                     />
-                    <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
                   </label>
                   <label>
                     Fecha y hora de humedad de cierre
