@@ -5,6 +5,7 @@ import type { Load, WorkMember } from '../types'
 type LoadListProps = {
   entries: Load[]
   profileNames: Record<string, string>
+  lotNames?: Map<string, string>
   canEdit?: boolean
   canChangeAuthor?: boolean
   workMembers?: WorkMember[]
@@ -17,6 +18,7 @@ type LoadListProps = {
 export function LoadList({
   entries,
   profileNames,
+  lotNames,
   canEdit = false,
   canChangeAuthor = false,
   workMembers = [],
@@ -40,6 +42,7 @@ export function LoadList({
               ? profileNames[entry.created_by] ?? 'Integrante del grupo'
               : 'Integrante del grupo'
           }
+          lotName={lotNames?.get(entry.lot_id)}
           canEdit={canEdit}
           canChangeAuthor={canChangeAuthor}
           workMembers={workMembers}
@@ -56,6 +59,7 @@ export function LoadList({
 function LoadRow({
   entry,
   profileName,
+  lotName,
   canEdit,
   canChangeAuthor,
   workMembers,
@@ -66,6 +70,7 @@ function LoadRow({
 }: {
   entry: Load
   profileName: string
+  lotName?: string
   canEdit: boolean
   canChangeAuthor: boolean
   workMembers: WorkMember[]
@@ -90,6 +95,7 @@ function LoadRow({
       <div className="load-list__details">
         <time dateTime={entry.date}>{formatDate(entry.date)}</time>
         <span>Cargó {profileName}</span>
+        {lotName && <span className="load-list__lot">Lote: {lotName}</span>}
       </div>
       <strong>{formatKilos(entry.kg)} kg</strong>
       {canChangeAuthor && !changingAuthor && (

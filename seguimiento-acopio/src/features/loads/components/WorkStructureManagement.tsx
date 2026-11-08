@@ -9,12 +9,10 @@ type WorkStructureManagementProps = {
   activeLotId: string
   newLotName: string
   newLotCereal: string
-  newLotHectares: string
   busy: string
   onLotChange: (lotId: string) => void
   onNewLotNameChange: (value: string) => void
   onNewLotCerealChange: (value: string) => void
-  onNewLotHectaresChange: (value: string) => void
   onCreateLot: () => void
   onRenameLot: (lot: Lot, name: string) => void
   onUpdateLot: (lot: Lot, changes: LotChanges) => void
@@ -62,18 +60,6 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
             <option key={cereal} value={cereal}>{cereal}</option>
           ))}
         </select>
-      </label>
-      <label>
-        Hectáreas (opcional)
-        <input
-          inputMode="decimal"
-          min="0.01"
-          placeholder="Ej.: 45"
-          step="0.01"
-          type="number"
-          value={props.newLotHectares}
-          onChange={(event) => props.onNewLotHectaresChange(event.target.value)}
-        />
       </label>
       <button
         className="button button--primary"

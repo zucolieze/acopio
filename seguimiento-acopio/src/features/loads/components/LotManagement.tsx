@@ -68,13 +68,11 @@ function LotRow({
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(lot.name)
   const [cereal, setCereal] = useState(lot.cereal ?? '')
-  const [hectares, setHectares] = useState(lot.hectares === null ? '' : String(lot.hectares))
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (name.trim() !== lot.name) onRename(lot, name)
-    const nextHectares = hectares.trim() ? Number(hectares.replace(',', '.')) : null
-    onUpdate(lot, { cereal: cereal || undefined, hectares: nextHectares })
+    if (cereal && cereal !== lot.cereal) onUpdate(lot, { cereal })
     setEditing(false)
   }
 
@@ -99,16 +97,6 @@ function LotRow({
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
-          <input
-            inputMode="decimal"
-            min="0.01"
-            placeholder="Hectáreas"
-            step="0.01"
-            type="number"
-            value={hectares}
-            aria-label="Hectáreas del lote"
-            onChange={(event) => setHectares(event.target.value)}
-          />
           <button className="button button--secondary button--small" type="submit" disabled={busy}>
             Guardar
           </button>
@@ -128,7 +116,6 @@ function LotRow({
               onClick={() => {
                 setName(lot.name)
                 setCereal(lot.cereal ?? '')
-                setHectares(lot.hectares === null ? '' : String(lot.hectares))
                 setEditing(true)
               }}
             >

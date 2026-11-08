@@ -141,11 +141,10 @@ export async function createLot(
   fieldId: string,
   name: string,
   cereal: string,
-  hectares: number | null,
 ) {
   const { data, error } = await client
     .from('lots')
-    .insert({ field_id: fieldId, name, cereal, hectares })
+    .insert({ field_id: fieldId, name, cereal })
     .select('id')
     .single()
   if (error) throw error
@@ -218,9 +217,11 @@ export async function addLoad(
   destinationId: string,
   userId: string,
   kg: number,
+  lotId: string,
 ) {
   const { error } = await client.from('loads').insert({
     destination_id: destinationId,
+    lot_id: lotId,
     created_by: userId,
     kg,
   })
@@ -299,6 +300,13 @@ export async function updateLoadAttribution(
   const { error } = await client.rpc('set_load_attribution', {
     p_load_id: loadId,
     p_created_by: userId,
+  })
+  if (error) throw error
+}
+
+export async function reopenDestination(client: Client, destinationId: string) {
+  const { error } = await client.rpc('reopen_destination', {
+    p_destination_id: destinationId,
   })
   if (error) throw error
 }

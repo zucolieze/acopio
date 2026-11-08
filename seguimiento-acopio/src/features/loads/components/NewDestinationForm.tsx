@@ -121,7 +121,7 @@ export function NewDestinationForm({
             Humedad inicial (%)
             <input
               autoComplete="off"
-              inputMode="numeric"
+              inputMode="decimal"
               maxLength={4}
               pattern={HUMIDITY_PATTERN}
               placeholder="Ej.: 14.5"
@@ -131,7 +131,6 @@ export function NewDestinationForm({
               value={openingHumidity}
               onChange={(event) => onOpeningHumidityChange(formatHumidityInput(event.target.value))}
             />
-            <span className="muted small-copy">Dos cifras y un decimal. Escribí 145 para 14.5.</span>
           </label>
         )}
         <button className="button button--primary button--large" disabled={busy || loading || !canOpen}>
