@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatKilos } from '../../../utils/format'
+import { formatDate, formatKilos } from '../../../utils/format'
 import type { Destination, Load, Lot, LotChanges } from '../types'
 
 type LotSummaryProps = {
@@ -9,12 +9,16 @@ type LotSummaryProps = {
   canEditHectares: boolean
   busy: string
   onUpdateLot: (lot: Lot, changes: LotChanges) => void
+  /** Campo (trabajo) al que pertenecen los lotes. */
+  fieldName: string
+  destinationNames: Map<string, string>
+  profileNames: Record<string, string>
 }
 
 type LotRow = {
   lot: Lot
   destinations: number
-  loads: number
+  loads: Load[]
   kilos: number
 }
 
@@ -27,6 +31,9 @@ export function LotSummary({
   canEditHectares,
   busy,
   onUpdateLot,
+  fieldName,
+  destinationNames,
+  profileNames,
 }: LotSummaryProps) {
   const loads = destinations.flatMap(
     (destination) => loadsByDestination.get(destination.id) ?? [],
@@ -41,11 +48,11 @@ export function LotSummary({
       return {
         lot,
         destinations: destinationIds.size,
-        loads: lotLoads.length,
+        loads: lotLoads,
         kilos: lotLoads.reduce((sum, load) => sum + load.kg, 0),
       }
     })
-    .filter((row) => row.lot.deleted_at === null || row.loads > 0)
+    .filter((row) => row.lot.deleted_at === null || row.loads.length > 0)
 
   if (rows.length === 0) {
     return <p className="muted small-copy">Todavía no hay lotes en este trabajo.</p>
@@ -59,7 +66,7 @@ export function LotSummary({
 
   return (
     <section className="lot-summary" aria-labelledby="lot-summary-title">
-      <h3 id="lot-summary-title">Kilos y rendimiento por lote</h3>
+      <h2 id="lot-summary-title">Campo: {fieldName}</h2>
       <ul className="lot-summary__list">
         {rows.map((row) => (
           <LotSummaryItem
@@ -68,6 +75,8 @@ export function LotSummary({
             canEditHectares={canEditHectares}
             busy={busy === row.lot.id}
             onUpdateLot={onUpdateLot}
+            destinationNames={destinationNames}
+            profileNames={profileNames}
           />
         ))}
       </ul>
@@ -86,11 +95,15 @@ function LotSummaryItem({
   canEditHectares,
   busy,
   onUpdateLot,
+  destinationNames,
+  profileNames,
 }: {
   row: LotRow
   canEditHectares: boolean
   busy: boolean
   onUpdateLot: LotSummaryProps['onUpdateLot']
+  destinationNames: Map<string, string>
+  profileNames: Record<string, string>
 }) {
   const [editing, setEditing] = useState(false)
   const [hectares, setHectares] = useState(
@@ -118,7 +131,7 @@ function LotSummaryItem({
         </div>
         <div>
           <dt>Descargas</dt>
-          <dd>{row.loads}</dd>
+          <dd>{row.loads.length}</dd>
         </div>
         <div>
           <dt>Rendimiento</dt>
@@ -129,6 +142,22 @@ function LotSummaryItem({
           </dd>
         </div>
       </dl>
+      {row.loads.length > 0 && (
+        <details className="lot-summary__loads">
+          <summary>Ver descargas ({row.loads.length})</summary>
+          <ul>
+            {row.loads.map((load) => (
+              <li key={load.id}>
+                <span>
+                  {formatDate(load.date)} · {destinationNames.get(load.destination_id) ?? 'Destino'}
+                  {load.created_by ? ` · ${profileNames[load.created_by] ?? 'Sin nombre'}` : ''}
+                </span>
+                <strong>{formatKilos(load.kg)} kg</strong>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
       {canEditHectares && !editing && (
         <button
           className="link-button lot-summary__edit"

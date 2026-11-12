@@ -10,7 +10,6 @@ type WorkStructureManagementProps = {
   newLotName: string
   newLotCereal: string
   busy: string
-  onLotChange: (lotId: string) => void
   onNewLotNameChange: (value: string) => void
   onNewLotCerealChange: (value: string) => void
   onCreateLot: () => void
@@ -21,7 +20,6 @@ type WorkStructureManagementProps = {
 
 export function WorkStructureManagement(props: WorkStructureManagementProps) {
   const lots = props.lots.filter((lot) => lot.deleted_at === null)
-  const activeLot = lots.find((lot) => lot.id === props.activeLotId)
   const [open, setOpen] = useState(!props.activeLotId)
   const previousLotId = useRef(props.activeLotId)
   const [addOpen, setAddOpen] = useState(false)
@@ -79,9 +77,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
     </form>
   )
 
-  const summary = activeLot
-    ? `Lote de trabajo: ${activeLot.name}${activeLot.cereal ? ` · ${activeLot.cereal}` : ''}`
-    : 'Creá el primer lote'
+  const summary = lots.length > 0 ? `Lotes del campo (${lots.length})` : 'Creá el primer lote'
 
   return (
     <details
@@ -103,19 +99,6 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
 
         {lots.length > 0 && (
           <>
-            <label>
-              Lote de trabajo
-              <select
-                value={props.activeLotId}
-                onChange={(event) => props.onLotChange(event.target.value)}
-              >
-                {lots.map((lot) => (
-                  <option key={lot.id} value={lot.id}>
-                    {lot.name}{lot.cereal ? ` · ${lot.cereal}` : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
             <details
               className="field-management"
               open={addOpen}

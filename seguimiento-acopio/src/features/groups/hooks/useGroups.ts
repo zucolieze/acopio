@@ -6,6 +6,7 @@ import {
   createGroup as createGroupInRepository,
   fetchMemberships,
   joinGroup as joinGroupInRepository,
+  setGroupArchived,
   softDeleteGroup as softDeleteGroupInRepository,
   updateGroup as updateGroupInRepository,
 } from '../model/groupsRepository'
@@ -143,6 +144,27 @@ export function useGroups(client: Client | null, userId: string | undefined) {
     [client, refresh],
   )
 
+  const archive = useCallback(
+    async (groupId: string, archived: boolean) => {
+      if (!client) throw new Error('No se pudo conectar con la base de datos.')
+      setBusy(true)
+      setError('')
+      setNotice('')
+      try {
+        await setGroupArchived(client, groupId, archived)
+        await refresh()
+        setNotice(archived ? 'Trabajo archivado.' : 'Trabajo recuperado del archivo.')
+        return true
+      } catch (archiveError) {
+        setError(messageFromError(archiveError))
+        return false
+      } finally {
+        setBusy(false)
+      }
+    },
+    [client, refresh],
+  )
+
   return {
     memberships,
     loading,
@@ -156,5 +178,6 @@ export function useGroups(client: Client | null, userId: string | undefined) {
     join,
     rename,
     remove,
+    archive,
   }
 }

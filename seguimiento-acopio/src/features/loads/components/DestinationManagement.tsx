@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import type { DestinationChanges, Destination, Lot } from '../types'
 import type { DestinationType } from '../../../lib/database.types'
 import { cerealOptions, destinationLabels } from '../types'
+import { isArgentinePlate, normalizePlate } from '../../../utils/plates'
 import {
   formatHumidityInput,
   humidityToInput,
@@ -56,6 +57,16 @@ export function DestinationManagement({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (
+      type === 'camion' &&
+      name !== destination.name &&
+      !isArgentinePlate(name) &&
+      !window.confirm(
+        `La patente ${name} no tiene el formato argentino (ABC123 o AA123BB). ¿Es de otro país y la querés guardar así?`,
+      )
+    ) {
+      return
+    }
     const changes: DestinationChanges = {
       lot_id: lotId,
       destination_type: type,
@@ -103,19 +114,14 @@ export function DestinationManagement({
             {type === 'camion' ? 'Patente' : 'Nombre'}
             <input
               autoCapitalize={type === 'camion' ? 'characters' : undefined}
-              maxLength={type === 'camion' ? 7 : 120}
-              minLength={type === 'camion' ? 6 : undefined}
-              pattern={
-                type === 'camion'
-                  ? '(?:[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2})'
-                  : undefined
-              }
+              maxLength={type === 'camion' ? 10 : 120}
+              minLength={type === 'camion' ? 4 : undefined}
               required
               value={name}
               onChange={(event) =>
                 setName(
                   type === 'camion'
-                    ? event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7)
+                    ? normalizePlate(event.target.value)
                     : event.target.value,
                 )
               }
@@ -164,7 +170,7 @@ export function DestinationManagement({
                 setType(nextType)
                 if (nextType === 'camion') {
                   setName((current) =>
-                    current.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7),
+                    normalizePlate(current),
                   )
                 }
               }}

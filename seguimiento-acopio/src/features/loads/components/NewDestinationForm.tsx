@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react'
 import type { DestinationType } from '../../../lib/database.types'
 import { destinationLabels } from '../types'
+import { normalizePlate } from '../../../utils/plates'
 import {
   formatHumidityInput,
   HUMIDITY_ERROR,
@@ -79,26 +80,21 @@ export function NewDestinationForm({
           <input
             autoCapitalize={destinationType === 'camion' ? 'characters' : undefined}
             autoComplete="off"
-            maxLength={destinationType === 'camion' ? 7 : 120}
-            minLength={destinationType === 'camion' ? 6 : undefined}
-            pattern={
-              destinationType === 'camion'
-                ? '(?:[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2})'
-                : undefined
-            }
+            maxLength={destinationType === 'camion' ? 10 : 120}
+            minLength={destinationType === 'camion' ? 4 : undefined}
             placeholder={placeholder}
             required
             value={destinationName}
             onChange={(event) =>
               onDestinationNameChange(
                 destinationType === 'camion'
-                  ? event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7)
+                  ? normalizePlate(event.target.value)
                   : event.target.value,
               )
             }
           />
           {destinationType === 'camion' && (
-            <span className="muted small-copy">Sin espacios. Formato: ABC123 o AA123BB.</span>
+            <span className="muted small-copy">Formato sugerido: ABC123 o AA123BB. Si es de otro país, escribila como figura.</span>
           )}
         </label>
         {destinationType === 'camion' && (

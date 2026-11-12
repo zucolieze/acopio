@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { MemberRole } from '../lib/database.types'
 import { Brand } from '../components/ui/Brand'
@@ -12,9 +12,11 @@ import {
 } from '../features/auth'
 import { useGroups, WorkMenuPage } from '../features/groups'
 import { DashboardPage, destinationLabels, useLoads } from '../features/loads'
+import type { Tab } from '../features/loads'
 import type { AppScreen, WorkMode } from '../types/app'
 import { messageFromError } from '../utils/errors'
 import { clearStored, readStored, writeStored } from '../utils/storage'
+import { isArgentinePlate, isValidPlate, normalizePlate } from '../utils/plates'
 
 type SavedNavigation = {
   userId: string
@@ -43,10 +45,30 @@ export default function AppController() {
   const [appError, setAppError] = useState('')
   const [appNotice, setAppNotice] = useState('')
 
+  // Trabajos donde la persona es carrero: de ahí salen los destinos fijados.
+  const pinnedFromGroupKey = groups.memberships
+    .filter(
+      (membership) =>
+        !membership.archived &&
+        (membership.role === 'proveedor' ||
+          (membership.role === 'admin' && auth.isDebugAdmin)),
+    )
+    .map((membership) => membership.groupId)
+    .sort()
+    .join(',')
+  const groupNames = useMemo(
+    () =>
+      Object.fromEntries(
+        groups.memberships.map((membership) => [membership.groupId, membership.groupName]),
+      ),
+    [groups.memberships],
+  )
+
   const loads = useLoads(
     auth.client,
     screen === 'trabajo' ? activeGroupId : '',
     auth.session?.user.id,
+    pinnedFromGroupKey,
   )
   const selectedMembership = groups.memberships.find(
     (membership) => membership.groupId === activeGroupId,
@@ -56,6 +78,52 @@ export default function AppController() {
   const isProvider =
     (selectedMembership?.role === 'proveedor' && selectedMode !== 'observador') ||
     (isAdminWork && adminMode === 'carrero')
+
+  // El botón "atrás" del celular vuelve a la vista anterior (pantalla y
+  // pestaña) en lugar de cerrar la app.
+  const navigatingBack = useRef(false)
+  const setTabRef = useRef(loads.setTab)
+  setTabRef.current = loads.setTab
+  const historyTab = screen === 'trabajo' ? loads.tab : null
+
+  useEffect(() => {
+    if (screen === 'login') return
+    const state = { acopio: true, screen, activeGroupId, tab: historyTab }
+    if (navigatingBack.current) {
+      navigatingBack.current = false
+      window.history.replaceState(state, '')
+      return
+    }
+    const current = window.history.state as typeof state | null
+    if (!current?.acopio) {
+      window.history.replaceState(state, '')
+    } else if (
+      current.screen !== screen ||
+      current.activeGroupId !== activeGroupId ||
+      current.tab !== historyTab
+    ) {
+      window.history.pushState(state, '')
+    }
+  }, [activeGroupId, historyTab, screen])
+
+  useEffect(() => {
+    function handleBack(event: PopStateEvent) {
+      const state = event.state as {
+        acopio?: boolean
+        screen: AppScreen
+        activeGroupId: string
+        tab: Tab | null
+      } | null
+      if (!state?.acopio || state.screen === 'login') return
+      navigatingBack.current = true
+      setScreen(state.screen)
+      setActiveGroupId(state.activeGroupId)
+      setMenuAction(null)
+      if (state.tab) setTabRef.current(state.tab)
+    }
+    window.addEventListener('popstate', handleBack)
+    return () => window.removeEventListener('popstate', handleBack)
+  }, [])
 
   function clearNotices() {
     setAppNotice('')
@@ -110,10 +178,11 @@ export default function AppController() {
 
   useEffect(() => {
     if (groups.memberships.length === 0) return
+    const activeMemberships = groups.memberships.filter((membership) => !membership.archived)
     setMenuGroupId((current) =>
-      groups.memberships.some((membership) => membership.groupId === current)
+      activeMemberships.some((membership) => membership.groupId === current)
         ? current
-        : (groups.memberships[0]?.groupId ?? ''),
+        : (activeMemberships[0]?.groupId ?? ''),
     )
     setActiveGroupId((current) =>
       groups.memberships.some((membership) => membership.groupId === current)
@@ -127,7 +196,7 @@ export default function AppController() {
     setSelectedMode(mode)
     setAdminMode(mode === 'carrero' ? 'carrero' : 'observador')
     setMenuAction(null)
-    setMenuGroupId(groups.memberships[0]?.groupId ?? '')
+    setMenuGroupId(groups.memberships.find((membership) => !membership.archived)?.groupId ?? '')
     setScreen('menu')
     setAppError('')
     setAppNotice('')
@@ -232,6 +301,23 @@ export default function AppController() {
     }
     const removed = await groups.remove(selectedMembership.groupId)
     if (removed) {
+      setScreen('menu')
+      setActiveGroupId('')
+      setAppNotice('')
+    }
+  }
+
+  async function handleArchiveGroup() {
+    if (!selectedMembership) return
+    if (
+      !window.confirm(
+        `¿Archivar el trabajo ${selectedMembership.groupName}? Deja de aparecer en la lista, pero lo podés recuperar desde "Entrar a un trabajo".`,
+      )
+    ) {
+      return
+    }
+    const archived = await groups.archive(selectedMembership.groupId, true)
+    if (archived) {
       setScreen('menu')
       setActiveGroupId('')
       setAppNotice('')
@@ -379,6 +465,12 @@ export default function AppController() {
         onCreate={(event) => void handleCreateGroup(event)}
         onJoin={(event) => void handleJoinGroup(event)}
         onEnter={handleEnterGroup}
+        onUnarchive={(groupId) => {
+          clearNotices()
+          void groups.archive(groupId, false).then((ok) => {
+            if (ok) setMenuGroupId(groupId)
+          })
+        }}
         onChangeMode={() => {
           clearNotices()
           setScreen('modalidad')
@@ -392,6 +484,11 @@ export default function AppController() {
     <DashboardPage
       membership={selectedMembership}
       memberships={groups.memberships}
+      groupNames={groupNames}
+      lotsById={loads.lotsById}
+      fieldsById={loads.fieldsById}
+      onArchiveGroup={() => void handleArchiveGroup()}
+      onTogglePinned={(destination, pinned) => void loads.setPinned(destination, pinned)}
       fullName={auth.fullName}
       activeDestinations={loads.activeDestinations}
       closedDestinations={loads.closedDestinations}
@@ -467,9 +564,20 @@ export default function AppController() {
       onDestinationNameChange={loads.setDestinationName}
       onTruckCapacityChange={loads.setTruckCapacity}
       onOpeningHumidityChange={loads.setOpeningHumidity}
-      onCreateDestination={(type, name, capacity, humidity) =>
+      onCreateDestination={(type, name, capacity, humidity) => {
+        const plate = normalizePlate(name)
+        if (
+          type === 'camion' &&
+          isValidPlate(plate) &&
+          !isArgentinePlate(plate) &&
+          !window.confirm(
+            `La patente ${plate} no tiene el formato argentino (ABC123 o AA123BB). ¿Es de otro país y la querés guardar así?`,
+          )
+        ) {
+          return
+        }
         void loads.create(type, name, capacity, humidity)
-      }
+      }}
       onKilosChange={(destinationId, value) =>
         loads.setLoadKilos((values) => ({ ...values, [destinationId]: value }))
       }

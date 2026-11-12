@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Brand } from '../../../components/ui/Brand'
 import { Feedback } from '../../../components/ui/Feedback'
 import { modeLabels, type WorkMode } from '../../../types/app'
@@ -28,6 +28,7 @@ type WorkMenuPageProps = {
   onCreate: (event: FormEvent<HTMLFormElement>) => void
   onJoin: (event: FormEvent<HTMLFormElement>) => void
   onEnter: () => void
+  onUnarchive: (groupId: string) => void
   onChangeMode: () => void
   onSignOut: () => void
 }
@@ -49,10 +50,14 @@ export function WorkMenuPage({
   onCreate,
   onJoin,
   onEnter,
+  onUnarchive,
   onChangeMode,
   onSignOut,
 }: WorkMenuPageProps) {
   const canCreateWork = mode !== 'observador'
+  const activeMemberships = memberships.filter((membership) => !membership.archived)
+  const archivedMemberships = memberships.filter((membership) => membership.archived)
+  const [showArchived, setShowArchived] = useState(false)
 
   return (
     <main className="center-page center-page--top">
@@ -115,8 +120,8 @@ export function WorkMenuPage({
             >
               <strong>Entrar a un trabajo</strong>
               <span>
-                {memberships.length
-                  ? `Elegí entre tus ${memberships.length} trabajos.`
+                {activeMemberships.length
+                  ? `Elegí entre tus ${activeMemberships.length} trabajos.`
                   : 'Todavía no participás en ningún trabajo.'}
               </span>
             </button>
@@ -126,19 +131,61 @@ export function WorkMenuPage({
             <label>
               Trabajos donde ya participás
               <select value={selectedGroupId} onChange={(event) => onSelectedGroupChange(event.target.value)}>
-                {memberships.map((membership) => (
+                {activeMemberships.length === 0 && <option value="">No hay trabajos sin archivar</option>}
+                {activeMemberships.map((membership) => (
                   <option key={membership.groupId} value={membership.groupId}>
                     {workLabel(membership)} · {roleLabels[membership.role]}
                   </option>
                 ))}
               </select>
             </label>
-            <button className="button button--primary" disabled={!selectedGroupId} onClick={onEnter}>
+            <button
+              className="button button--primary"
+              disabled={!activeMemberships.some((membership) => membership.groupId === selectedGroupId)}
+              onClick={onEnter}
+            >
               Entrar al trabajo
             </button>
           </div>
         )}
           </div>
+          {mode === 'observador' && archivedMemberships.length > 0 && (
+            <div className="work-action-group">
+              <button
+                className={showArchived ? 'work-action is-selected' : 'work-action'}
+                type="button"
+                aria-expanded={showArchived}
+                onClick={() => setShowArchived((current) => !current)}
+              >
+                <strong>Trabajos archivados</strong>
+                <span>
+                  {archivedMemberships.length === 1
+                    ? 'Hay 1 trabajo archivado.'
+                    : `Hay ${archivedMemberships.length} trabajos archivados.`}
+                </span>
+              </button>
+              {showArchived && (
+                <div className="panel form-stack work-form archived-works">
+                  <h2>Reactivar un trabajo</h2>
+                  <ul>
+                    {archivedMemberships.map((membership) => (
+                      <li key={membership.groupId}>
+                        <span>{workLabel(membership)}</span>
+                        <button
+                          className="button button--secondary button--small"
+                          type="button"
+                          disabled={busy}
+                          onClick={() => onUnarchive(membership.groupId)}
+                        >
+                          Reactivar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
           <div className="work-action-group">
             <button
               className={action === 'sumarme' ? 'work-action is-selected' : 'work-action'}

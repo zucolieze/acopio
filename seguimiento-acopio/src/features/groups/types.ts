@@ -7,6 +7,7 @@ export type Membership = {
   period: string
   inviteCode: string
   role: MemberRole
+  archived: boolean
 }
 
 export function workLabel(membership: Pick<Membership, 'groupName' | 'period'>) {

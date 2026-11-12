@@ -13,6 +13,10 @@ import {
 type DestinationCardProps = {
   destination: Destination
   location: string
+  /** Si el destino es de otro trabajo (fijado), de cuál. */
+  origin?: string
+  /** Fijar o soltar el destino entre los trabajos del carrero. */
+  pin?: { pinned: boolean; onToggle: () => void }
   loadingLot: string
   cerealMismatch: string
   entries: Load[]
@@ -30,6 +34,8 @@ type DestinationCardProps = {
 export function DestinationCard({
   destination,
   location,
+  origin,
+  pin,
   loadingLot,
   cerealMismatch,
   entries,
@@ -60,8 +66,29 @@ export function DestinationCard({
 
   return (
     <article className="destination-card">
-      <DestinationHeading destination={destination} entries={entries} />
-      <p className="destination-card__lot">{location}</p>
+      <DestinationHeading
+        destination={destination}
+        entries={entries}
+        compact={isProvider}
+        action={
+          pin && (
+            <button
+              className={pin.pinned ? 'pin-button is-pinned' : 'pin-button'}
+              type="button"
+              disabled={busy}
+              aria-pressed={pin.pinned}
+              title={pin.pinned ? 'Quitar de mis otros trabajos' : 'Fijar en todos mis trabajos'}
+              onClick={pin.onToggle}
+            >
+              <PinIcon />
+              <span>{pin.pinned ? 'Fijado' : 'Fijar'}</span>
+            </button>
+          )
+        }
+      />
+      {/* El carrero ve lo justo para cargar; el detalle queda en las otras pestañas. */}
+      {!isProvider && <p className="destination-card__lot">{location}</p>}
+      {!isProvider && origin && <p className="destination-card__origin">{origin}</p>}
       {isProvider && (
         <>
           <form className="load-form" onSubmit={handleAddLoad}>
@@ -147,6 +174,17 @@ export function DestinationCard({
         </button>
       )}
     </article>
+  )
+}
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M15 3a1 1 0 0 1 .7 1.7L14.4 6l2.3 4.6 1.6.4a1 1 0 0 1 .5 1.7L15.4 16l3.3 3.3a1 1 0 0 1-1.4 1.4L14 17.4l-3.3 3.4a1 1 0 0 1-1.7-.5l-.4-1.6L4 16.4a1 1 0 0 1-.2-1.7l.1-.1L8 10.5 12.3 4.3A1 1 0 0 1 13 4z"
+      />
+    </svg>
   )
 }
 

@@ -25,13 +25,16 @@ export type DestinationChanges = Partial<
   >
 >
 export type LotChanges = { cereal?: string; hectares?: number | null }
-export type Tab = 'activos' | 'nuevo' | 'historial'
+export type Tab = 'activos' | 'nuevo' | 'historial' | 'lotes' | 'info'
 
 export type GroupActivity = {
   destinations: Destination[]
   loads: Load[]
   fields: Field[]
   lots: Lot[]
+  /** Lotes y campos de otros trabajos que aparecen en descargas de estos destinos. */
+  foreignLots: Lot[]
+  foreignFields: Field[]
   seasonId: string | null
   workMembers: WorkMember[]
   audits: ChangeAudit[]

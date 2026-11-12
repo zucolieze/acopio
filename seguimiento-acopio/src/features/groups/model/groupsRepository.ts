@@ -19,7 +19,7 @@ export async function fetchMemberships(
 
   const { data: groups, error: groupsError } = await client
     .from('groups')
-    .select('id, name, invite_code, deleted_at, created_at')
+    .select('id, name, invite_code, deleted_at, created_at, archived_at')
     .in('id', memberRows.map((member) => member.group_id))
 
   if (groupsError) throw groupsError
@@ -34,9 +34,18 @@ export async function fetchMemberships(
           period: formatPeriod(group.created_at),
           inviteCode: group.invite_code,
           role: member.role,
+          archived: group.archived_at !== null,
         }]
       : []
   })
+}
+
+export async function setGroupArchived(client: Client, groupId: string, archived: boolean) {
+  const { error } = await client.rpc('set_group_archived', {
+    p_group_id: groupId,
+    p_archived: archived,
+  })
+  if (error) throw error
 }
 
 export async function createGroup(
