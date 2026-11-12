@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import type { DestinationType } from '../../../lib/database.types'
 import { Brand } from '../../../components/ui/Brand'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { Feedback } from '../../../components/ui/Feedback'
-import { formatKilos } from '../../../utils/format'
+import { formatDate, formatKilos } from '../../../utils/format'
 import { workLabel, type Membership } from '../../groups/types'
 import type {
   ChangeAudit,
@@ -27,11 +26,14 @@ import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
 import { LotSummary } from './LotSummary'
 import { NewDestinationForm } from './NewDestinationForm'
+import { WorkSettings } from './WorkSettings'
 import { WorkStructureManagement } from './WorkStructureManagement'
 
 type DashboardPageProps = {
   membership: Membership
   memberships: Membership[]
+  /** Nombre de cada trabajo de la persona, para los destinos fijados de otros trabajos. */
+  groupNames: Record<string, string>
   fullName: string
   activeDestinations: Destination[]
   closedDestinations: Destination[]
@@ -39,6 +41,8 @@ type DashboardPageProps = {
   loadsByDestination: Map<string, Load[]>
   fields: Field[]
   lots: Lot[]
+  lotsById: Map<string, Lot>
+  fieldsById: Map<string, Field>
   workMembers: WorkMember[]
   activeLotId: string
   newLotName: string
@@ -76,6 +80,7 @@ type DashboardPageProps = {
   onDeleteLot: (lot: Lot) => void
   onUpdateLot: (lot: Lot, changes: LotChanges) => void
   onRenameGroup: (name: string) => void
+  onArchiveGroup: () => void
   onDeleteGroup: () => void
   onDestinationTypeChange: (type: DestinationType) => void
   onDestinationNameChange: (name: string) => void
@@ -91,6 +96,7 @@ type DashboardPageProps = {
   onClosingHumidityChange: (destinationId: string, value: string) => void
   onAddLoad: (destinationId: string, kilos: string) => void
   onCloseDestination: (destination: Destination, humidity: string) => void
+  onTogglePinned: (destination: Destination, pinned: boolean) => void
   onEditLoad: (load: Load, kilos: string, date: string) => void
   onChangeLoadAuthor: (load: Load, userId: string | null) => void
   onDeleteLoad: (load: Load) => void
@@ -102,47 +108,94 @@ type DashboardPageProps = {
 }
 
 export function DashboardPage(props: DashboardPageProps) {
-  const [editingGroup, setEditingGroup] = useState(false)
-  const [groupName, setGroupName] = useState(props.membership.groupName)
-  const tab: Tab = props.tab === 'nuevo' && !props.isProvider ? 'activos' : props.tab
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'activos', label: 'Activos' },
-    ...(props.isProvider ? [{ id: 'nuevo' as const, label: 'Nuevo' }] : []),
-    { id: 'historial', label: 'Historial' },
-  ]
-  const lotNames = new Map(
-    props.lots.map((lot) => [lot.id, lot.cereal ? `${lot.name} · ${lot.cereal}` : lot.name]),
-  )
-  const availableLots = props.lots.filter((lot) => lot.deleted_at === null)
+  const groupId = props.membership.groupId
+  const tabs: { id: Tab; label: string }[] = props.isProvider
+    ? [
+        { id: 'activos', label: 'Activos' },
+        { id: 'nuevo', label: 'Nuevo' },
+        { id: 'historial', label: 'Historial' },
+      ]
+    : [
+        { id: 'activos', label: 'Activos' },
+        { id: 'historial', label: 'Destinos' },
+        { id: 'lotes', label: 'Lotes' },
+        { id: 'info', label: 'Info' },
+      ]
+  const tab: Tab = tabs.some((item) => item.id === props.tab) ? props.tab : 'activos'
 
-  const lotsById = new Map(props.lots.map((lot) => [lot.id, lot]))
+  const availableLots = props.lots.filter((lot) => lot.deleted_at === null)
+  const fieldName = props.fields[0]?.name ?? props.membership.groupName
+  const ownActiveDestinations = props.activeDestinations.filter(
+    (destination) => destination.group_id === groupId,
+  )
+  const historyDestinations = [...props.activeDestinations, ...props.closedDestinations]
+  const destinationNames = new Map(
+    [...historyDestinations, ...props.deletedDestinations].map((destination) => [
+      destination.id,
+      destination.name,
+    ]),
+  )
+  const workAudits = props.audits.filter((entry) => entry.destination_id === null)
+
+  // "Lote 1 · Soja"
+  function lotLabel(lotId: string) {
+    const lot = props.lotsById.get(lotId)
+    if (!lot) return 'Lote sin datos'
+    return lot.cereal ? `${lot.name} · ${lot.cereal}` : lot.name
+  }
+
+  // "El Molino · Lote 1 · Soja": distintos campos pueden tener lotes con el mismo nombre.
+  function lotWithField(lotId: string) {
+    const lot = props.lotsById.get(lotId)
+    if (!lot) return 'Lote sin datos'
+    const field = props.fieldsById.get(lot.field_id)?.name
+    return field ? `${field} · ${lotLabel(lotId)}` : lotLabel(lotId)
+  }
+
+  const lotLabels = new Map(
+    [...props.lotsById.keys()].map((lotId) => [lotId, lotWithField(lotId)]),
+  )
+
+  function destinationLotIds(destination: Destination, entries: Load[]) {
+    const lotIds = [...new Set(entries.map((entry) => entry.lot_id))]
+    return lotIds.length > 0 ? lotIds : [destination.lot_id]
+  }
+
+  // En Activos solo se muestran lote y cereal; si hay lotes de otro campo, se aclara el campo.
+  function activeLotsLabel(destination: Destination, entries: Load[]) {
+    const lotIds = destinationLotIds(destination, entries)
+    const mixedFields =
+      new Set(lotIds.map((id) => props.lotsById.get(id)?.field_id)).size > 1 ||
+      destination.group_id !== groupId
+    return lotIds.map((id) => (mixedFields ? lotWithField(id) : lotLabel(id))).join(' / ')
+  }
 
   // Un destino tiene un solo cereal: el del lote con el que se abrió.
   function cerealMismatch(destination: Destination) {
-    const destinationCereal = lotsById.get(destination.lot_id)?.cereal ?? null
-    const activeCereal = lotsById.get(props.activeLotId)?.cereal ?? null
+    const destinationCereal = props.lotsById.get(destination.lot_id)?.cereal ?? null
+    const activeCereal = props.lotsById.get(props.activeLotId)?.cereal ?? null
     if (!props.activeLotId || destinationCereal === activeCereal) return ''
     return `Este destino es de ${destinationCereal ?? 'otro cereal'} y el lote elegido arriba es de ${activeCereal ?? 'otro cereal'}. No se pueden mezclar cereales: cambiá el lote arriba o usá otro destino.`
   }
 
-  function destinationLots(destination: Destination, entries: Load[]) {
-    const lotIds = [...new Set(entries.map((entry) => entry.lot_id))]
-    const ids = lotIds.length > 0 ? lotIds : [destination.lot_id]
-    return ids.map((id) => lotNames.get(id) ?? 'Lote no disponible').join(' / ')
+  function originLabel(destination: Destination) {
+    if (destination.group_id === groupId) return undefined
+    const name = props.groupNames[destination.group_id]
+    return name ? `Destino fijado desde el trabajo ${name}` : 'Destino de otro trabajo'
   }
+
   // Mientras no haya ningún lote, crearlo es lo primero que se ve en "Nuevo".
-  const firstLotFirst = !props.loading && !props.lots.some((lot) => lot.deleted_at === null)
+  const firstLotFirst = !props.loading && availableLots.length === 0
   const structurePanel = props.loading ? (
     <p className="muted" role="status">Cargando lotes…</p>
   ) : (
     <WorkStructureManagement
       lots={props.lots}
-      destinations={props.activeDestinations}
+      destinations={ownActiveDestinations}
       activeLotId={props.activeLotId}
       newLotName={props.newLotName}
       newLotCereal={props.newLotCereal}
       busy={props.busy}
-      onLotChange={props.onActiveLotChange}
       onNewLotNameChange={props.onNewLotNameChange}
       onNewLotCerealChange={props.onNewLotCerealChange}
       onCreateLot={props.onCreateLot}
@@ -152,57 +205,90 @@ export function DashboardPage(props: DashboardPageProps) {
     />
   )
 
-  const historyDestinations = [
-    ...props.activeDestinations,
-    ...props.closedDestinations,
-  ]
-  const workAudits = props.audits.filter((entry) => entry.destination_id === null)
-
-  function auditForDestination(destinationId: string) {
-    return props.audits.filter((entry) => entry.destination_id === destinationId)
-  }
-
   function renderHistoryDestination(destination: Destination, deleted: boolean) {
     const entries = props.loadsByDestination.get(destination.id) ?? []
-    const audits = auditForDestination(destination.id)
+    const audits = props.audits.filter((entry) => entry.destination_id === destination.id)
     const expanded = !props.isProvider || props.expandedHistory === destination.id
     const total = entries.reduce((sum, entry) => sum + entry.kg, 0)
+    const ownDestination = destination.group_id === groupId
+    const closed = destination.status === 'cerrado'
+    const heading = (
+      <DestinationHeading
+        destination={destination}
+        entries={entries}
+        closed={closed}
+        deleted={deleted}
+      />
+    )
     return (
       <article className={`destination-card${deleted ? ' is-deleted' : ''}`} key={destination.id}>
-        {!props.isProvider ? (
-          <DestinationHeading
-            destination={destination}
-            entries={entries}
-            closed={destination.status === 'cerrado'}
-            deleted={deleted}
-          />
+        {props.isProvider ? (
+          <button
+            className="history-toggle"
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => props.onHistoryToggle(expanded ? null : destination.id)}
+          >
+            {heading}
+            <span className="history-toggle__icon" aria-hidden="true">
+              {expanded ? '−' : '+'}
+            </span>
+          </button>
         ) : (
-        <button
-          className="history-toggle"
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => props.onHistoryToggle(expanded ? null : destination.id)}
-        >
-          <DestinationHeading
-            destination={destination}
-            entries={entries}
-            closed={destination.status === 'cerrado'}
-            deleted={deleted}
-          />
-          <span className="history-toggle__icon" aria-hidden="true">
-            {expanded ? '−' : '+'}
-          </span>
-        </button>
+          heading
         )}
         {expanded && (
           <div className="destination-history">
-            <p className="destination-card__lot">Lote: {destinationLots(destination, entries)}</p>
+            <dl className="destination-facts">
+              <div>
+                <dt>Lotes</dt>
+                <dd>
+                  {destinationLotIds(destination, entries)
+                    .map((id) => lotWithField(id))
+                    .join(' / ')}
+                </dd>
+              </div>
+              <div>
+                <dt>Total</dt>
+                <dd>
+                  {formatKilos(total)} kg en {entries.length}{' '}
+                  {entries.length === 1 ? 'descarga' : 'descargas'}
+                </dd>
+              </div>
+              <div>
+                <dt>Abierto</dt>
+                <dd>{formatDate(destination.created_at)}</dd>
+              </div>
+              {destination.closed_at && (
+                <div>
+                  <dt>Cerrado</dt>
+                  <dd>{formatDate(destination.closed_at)}</dd>
+                </div>
+              )}
+              {!ownDestination && (
+                <div>
+                  <dt>Trabajo</dt>
+                  <dd>{originLabel(destination)}</dd>
+                </div>
+              )}
+              {destination.closed_from_group_id &&
+                destination.closed_from_group_id !== destination.group_id && (
+                  <div>
+                    <dt>Cerrado desde</dt>
+                    <dd>
+                      {destination.closed_from_group_id === groupId
+                        ? 'Este trabajo'
+                        : (props.groupNames[destination.closed_from_group_id] ?? 'Otro trabajo')}
+                    </dd>
+                  </div>
+                )}
+            </dl>
             {destination.destination_type === 'camion' ? (
               <CapacitySummary destination={destination} total={total} />
             ) : (
               <HumiditySummary destination={destination} />
             )}
-            {props.isProvider && (
+            {ownDestination && !deleted && (
               <DestinationManagement
                 destination={destination}
                 lots={props.lots}
@@ -214,10 +300,10 @@ export function DashboardPage(props: DashboardPageProps) {
             )}
             <LoadList
               entries={entries}
-              lotNames={lotNames}
+              lotNames={lotLabels}
               profileNames={props.profileNames}
               canEdit={props.isProvider && !deleted}
-              canChangeAuthor={!props.isProvider && !deleted}
+              canChangeAuthor={!props.isProvider && !deleted && ownDestination}
               workMembers={props.workMembers}
               busyId={props.busy}
               onEdit={props.onEditLoad}
@@ -230,7 +316,7 @@ export function DashboardPage(props: DashboardPageProps) {
               lots={props.lots}
               destinationName={destination.name}
             />
-            {!props.isProvider && !deleted && destination.status === 'cerrado' && (
+            {!props.isProvider && !deleted && closed && ownDestination && (
               <button
                 className="button button--secondary destination-card__reopen"
                 type="button"
@@ -246,44 +332,15 @@ export function DashboardPage(props: DashboardPageProps) {
     )
   }
 
+  const visibleMemberships = props.memberships.filter(
+    (membership) => !membership.archived || membership.groupId === groupId,
+  )
+
   return (
     <main className="app-shell">
       <header className="app-header">
         <Brand iconOnly />
         <div className="app-header__actions">
-          {props.isProvider ? (
-            <label className="group-picker">
-              <span className="sr-only">Lote de las descargas</span>
-              <select
-                aria-label="Lote de las descargas"
-                value={props.activeLotId}
-                disabled={availableLots.length === 0}
-                onChange={(event) => props.onActiveLotChange(event.target.value)}
-              >
-                {availableLots.length === 0 && <option value="">Sin lotes</option>}
-                {availableLots.map((lot) => (
-                  <option key={lot.id} value={lot.id}>
-                    {lotNames.get(lot.id)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <label className="group-picker">
-              <span className="sr-only">Trabajo</span>
-              <select
-                aria-label="Trabajo"
-                value={props.membership.groupId}
-                onChange={(event) => props.onGroupChange(event.target.value)}
-              >
-                {props.memberships.map((membership) => (
-                  <option key={membership.groupId} value={membership.groupId}>
-                    {workLabel(membership)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
           <button className="button button--quiet button--small" type="button" onClick={props.onReturnToMenu}>
             Trabajos
           </button>
@@ -294,6 +351,47 @@ export function DashboardPage(props: DashboardPageProps) {
           )}
         </div>
       </header>
+
+      <div className="work-context" aria-label="Campo y lote de trabajo">
+        {props.isProvider ? (
+          <p className="work-context__item">
+            <span>Campo:</span> <strong>{fieldName}</strong>
+          </p>
+        ) : (
+          <label className="work-context__item">
+            <span>Campo:</span>
+            <select
+              aria-label="Campo"
+              value={groupId}
+              onChange={(event) => props.onGroupChange(event.target.value)}
+            >
+              {visibleMemberships.map((membership) => (
+                <option key={membership.groupId} value={membership.groupId}>
+                  {workLabel(membership)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {props.isProvider && (
+          <label className="work-context__item">
+            <span>Lote:</span>
+            <select
+              aria-label="Lote"
+              value={props.activeLotId}
+              disabled={availableLots.length === 0}
+              onChange={(event) => props.onActiveLotChange(event.target.value)}
+            >
+              {availableLots.length === 0 && <option value="">Creá un lote en “Nuevo”</option>}
+              {availableLots.map((lot) => (
+                <option key={lot.id} value={lot.id}>
+                  {lotLabel(lot.id)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
 
       <section className="dashboard">
         <h1 className="sr-only">{workLabel(props.membership)}</h1>
@@ -324,7 +422,7 @@ export function DashboardPage(props: DashboardPageProps) {
               busy={props.busy === 'destination'}
               loading={props.loading}
               canOpen={Boolean(props.activeLotId)}
-              lotLabel={props.activeLotId ? lotNames.get(props.activeLotId) ?? '' : ''}
+              lotLabel={props.activeLotId ? lotLabel(props.activeLotId) : ''}
               onDestinationTypeChange={props.onDestinationTypeChange}
               onDestinationNameChange={props.onDestinationNameChange}
               onTruckCapacityChange={props.onTruckCapacityChange}
@@ -340,31 +438,40 @@ export function DashboardPage(props: DashboardPageProps) {
             {props.activeDestinations.length === 0 ? (
               <EmptyState
                 title="Todavía no hay destinos activos"
-                description={props.isProvider ? 'Tocá “Nuevo” para abrir un camión, silo o silobolsa.' : 'Cuando el proveedor abra un destino, va a aparecer acá.'}
+                description={props.isProvider ? 'Tocá “Nuevo” para abrir un camión, silo o silobolsa.' : 'Cuando el carrero abra un destino, va a aparecer acá.'}
               />
             ) : (
-              props.activeDestinations.map((destination) => (
-                <DestinationCard
-                  key={destination.id}
-                  destination={destination}
-                  location={`Lote: ${destinationLots(
-                    destination,
-                    props.loadsByDestination.get(destination.id) ?? [],
-                  )}`}
-                  loadingLot={lotNames.get(props.activeLotId) ?? ''}
-                  cerealMismatch={cerealMismatch(destination)}
-                  entries={props.loadsByDestination.get(destination.id) ?? []}
-                  isProvider={props.isProvider}
-                  busy={props.busy === destination.id}
-                  kilos={props.loadKilos[destination.id] ?? ''}
-                  closingHumidity={props.closingHumidity[destination.id] ?? ''}
-                  onKilosChange={(value) => props.onKilosChange(destination.id, value)}
-                  onClosingHumidityChange={(value) => props.onClosingHumidityChange(destination.id, value)}
-                  onAddLoad={(kilos) => props.onAddLoad(destination.id, kilos)}
-                  onClose={(humidity) => props.onCloseDestination(destination, humidity)}
-                  onDelete={() => props.onDeleteDestination(destination)}
-                />
-              ))
+              props.activeDestinations.map((destination) => {
+                const entries = props.loadsByDestination.get(destination.id) ?? []
+                return (
+                  <DestinationCard
+                    key={destination.id}
+                    destination={destination}
+                    location={`Lote: ${activeLotsLabel(destination, entries)}`}
+                    origin={originLabel(destination)}
+                    pin={
+                      props.isProvider && destination.group_id === groupId
+                        ? {
+                            pinned: destination.pinned,
+                            onToggle: () => props.onTogglePinned(destination, !destination.pinned),
+                          }
+                        : undefined
+                    }
+                    loadingLot={props.activeLotId ? lotLabel(props.activeLotId) : ''}
+                    cerealMismatch={cerealMismatch(destination)}
+                    entries={entries}
+                    isProvider={props.isProvider}
+                    busy={props.busy === destination.id}
+                    kilos={props.loadKilos[destination.id] ?? ''}
+                    closingHumidity={props.closingHumidity[destination.id] ?? ''}
+                    onKilosChange={(value) => props.onKilosChange(destination.id, value)}
+                    onClosingHumidityChange={(value) => props.onClosingHumidityChange(destination.id, value)}
+                    onAddLoad={(kilos) => props.onAddLoad(destination.id, kilos)}
+                    onClose={(humidity) => props.onCloseDestination(destination, humidity)}
+                    onDelete={() => props.onDeleteDestination(destination)}
+                  />
+                )
+              })
             )}
           </section>
         )}
@@ -373,8 +480,8 @@ export function DashboardPage(props: DashboardPageProps) {
           <section className="destination-list" aria-live="polite">
             {historyDestinations.length === 0 ? (
               <EmptyState
-                title="Todavía no hay destinos en el historial"
-                description="Acá vas a ver las cargas de todos los destinos, activos y cerrados."
+                title="Todavía no hay destinos"
+                description="Acá vas a ver cada destino, activo o cerrado, con sus descargas."
               />
             ) : (
               historyDestinations.map((destination) =>
@@ -405,109 +512,74 @@ export function DashboardPage(props: DashboardPageProps) {
           </details>
         )}
 
-        {tab === 'historial' && (
-          <>
-        {!props.isProvider && (
-          <details className="work-summary">
-            <summary>Información del trabajo</summary>
-            <div className="work-summary__content">
-              <div className="summary-row">
-                <div className="summary-card">
-                  <span>Kilos registrados</span>
-                  <strong>{formatKilos(props.totalKilos)} kg</strong>
-                </div>
-                <div className="summary-card">
-                  <span>Destinos activos</span>
-                  <strong>{props.activeDestinations.length}</strong>
-                </div>
-                <div className="connection-state" role="status">
-                  <span className={props.live ? 'connection-state__dot is-live' : 'connection-state__dot'} />
-                  {props.live ? 'En línea' : 'Conectando'}
-                </div>
-              </div>
-              <LotSummary
-                lots={props.lots}
-                destinations={historyDestinations}
-                loadsByDestination={props.loadsByDestination}
-                canEditHectares
-                busy={props.busy}
-                onUpdateLot={props.onUpdateLot}
-              />
-              <div className="group-code">
-                <span>Código para invitar</span>
-                <strong>{props.membership.inviteCode}</strong>
-                <button className="link-button" type="button" onClick={props.onCopyInviteCode}>
-                  Copiar código
-                </button>
-              </div>
-              {workAudits.length > 0 && (
-                <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
-              )}
-            </div>
-          </details>
-        )}
-        {props.isProvider && (
+        {tab === 'historial' && props.isProvider && (
           <details className="work-summary">
             <summary>Opciones del trabajo</summary>
             <div className="work-summary__content">
-              <div className="group-code">
-                <span>Código para invitar</span>
-                <strong>{props.membership.inviteCode}</strong>
-                <button className="link-button" type="button" onClick={props.onCopyInviteCode}>
-                  Copiar código
-                </button>
-              </div>
-              <section className="work-management">
-                <div className="destination-management__actions">
-                  <button
-                    className="link-button"
-                    type="button"
-                    onClick={() => {
-                      setGroupName(props.membership.groupName)
-                      setEditingGroup((current) => !current)
-                    }}
-                  >
-                    {editingGroup ? 'Cancelar edición' : 'Editar trabajo'}
-                  </button>
-                  <button
-                    className="link-button link-button--danger"
-                    type="button"
-                    disabled={props.busy === 'group'}
-                    onClick={props.onDeleteGroup}
-                  >
-                    Eliminar trabajo
-                  </button>
-                </div>
-                {editingGroup && (
-                  <form
-                    className="group-edit-form"
-                    onSubmit={(event) => {
-                      event.preventDefault()
-                      props.onRenameGroup(groupName)
-                      setEditingGroup(false)
-                    }}
-                  >
-                    <label>
-                      Nombre del trabajo
-                      <input
-                        maxLength={100}
-                        required
-                        value={groupName}
-                        onChange={(event) => setGroupName(event.target.value)}
-                      />
-                    </label>
-                    <button className="button button--secondary" type="submit" disabled={props.busy === 'group'}>
-                      Guardar nombre
-                    </button>
-                  </form>
-                )}
-              </section>
+              <WorkSettings
+                key={groupId}
+                membership={props.membership}
+                busy={props.busy === 'group'}
+                canEdit
+                hasActiveDestinations={ownActiveDestinations.length > 0}
+                onCopyInviteCode={props.onCopyInviteCode}
+                onRename={props.onRenameGroup}
+                onArchive={props.onArchiveGroup}
+                onDelete={props.onDeleteGroup}
+              />
             </div>
           </details>
         )}
-          </>
+
+        {tab === 'lotes' && !props.isProvider && (
+          <div className="panel">
+            <LotSummary
+              lots={props.lots}
+              destinations={historyDestinations}
+              loadsByDestination={props.loadsByDestination}
+              canEditHectares
+              busy={props.busy}
+              onUpdateLot={props.onUpdateLot}
+              fieldName={fieldName}
+              destinationNames={destinationNames}
+              profileNames={props.profileNames}
+            />
+          </div>
         )}
 
+        {tab === 'info' && !props.isProvider && (
+          <section className="work-info panel">
+            <h2>Información del trabajo</h2>
+            <div className="summary-row">
+              <div className="summary-card">
+                <span>Kilos de este campo</span>
+                <strong>{formatKilos(props.totalKilos)} kg</strong>
+              </div>
+              <div className="summary-card">
+                <span>Destinos activos</span>
+                <strong>{ownActiveDestinations.length}</strong>
+              </div>
+              <div className="connection-state" role="status">
+                <span className={props.live ? 'connection-state__dot is-live' : 'connection-state__dot'} />
+                {props.live ? 'En línea' : 'Conectando'}
+              </div>
+            </div>
+            <WorkSettings
+              key={groupId}
+              membership={props.membership}
+              busy={props.busy === 'group'}
+              canEdit={false}
+              hasActiveDestinations={ownActiveDestinations.length > 0}
+              onCopyInviteCode={props.onCopyInviteCode}
+              onRename={props.onRenameGroup}
+              onArchive={props.onArchiveGroup}
+              onDelete={props.onDeleteGroup}
+            />
+            {workAudits.length > 0 && (
+              <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
+            )}
+          </section>
+        )}
       </section>
       <footer className="app-footer">
         <span>

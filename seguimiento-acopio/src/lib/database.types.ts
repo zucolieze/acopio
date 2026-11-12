@@ -26,6 +26,7 @@ type Group = {
   created_by: string | null
   created_at: string
   deleted_at: string | null
+  archived_at: string | null
 }
 
 type Season = {
@@ -65,6 +66,8 @@ type Member = {
 type Destination = {
   id: string
   group_id: string
+  pinned: boolean
+  closed_from_group_id: string | null
   destination_type: DestinationType
   name: string
   status: DestinationStatus
@@ -141,6 +144,10 @@ export type Database = {
       }
       restore_destination: {
         Args: { p_destination_id: string }
+        Returns: undefined
+      }
+      set_group_archived: {
+        Args: { p_group_id: string; p_archived: boolean }
         Returns: undefined
       }
       reopen_destination: {

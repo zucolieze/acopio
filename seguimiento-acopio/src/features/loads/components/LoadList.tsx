@@ -109,9 +109,17 @@ function LoadRow({
         </button>
       )}
       {canChangeAuthor && changingAuthor && (
-        <label className="load-list__author">
-          Responsable de la descarga
+        <div className="load-list__author">
+          <button
+            className="load-list__author-close"
+            type="button"
+            aria-expanded="true"
+            onClick={() => setChangingAuthor(false)}
+          >
+            Responsable de la descarga <span aria-hidden="true">▲</span>
+          </button>
           <select
+            aria-label="Responsable de la descarga"
             value={entry.created_by ?? ''}
             disabled={busy}
             onChange={(event) => {
@@ -126,7 +134,7 @@ function LoadRow({
               </option>
             ))}
           </select>
-        </label>
+        </div>
       )}
       {canEdit && (
         <div className="load-list__actions">

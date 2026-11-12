@@ -16,13 +16,32 @@ type Client = SupabaseClient<Database>
 export async function fetchGroupActivity(
   client: Client,
   groupId: string,
+  pinnedFromGroupIds: string[] = [],
 ): Promise<GroupActivity> {
-  const [destinationsResult, fieldsResult, membersResult, auditResult, seasonsResult] = await Promise.all([
+  const otherGroups = pinnedFromGroupIds.filter((id) => id !== groupId)
+  const [
+    destinationsResult,
+    pinnedResult,
+    fieldsResult,
+    membersResult,
+    auditResult,
+    seasonsResult,
+  ] = await Promise.all([
     client
       .from('destinations')
       .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false }),
+    // Destinos fijados en otros trabajos donde la persona es carrero.
+    otherGroups.length > 0
+      ? client
+          .from('destinations')
+          .select('*')
+          .eq('pinned', true)
+          .eq('status', 'activo')
+          .is('deleted_at', null)
+          .in('group_id', otherGroups)
+      : Promise.resolve({ data: [] as Destination[], error: null }),
     client.from('fields').select('*').eq('group_id', groupId).order('created_at'),
     client.from('members').select('user_id, role').eq('group_id', groupId),
     client
@@ -35,6 +54,7 @@ export async function fetchGroupActivity(
   ])
 
   if (destinationsResult.error) throw destinationsResult.error
+  if (pinnedResult.error) throw pinnedResult.error
   if (fieldsResult.error) throw fieldsResult.error
   if (membersResult.error) throw membersResult.error
   if (auditResult.error) throw auditResult.error
@@ -53,7 +73,30 @@ export async function fetchGroupActivity(
     lots = data
   }
 
-  const destinations = destinationsResult.data
+  const destinations: Destination[] = [...destinationsResult.data, ...pinnedResult.data]
+
+  // Destinos de otros trabajos que recibieron descargas de lotes de este trabajo.
+  if (lots.length > 0) {
+    const knownIds = new Set(destinations.map((destination) => destination.id))
+    const { data, error } = await client
+      .from('loads')
+      .select('destination_id')
+      .in('lot_id', lots.map((lot) => lot.id))
+      .is('deleted_at', null)
+    if (error) throw error
+    const missingIds = [...new Set(data.map((row) => row.destination_id))].filter(
+      (id) => !knownIds.has(id),
+    )
+    if (missingIds.length > 0) {
+      const { data: external, error: externalError } = await client
+        .from('destinations')
+        .select('*')
+        .in('id', missingIds)
+      if (externalError) throw externalError
+      destinations.push(...external)
+    }
+  }
+
   let loads: Load[] = []
   if (destinations.length > 0) {
     const { data, error } = await client
@@ -63,6 +106,31 @@ export async function fetchGroupActivity(
       .order('date', { ascending: false })
     if (error) throw error
     loads = data.filter((load) => load.deleted_at === null)
+  }
+
+  // Lotes y campos de otros trabajos que aparecen en estas descargas, para poder
+  // mostrar de qué campo y lote viene cada una.
+  const ownLotIds = new Set(lots.map((lot) => lot.id))
+  const foreignLotIds = [
+    ...new Set(
+      [...loads.map((load) => load.lot_id), ...destinations.map((destination) => destination.lot_id)],
+    ),
+  ].filter((id) => !ownLotIds.has(id))
+  let foreignLots: Lot[] = []
+  let foreignFields: Field[] = []
+  if (foreignLotIds.length > 0) {
+    const { data, error } = await client.from('lots').select('*').in('id', foreignLotIds)
+    if (error) throw error
+    foreignLots = data
+    const foreignFieldIds = [...new Set(data.map((lot) => lot.field_id))]
+    if (foreignFieldIds.length > 0) {
+      const { data: fieldRows, error: fieldsError } = await client
+        .from('fields')
+        .select('*')
+        .in('id', foreignFieldIds)
+      if (fieldsError) throw fieldsError
+      foreignFields = fieldRows
+    }
   }
 
   const audits = auditResult.data
@@ -103,6 +171,8 @@ export async function fetchGroupActivity(
     loads,
     fields,
     lots,
+    foreignLots,
+    foreignFields,
     seasonId: seasonsResult.data[0]?.id ?? null,
     audits,
     workMembers,
@@ -232,6 +302,7 @@ export async function closeDestination(
   client: Client,
   destinationId: string,
   closingHumidity: number | null,
+  closedFromGroupId: string,
 ) {
   const closingHumidityAt = closingHumidity === null ? null : new Date().toISOString()
   const { data, error } = await client
@@ -241,6 +312,7 @@ export async function closeDestination(
       closed_at: new Date().toISOString(),
       closing_humidity: closingHumidity,
       closing_humidity_at: closingHumidityAt,
+      closed_from_group_id: closedFromGroupId,
     })
     .eq('id', destinationId)
     .select('id')
@@ -302,6 +374,21 @@ export async function updateLoadAttribution(
     p_created_by: userId,
   })
   if (error) throw error
+}
+
+export async function setDestinationPinned(
+  client: Client,
+  destinationId: string,
+  pinned: boolean,
+) {
+  const { data, error } = await client
+    .from('destinations')
+    .update({ pinned })
+    .eq('id', destinationId)
+    .select('id')
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error('No se encontró el destino o no tenés permiso para cambiarlo.')
 }
 
 export async function reopenDestination(client: Client, destinationId: string) {

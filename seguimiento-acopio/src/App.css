@@ -1678,3 +1678,210 @@ button:focus-visible {
   grid-column: 1 / -1;
   margin: 0;
 }
+
+/* Barra con el campo y el lote en los que se está trabajando */
+.work-context {
+  display: flex;
+  width: min(100%, 68rem);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin: 0 auto;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #aebbb2;
+}
+
+.work-context__item {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 12rem;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: var(--color-green);
+  font-size: 0.95rem;
+}
+
+.work-context__item > span {
+  flex: none;
+  color: var(--color-muted);
+  font-weight: 650;
+}
+
+.work-context__item strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.work-context__item select {
+  min-height: 2.6rem;
+  padding: 0.35rem 0.6rem;
+  font-weight: 650;
+}
+
+/* Destinos fijados entre trabajos */
+.status-badge.is-pinned {
+  background: #fbf3d9;
+  color: #5c4500;
+}
+
+.destination-card__origin {
+  margin: 0.25rem 0 0;
+  color: #5c4500;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.destination-card__pin {
+  min-height: 2rem;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* Datos del destino en el historial */
+.destination-facts {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.65rem;
+  background: #f4f6f2;
+}
+
+.destination-facts > div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.destination-facts dt {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.destination-facts dd {
+  margin: 0;
+  color: #1c302a;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+/* Vista por lote del observador */
+.lot-summary h2 {
+  margin: 0 0 0.6rem;
+  color: var(--color-green);
+  font-size: 1.15rem;
+}
+
+.lot-summary__loads {
+  margin-top: 0.5rem;
+}
+
+.lot-summary__loads > summary {
+  color: var(--color-green);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.lot-summary__loads ul {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lot-summary__loads li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.work-info h2 {
+  margin: 0 0 0.75rem;
+  color: var(--color-green);
+  font-size: 1.15rem;
+}
+
+.work-info .summary-row {
+  margin-bottom: 0.75rem;
+}
+
+/* Trabajos archivados en el menú */
+.archived-works > summary {
+  color: var(--color-green);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.archived-works ul {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archived-works li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* Responsable de la descarga: tocar el título cierra el selector */
+.load-list__author-close {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #31443c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-align: left;
+}
+
+/* Pin para fijar un destino en todos los trabajos */
+.destination-heading__action {
+  margin-left: auto;
+}
+
+.pin-button {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #8b998f;
+  border-radius: 99px;
+  background: #fff;
+  color: var(--color-green);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pin-button svg {
+  transform: rotate(45deg);
+}
+
+.pin-button.is-pinned {
+  border-color: #9a7414;
+  background: #fbf3d9;
+  color: #5c4500;
+}
+
+.pin-button.is-pinned svg {
+  transform: none;
+}

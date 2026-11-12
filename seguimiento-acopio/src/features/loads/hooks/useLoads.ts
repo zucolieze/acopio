@@ -4,6 +4,7 @@ import type { Database, DestinationType } from '../../../lib/database.types'
 import { messageFromError } from '../../../utils/errors'
 import { HUMIDITY_ERROR, parseHumidity } from '../../../utils/humidity'
 import { readStored, writeStored } from '../../../utils/storage'
+import { isValidPlate, normalizePlate } from '../../../utils/plates'
 import {
   addLoad as addLoadToRepository,
   closeDestination as closeDestinationInRepository,
@@ -13,6 +14,7 @@ import {
   softDeleteDestination,
   restoreDestination as restoreDestinationInRepository,
   reopenDestination as reopenDestinationInRepository,
+  setDestinationPinned as setDestinationPinnedInRepository,
   softDeleteLoad,
   softDeleteLot,
   updateDestination as updateDestinationInRepository,
@@ -29,11 +31,15 @@ export function useLoads(
   client: Client | null,
   groupId: string,
   userId: string | undefined,
+  /** Trabajos (separados por coma) donde la persona es carrero: de ahí se traen los destinos fijados. */
+  pinnedFromGroupKey = '',
 ) {
   const [destinations, setDestinations] = useState<Destination[]>([])
   const [loads, setLoads] = useState<Load[]>([])
   const [fields, setFields] = useState<Field[]>([])
   const [lots, setLots] = useState<Lot[]>([])
+  const [foreignLots, setForeignLots] = useState<Lot[]>([])
+  const [foreignFields, setForeignFields] = useState<Field[]>([])
   const [workMembers, setWorkMembers] = useState<WorkMember[]>([])
   const [audits, setAudits] = useState<Awaited<ReturnType<typeof fetchGroupActivity>>['audits']>([])
   const [profileNames, setProfileNames] = useState<Record<string, string>>({})
@@ -67,11 +73,13 @@ export function useLoads(
   const refresh = useCallback(async () => {
     if (!client || !groupId) return
     try {
-      const activity = await fetchGroupActivity(client, groupId)
+      const activity = await fetchGroupActivity(client, groupId, pinnedFromGroupKey ? pinnedFromGroupKey.split(',') : [])
       setDestinations(activity.destinations)
       setLoads(activity.loads)
       setFields(activity.fields)
       setLots(activity.lots)
+      setForeignLots(activity.foreignLots)
+      setForeignFields(activity.foreignFields)
       setWorkMembers(activity.workMembers)
       setAudits(activity.audits)
       setProfileNames(activity.profileNames)
@@ -90,13 +98,15 @@ export function useLoads(
       setError(messageFromError(refreshError))
       throw refreshError
     }
-  }, [client, groupId])
+  }, [client, groupId, pinnedFromGroupKey])
 
   useEffect(() => {
     setDestinations([])
     setLoads([])
     setFields([])
     setLots([])
+    setForeignLots([])
+    setForeignFields([])
     setWorkMembers([])
     setAudits([])
     setProfileNames({})
@@ -110,13 +120,15 @@ export function useLoads(
     let mounted = true
     setLoading(true)
 
-    void fetchGroupActivity(client, groupId)
+    void fetchGroupActivity(client, groupId, pinnedFromGroupKey ? pinnedFromGroupKey.split(',') : [])
       .then((activity) => {
         if (!mounted) return
         setDestinations(activity.destinations)
         setLoads(activity.loads)
         setFields(activity.fields)
         setLots(activity.lots)
+        setForeignLots(activity.foreignLots)
+        setForeignFields(activity.foreignFields)
         setWorkMembers(activity.workMembers)
         setAudits(activity.audits)
         setProfileNames(activity.profileNames)
@@ -240,15 +252,9 @@ export function useLoads(
       humidity: string,
     ) => {
       if (!client || !userId || !groupId) return
-      const destinationLabel =
-        type === 'camion'
-          ? name.toUpperCase().replace(/[^A-Z0-9]/g, '')
-          : name.trim()
-      if (
-        type === 'camion' &&
-        !/^(?:[A-Z]{3}\d{3}|[A-Z]{2}\d{3}[A-Z]{2})$/.test(destinationLabel)
-      ) {
-        setError('Ingresá una patente válida: ABC123 o AA123BB, sin espacios.')
+      const destinationLabel = type === 'camion' ? normalizePlate(name) : name.trim()
+      if (type === 'camion' && !isValidPlate(destinationLabel)) {
+        setError('La patente tiene que tener entre 4 y 10 letras o números, sin espacios.')
         return
       }
       if (!activeLotId) {
@@ -405,8 +411,9 @@ export function useLoads(
         return
       }
       const destination = destinations.find((item) => item.id === destinationId)
-      const destinationCereal = lots.find((lot) => lot.id === destination?.lot_id)?.cereal ?? null
-      const loadCereal = lots.find((lot) => lot.id === activeLotId)?.cereal ?? null
+      const allLots = [...lots, ...foreignLots]
+      const destinationCereal = allLots.find((lot) => lot.id === destination?.lot_id)?.cereal ?? null
+      const loadCereal = allLots.find((lot) => lot.id === activeLotId)?.cereal ?? null
       if (destination && destinationCereal !== loadCereal) {
         setError('No se pueden mezclar cereales en un mismo destino. Elegí arriba un lote del mismo cereal.')
         return
@@ -430,7 +437,7 @@ export function useLoads(
         setBusy('')
       }
     },
-    [activeLotId, client, destinations, lots, refresh, userId],
+    [activeLotId, client, destinations, foreignLots, lots, refresh, userId],
   )
 
   const close = useCallback(
@@ -445,7 +452,7 @@ export function useLoads(
       setBusy(destination.id)
       setError('')
       try {
-        await closeDestinationInRepository(client, destination.id, humidity)
+        await closeDestinationInRepository(client, destination.id, humidity, groupId)
         setNotice('Destino cerrado y guardado en el historial.')
         await refresh()
       } catch (closeError) {
@@ -542,6 +549,28 @@ export function useLoads(
     [client, refresh],
   )
 
+  const setPinned = useCallback(
+    async (destination: Destination, pinned: boolean) => {
+      if (!client) return
+      setBusy(destination.id)
+      setError('')
+      try {
+        await setDestinationPinnedInRepository(client, destination.id, pinned)
+        setNotice(
+          pinned
+            ? 'Destino fijado: ahora aparece en todos tus trabajos.'
+            : 'El destino ya no aparece en tus otros trabajos.',
+        )
+        await refresh()
+      } catch (pinError) {
+        setError(messageFromError(pinError))
+      } finally {
+        setBusy('')
+      }
+    },
+    [client, refresh],
+  )
+
   const reopenDestination = useCallback(
     async (destination: Destination) => {
       if (!client) return
@@ -589,9 +618,14 @@ export function useLoads(
   }, [loads])
 
   const lotsById = useMemo(
-    () => new Map(lots.map((lot) => [lot.id, lot])),
-    [lots],
+    () => new Map([...foreignLots, ...lots].map((lot) => [lot.id, lot])),
+    [foreignLots, lots],
   )
+  const fieldsById = useMemo(
+    () => new Map([...foreignFields, ...fields].map((field) => [field.id, field])),
+    [fields, foreignFields],
+  )
+  const ownLotIds = useMemo(() => new Set(lots.map((lot) => lot.id)), [lots])
 
   return {
     destinations,
@@ -600,19 +634,28 @@ export function useLoads(
     lots,
     workMembers,
     lotsById,
+    fieldsById,
+    setPinned,
     audits,
     profileNames,
     loadsByDestination,
-    totalKilos: loads.reduce((total, load) => total + load.kg, 0),
+    // Solo cuentan los kilos de los lotes de este trabajo.
+    totalKilos: loads
+      .filter((load) => ownLotIds.has(load.lot_id))
+      .reduce((total, load) => total + load.kg, 0),
+    // Los destinos de otros trabajos aparecen activos solo si están fijados.
     activeDestinations: destinations.filter(
-      (destination) => destination.status === 'activo' && destination.deleted_at === null,
+      (destination) =>
+        destination.status === 'activo' &&
+        destination.deleted_at === null &&
+        (destination.group_id === groupId || destination.pinned),
     ),
     closedDestinations: destinations.filter(
       (destination) =>
         destination.status === 'cerrado' && destination.deleted_at === null,
     ),
     deletedDestinations: destinations.filter(
-      (destination) => destination.deleted_at !== null,
+      (destination) => destination.deleted_at !== null && destination.group_id === groupId,
     ),
     activeLots: lots.filter((lot) => lot.deleted_at === null),
     tab,
