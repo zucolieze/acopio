@@ -178,6 +178,7 @@ function AuthShell({ children }: { children: React.ReactNode }) {
         {children}
       </section>
       <InstallHint />
+      <p className="app-version">Versión {__APP_VERSION__}</p>
     </main>
   )
 }

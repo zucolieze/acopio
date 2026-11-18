@@ -572,21 +572,22 @@ export function useLoads(
   )
 
   const reopenDestination = useCallback(
-    async (destination: Destination) => {
+    async (destination: Destination, openingHumidity: number | null) => {
       if (!client) return
       setBusy(destination.id)
       setError('')
       try {
-        await reopenDestinationInRepository(client, destination.id)
-        setNotice('Destino reabierto. Ya aparece de nuevo en Activos.')
+        await reopenDestinationInRepository(client, destination.id, openingHumidity)
         await refresh()
+        setTab('activos')
+        setNotice('Destino reactivado: ya aparece en Activos como un destino nuevo.')
       } catch (reopenError) {
         setError(messageFromError(reopenError))
       } finally {
         setBusy('')
       }
     },
-    [client, refresh],
+    [client, refresh, setTab],
   )
 
   const restoreDestination = useCallback(
@@ -626,6 +627,15 @@ export function useLoads(
     [fields, foreignFields],
   )
   const ownLotIds = useMemo(() => new Set(lots.map((lot) => lot.id)), [lots])
+  const deletedDestinationIds = useMemo(
+    () =>
+      new Set(
+        destinations
+          .filter((destination) => destination.deleted_at !== null)
+          .map((destination) => destination.id),
+      ),
+    [destinations],
+  )
 
   return {
     destinations,
@@ -639,9 +649,13 @@ export function useLoads(
     audits,
     profileNames,
     loadsByDestination,
-    // Solo cuentan los kilos de los lotes de este trabajo.
+    // Solo cuentan los kilos de los lotes de este trabajo y de los destinos que
+    // están en el historial: los destinos eliminados no suman.
     totalKilos: loads
-      .filter((load) => ownLotIds.has(load.lot_id))
+      .filter(
+        (load) =>
+          ownLotIds.has(load.lot_id) && !deletedDestinationIds.has(load.destination_id),
+      )
       .reduce((total, load) => total + load.kg, 0),
     // Los destinos de otros trabajos aparecen activos solo si están fijados.
     activeDestinations: destinations.filter(

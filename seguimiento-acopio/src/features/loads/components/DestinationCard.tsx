@@ -216,9 +216,17 @@ export function CapacitySummary({
 }
 
 export function HumiditySummary({ destination }: { destination: Destination }) {
+  // El promedio usa todas las lecturas: las de etapas anteriores (cuando el
+  // destino se reactivó) y las actuales.
+  const previous = destination.humidity_history ?? []
+  const readings = [
+    ...previous.flatMap((session) => [session.opening, session.closing]),
+    destination.opening_humidity,
+    destination.closing_humidity,
+  ].filter((value): value is number => value !== null)
   const average =
-    destination.opening_humidity !== null && destination.closing_humidity !== null
-      ? (destination.opening_humidity + destination.closing_humidity) / 2
+    destination.closing_humidity !== null && readings.length > 0
+      ? readings.reduce((sum, value) => sum + value, 0) / readings.length
       : null
 
   return (
@@ -245,6 +253,15 @@ export function HumiditySummary({ destination }: { destination: Destination }) {
             : ''}
         </dd>
       </div>
+      {previous.map((session, index) => (
+        <div key={index}>
+          <dt>Etapa anterior {index + 1}</dt>
+          <dd>
+            {session.opening === null ? 'Sin dato' : formatHumidity(session.opening)} →{' '}
+            {session.closing === null ? 'Sin cierre' : formatHumidity(session.closing)}
+          </dd>
+        </div>
+      ))}
       <div>
         <dt>Promedio</dt>
         <dd>{average === null ? 'Pendiente' : formatHumidity(average)}</dd>
