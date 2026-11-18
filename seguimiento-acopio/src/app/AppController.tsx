@@ -596,15 +596,9 @@ export default function AppController() {
       }
       onDeleteDestination={handleDeleteDestination}
       onRestoreDestination={(destination) => void loads.restoreDestination(destination)}
-      onReopenDestination={(destination) => {
-        if (
-          window.confirm(
-            `¿Reabrir ${destinationLabels[destination.destination_type]} ${destination.name}? Va a volver a Activos y se borra la humedad de cierre.`,
-          )
-        ) {
-          void loads.reopenDestination(destination)
-        }
-      }}
+      onReopenDestination={(destination, openingHumidity) =>
+        void loads.reopenDestination(destination, openingHumidity)
+      }
       onHistoryToggle={loads.setExpandedHistory}
     />
   )

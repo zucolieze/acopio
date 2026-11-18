@@ -391,9 +391,14 @@ export async function setDestinationPinned(
   if (!data) throw new Error('No se encontró el destino o no tenés permiso para cambiarlo.')
 }
 
-export async function reopenDestination(client: Client, destinationId: string) {
+export async function reopenDestination(
+  client: Client,
+  destinationId: string,
+  openingHumidity: number | null,
+) {
   const { error } = await client.rpc('reopen_destination', {
     p_destination_id: destinationId,
+    p_opening_humidity: openingHumidity,
   })
   if (error) throw error
 }

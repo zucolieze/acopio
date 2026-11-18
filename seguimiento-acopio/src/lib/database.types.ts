@@ -63,11 +63,20 @@ type Member = {
   created_at: string
 }
 
+export type HumiditySession = {
+  opening: number | null
+  opening_at: string | null
+  closing: number | null
+  closing_at: string | null
+  closed_at: string | null
+}
+
 type Destination = {
   id: string
   group_id: string
   pinned: boolean
   closed_from_group_id: string | null
+  humidity_history: HumiditySession[]
   destination_type: DestinationType
   name: string
   status: DestinationStatus
@@ -151,7 +160,7 @@ export type Database = {
         Returns: undefined
       }
       reopen_destination: {
-        Args: { p_destination_id: string }
+        Args: { p_destination_id: string; p_opening_humidity?: number | null }
         Returns: undefined
       }
       set_load_attribution: {

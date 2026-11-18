@@ -25,7 +25,9 @@ import { DestinationHeading } from './DestinationHeading'
 import { DestinationManagement } from './DestinationManagement'
 import { LoadList } from './LoadList'
 import { LotSummary } from './LotSummary'
+import { DestinationBrowser } from './DestinationBrowser'
 import { NewDestinationForm } from './NewDestinationForm'
+import { ReopenDestination } from './ReopenDestination'
 import { WorkSettings } from './WorkSettings'
 import { WorkStructureManagement } from './WorkStructureManagement'
 
@@ -103,7 +105,7 @@ type DashboardPageProps = {
   onEditDestination: (destination: Destination, changes: DestinationChanges) => void
   onDeleteDestination: (destination: Destination) => void
   onRestoreDestination: (destination: Destination) => void
-  onReopenDestination: (destination: Destination) => void
+  onReopenDestination: (destination: Destination, openingHumidity: number | null) => void
   onHistoryToggle: (destinationId: string | null) => void
 }
 
@@ -317,14 +319,11 @@ export function DashboardPage(props: DashboardPageProps) {
               destinationName={destination.name}
             />
             {!props.isProvider && !deleted && closed && ownDestination && (
-              <button
-                className="button button--secondary destination-card__reopen"
-                type="button"
-                disabled={props.busy === destination.id}
-                onClick={() => props.onReopenDestination(destination)}
-              >
-                {props.busy === destination.id ? 'Reabriendo…' : 'Reabrir destino'}
-              </button>
+              <ReopenDestination
+                destination={destination}
+                busy={props.busy === destination.id}
+                onReopen={props.onReopenDestination}
+              />
             )}
           </div>
         )}
@@ -477,16 +476,22 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
 
         {tab === 'historial' && (
-          <section className="destination-list" aria-live="polite">
+          <section aria-live="polite">
             {historyDestinations.length === 0 ? (
               <EmptyState
                 title="Todavía no hay destinos"
                 description="Acá vas a ver cada destino, activo o cerrado, con sus descargas."
               />
             ) : (
-              historyDestinations.map((destination) =>
-                renderHistoryDestination(destination, false),
-              )
+              <DestinationBrowser
+                destinations={historyDestinations}
+                lots={props.lots}
+                lotIdsOf={(destination) =>
+                  destinationLotIds(destination, props.loadsByDestination.get(destination.id) ?? [])
+                }
+                lotLabel={lotLabel}
+                render={(destination) => renderHistoryDestination(destination, false)}
+              />
             )}
           </section>
         )}
