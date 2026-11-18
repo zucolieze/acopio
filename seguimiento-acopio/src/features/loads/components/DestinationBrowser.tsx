@@ -75,7 +75,7 @@ export function DestinationBrowser({
         <label>
           <span className="sr-only">Estado</span>
           <select value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
-            <option value="todos">Todos los estados</option>
+            <option value="todos">Estados</option>
             <option value="activo">Activos</option>
             <option value="cerrado">Cerrados</option>
           </select>
@@ -83,7 +83,7 @@ export function DestinationBrowser({
         <label>
           <span className="sr-only">Tipo</span>
           <select value={type} onChange={(event) => setType(event.target.value as typeof type)}>
-            <option value="todos">Todos los tipos</option>
+            <option value="todos">Destinos</option>
             {GROUPS.map((group) => (
               <option key={group.type} value={group.type}>
                 {destinationLabels[group.type]}
@@ -94,7 +94,7 @@ export function DestinationBrowser({
         <label>
           <span className="sr-only">Lote</span>
           <select value={lotId} onChange={(event) => setLotId(event.target.value)}>
-            <option value="todos">Todos los lotes</option>
+            <option value="todos">Lotes</option>
             {lots
               .filter((lot) => lot.deleted_at === null)
               .map((lot) => (
