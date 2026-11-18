@@ -1975,3 +1975,8 @@ button:focus-visible {
     grid-column: auto;
   }
 }
+
+.destination-card__delete-link {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}

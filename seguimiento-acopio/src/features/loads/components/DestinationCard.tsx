@@ -173,6 +173,17 @@ export function DestinationCard({
           Cerrar camión
         </button>
       )}
+      {/* Se puede eliminar cualquier destino en cualquier momento, tenga o no cargas. */}
+      {isProvider && !isEmpty && (
+        <button
+          className="link-button link-button--danger destination-card__delete-link"
+          type="button"
+          disabled={busy}
+          onClick={onDelete}
+        >
+          Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'}
+        </button>
+      )}
     </article>
   )
 }

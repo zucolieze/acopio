@@ -318,7 +318,7 @@ export function DashboardPage(props: DashboardPageProps) {
               lots={props.lots}
               destinationName={destination.name}
             />
-            {!props.isProvider && !deleted && closed && ownDestination && (
+            {!deleted && closed && (
               <ReopenDestination
                 destination={destination}
                 busy={props.busy === destination.id}
@@ -496,7 +496,7 @@ export function DashboardPage(props: DashboardPageProps) {
           </section>
         )}
 
-        {tab === 'historial' && !props.isProvider && props.deletedDestinations.length > 0 && (
+        {tab === 'historial' && props.deletedDestinations.length > 0 && (
           <details className="deleted-destinations">
             <summary>Destinos eliminados ({props.deletedDestinations.length})</summary>
             <div className="destination-list">
