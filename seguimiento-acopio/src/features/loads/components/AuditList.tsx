@@ -1,5 +1,5 @@
-import { formatKilos } from '../../../utils/format'
-import { formatHumidity } from '../../../utils/humidity'
+import { formatKilos } from '@/shared/utils/format'
+import { formatHumidity } from '@/shared/utils/humidity'
 import type { ChangeAudit, Lot } from '../types'
 
 const fieldLabels: Record<string, string> = {

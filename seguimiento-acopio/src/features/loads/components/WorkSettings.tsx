@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Membership } from '../../groups/types'
+import type { Membership } from '@/features/groups/types'
 
 type WorkSettingsProps = {
   membership: Membership

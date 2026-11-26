@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { destinationLabels } from '../types'
 import type { Destination, Lot } from '../types'
-import type { DestinationType } from '../../../lib/database.types'
+import type { DestinationType } from '@/shared/lib/database.types'
 
 type DestinationBrowserProps = {
   destinations: Destination[]

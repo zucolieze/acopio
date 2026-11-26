@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { formatDate, formatKilos } from '../../../utils/format'
+import { formatDate, formatKilos } from '@/shared/utils/format'
 import { destinationLabels } from '../types'
 import type { Destination, Load } from '../types'
 

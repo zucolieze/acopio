@@ -1,12 +1,12 @@
 import type { FormEvent } from 'react'
-import type { DestinationType } from '../../../lib/database.types'
+import type { DestinationType } from '@/shared/lib/database.types'
 import { destinationLabels } from '../types'
-import { normalizePlate } from '../../../utils/plates'
+import { normalizePlate } from '@/shared/utils/plates'
 import {
   formatHumidityInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
-} from '../../../utils/humidity'
+} from '@/shared/utils/humidity'
 
 type NewDestinationFormProps = {
   destinationType: DestinationType

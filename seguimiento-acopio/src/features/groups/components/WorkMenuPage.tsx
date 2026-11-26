@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { Brand } from '../../../components/ui/Brand'
-import { Feedback } from '../../../components/ui/Feedback'
-import { modeLabels, type WorkMode } from '../../../types/app'
-import type { MemberRole } from '../../../lib/database.types'
+import { Brand } from '@/shared/ui/Brand'
+import { Feedback } from '@/shared/ui/Feedback'
+import { modeLabels, type WorkMode } from '@/shared/types/app'
+import type { MemberRole } from '@/shared/lib/database.types'
 import { workLabel, type Membership, type WorkMenuAction } from '../types'
 
 const roleLabels: Record<MemberRole, string> = {

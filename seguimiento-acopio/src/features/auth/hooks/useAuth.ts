@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '../../../lib/database.types'
-import { getSupabaseClient } from '../../../lib/supabase'
-import { messageFromError } from '../../../utils/errors'
+import type { Database } from '@/shared/lib/database.types'
+import { getSupabaseClient } from '@/shared/lib/supabase'
+import { messageFromError } from '@/shared/utils/errors'
 import {
   authErrorMessage,
   clearAuthErrorFromUrl,

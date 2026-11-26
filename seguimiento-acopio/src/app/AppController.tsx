@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import type { MemberRole } from '../lib/database.types'
-import { Brand } from '../components/ui/Brand'
-import { Feedback } from '../components/ui/Feedback'
+import type { MemberRole } from '@/shared/lib/database.types'
+import { Brand } from '@/shared/ui/Brand'
+import { Feedback } from '@/shared/ui/Feedback'
 import {
   AuthPage,
   ModeSelectionPage,
   ProfileNamePage,
   ResetPasswordPage,
   useAuth,
-} from '../features/auth'
-import { useGroups, WorkMenuPage } from '../features/groups'
-import { DashboardPage, destinationLabels, useLoads } from '../features/loads'
-import type { Tab } from '../features/loads'
-import type { AppScreen, WorkMode } from '../types/app'
-import { messageFromError } from '../utils/errors'
-import { clearStored, readStored, writeStored } from '../utils/storage'
-import { isArgentinePlate, isValidPlate, normalizePlate } from '../utils/plates'
+} from '@/features/auth'
+import { useGroups, WorkMenuPage } from '@/features/groups'
+import { DashboardPage, destinationLabels, useLoads } from '@/features/loads'
+import type { Tab } from '@/features/loads'
+import type { AppScreen, WorkMode } from '@/shared/types/app'
+import { messageFromError } from '@/shared/utils/errors'
+import { clearStored, readStored, writeStored } from '@/shared/utils/storage'
+import { isArgentinePlate, isValidPlate, normalizePlate } from '@/shared/utils/plates'
 
 type SavedNavigation = {
   userId: string

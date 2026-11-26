@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react'
-import { Brand } from '../../../components/ui/Brand'
-import { Feedback } from '../../../components/ui/Feedback'
-import { InstallHint } from '../../../components/ui/InstallHint'
+import { Brand } from '@/shared/ui/Brand'
+import { Feedback } from '@/shared/ui/Feedback'
+import { InstallHint } from '@/shared/ui/InstallHint'
 import type { AuthMode } from '../types'
 
 type AuthPageProps = {
