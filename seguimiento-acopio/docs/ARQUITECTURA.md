@@ -66,6 +66,8 @@ src/
 | `EncabezadoSimple` | solo contenido |
 | `PieDePagina` | `alFinal`: contenido a la derecha |
 | `FormularioApilado` | un `form` en columna |
+| `CamposApilados` (en `FormularioApilado.tsx`) | lo mismo sin ser un `form` |
+| `Sobretitulo` | línea en mayúsculas arriba de un título |
 | `TextoSuave` | `como`: `p` o `span`; `chico` |
 
 El aspecto se elige con props. `className` en `Boton`, `Panel` y `Aviso` es solo
@@ -89,9 +91,9 @@ de capa. Roles: `carrero` y `observador`. Ver [GLOSARIO.md](GLOSARIO.md).
 
 ## Estado actual
 
-Etapas 1, 2 y 3a hechas: la estructura de carpetas ya es la objetivo, la base de
-estilos y los componentes compartidos están en `shared/`, y la feature `auth` usa
-solo CSS Modules. Todavía falta:
+Etapas 1, 2, 3a y 3b hechas: la estructura de carpetas ya es la objetivo, la base de
+estilos y los componentes compartidos están en `shared/`, y las features `auth` y
+`groups` usan solo CSS Modules. Todavía falta:
 
 - Hay tres features: `auth`, `groups` y `loads`. La administración de lotes y
   campos vive dentro de `loads`.
@@ -101,10 +103,9 @@ solo CSS Modules. Todavía falta:
   features y decide qué pantalla mostrar por estado. `index.html` carga
   `/src/app/main.tsx`.
 - El alias `@/` apunta a `src/` (en `tsconfig.json` y `vite.config.ts`).
-- Los estilos de `groups` y `loads` siguen en `src/App.css` (globales). Se pasan
-  a CSS Modules en las etapas 3b y 3c. Hasta entonces, `App.css` repite algunas
-  reglas que ya están en `shared/ui` (página centrada, pie, formulario apilado y
-  textos suaves).
+- Los estilos de `loads` siguen en `src/App.css` (globales). Se pasan a CSS
+  Modules en la etapa 3c. Hasta entonces, `App.css` repite algunas reglas que ya
+  están en `shared/ui` (pie, formulario apilado y textos suaves).
 - `App.css` todavía usa puntos de corte de `40rem` y `65rem`, además de los
   documentados. Se unifican en la Etapa 4.
 - Los nombres están en inglés y los roles en la base y en el código son

@@ -3,9 +3,17 @@ import { Boton } from '@/shared/ui/Boton'
 import { Marca } from '@/shared/ui/Marca'
 import { Avisos } from '@/shared/ui/Aviso'
 import { Panel } from '@/shared/ui/Panel'
+import { EncabezadoSimple } from '@/shared/ui/EncabezadoSimple'
+import { CamposApilados, FormularioApilado } from '@/shared/ui/FormularioApilado'
+import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
+import { PieDePagina } from '@/shared/ui/PieDePagina'
+import { Sobretitulo } from '@/shared/ui/Sobretitulo'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import { unirClases } from '@/shared/utils/unirClases'
 import { modeLabels, type WorkMode } from '@/shared/types/app'
 import type { MemberRole } from '@/shared/lib/database.types'
 import { workLabel, type Membership, type WorkMenuAction } from '../types'
+import estilos from './WorkMenuPage.module.css'
 
 const roleLabels: Record<MemberRole, string> = {
   cliente: 'Observador',
@@ -62,30 +70,30 @@ export function WorkMenuPage({
   const [showArchived, setShowArchived] = useState(false)
 
   return (
-    <main className="center-page center-page--top">
-      <header className="simple-header">
+    <PaginaCentrada arriba>
+      <EncabezadoSimple>
         <Marca soloIcono />
-        <div className="app-header__actions">
+        <div className={estilos.acciones}>
           <Boton variante="silenciosa" tamano="chico" type="button" onClick={onChangeMode}>
             Cambiar modalidad
           </Boton>
         </div>
-      </header>
-      <section className="onboarding">
-        <p className="eyebrow">{mode ? modeLabels[mode] : 'Trabajo'}</p>
+      </EncabezadoSimple>
+      <section className={estilos.contenido}>
+        <Sobretitulo>{mode ? modeLabels[mode] : 'Trabajo'}</Sobretitulo>
         <h1>¿Qué querés hacer?</h1>
-        <p className="muted">
+        <TextoSuave className={estilos.introduccion}>
           {mode === 'observador'
             ? 'Elegí un trabajo al que ya pertenecés o sumate con un código. El carrero crea los trabajos.'
             : 'Creá un trabajo, elegí uno al que ya pertenecés o sumate con un código.'}
-        </p>
+        </TextoSuave>
         <Avisos error={error} aviso={notice} />
 
-        <div className="work-actions">
+        <div className={estilos.opciones}>
           {canCreateWork && (
-            <div className="work-action-group">
+            <div className={estilos.grupo}>
                 <button
-                  className={action === 'crear' ? 'work-action is-selected' : 'work-action'}
+                  className={unirClases(estilos.opcion, action === 'crear' && estilos.elegida)}
                   type="button"
                   onClick={() => onActionChange(action === 'crear' ? null : 'crear')}
                 >
@@ -93,7 +101,7 @@ export function WorkMenuPage({
                   <span>Empezá a registrar kilos en un trabajo nuevo.</span>
                 </button>
         {action === 'crear' && canCreateWork && (
-          <Panel como="form" className="form-stack work-form" onSubmit={onCreate}>
+          <Panel como={FormularioApilado} className={estilos.tarjeta} onSubmit={onCreate}>
             <h2>Crear trabajo</h2>
             <label>
               Nombre del trabajo o campo
@@ -113,9 +121,9 @@ export function WorkMenuPage({
         )}
             </div>
           )}
-          <div className="work-action-group">
+          <div className={estilos.grupo}>
             <button
-              className={action === 'elegir' ? 'work-action is-selected' : 'work-action'}
+              className={unirClases(estilos.opcion, action === 'elegir' && estilos.elegida)}
               type="button"
               disabled={memberships.length === 0}
               onClick={() => onActionChange(action === 'elegir' ? null : 'elegir')}
@@ -128,7 +136,7 @@ export function WorkMenuPage({
               </span>
             </button>
         {action === 'elegir' && (
-          <Panel como="div" className="form-stack work-form">
+          <Panel como={CamposApilados} className={estilos.tarjeta}>
             <h2>Elegir un trabajo</h2>
             <label>
               Trabajos donde ya participás
@@ -152,9 +160,9 @@ export function WorkMenuPage({
         )}
           </div>
           {mode === 'observador' && archivedMemberships.length > 0 && (
-            <div className="work-action-group">
+            <div className={estilos.grupo}>
               <button
-                className={showArchived ? 'work-action is-selected' : 'work-action'}
+                className={unirClases(estilos.opcion, showArchived && estilos.elegida)}
                 type="button"
                 aria-expanded={showArchived}
                 onClick={() => setShowArchived((current) => !current)}
@@ -167,7 +175,7 @@ export function WorkMenuPage({
                 </span>
               </button>
               {showArchived && (
-                <Panel como="div" className="form-stack work-form archived-works">
+                <Panel como={CamposApilados} className={unirClases(estilos.tarjeta, estilos.archivados)}>
                   <h2>Reactivar un trabajo</h2>
                   <ul>
                     {archivedMemberships.map((membership) => (
@@ -188,9 +196,9 @@ export function WorkMenuPage({
               )}
             </div>
           )}
-          <div className="work-action-group">
+          <div className={estilos.grupo}>
             <button
-              className={action === 'sumarme' ? 'work-action is-selected' : 'work-action'}
+              className={unirClases(estilos.opcion, action === 'sumarme' && estilos.elegida)}
               type="button"
               onClick={() => onActionChange(action === 'sumarme' ? null : 'sumarme')}
             >
@@ -198,7 +206,7 @@ export function WorkMenuPage({
               <span>Ingresá el código de invitación que te compartieron.</span>
             </button>
         {action === 'sumarme' && (
-          <Panel como="form" className="form-stack work-form" onSubmit={onJoin}>
+          <Panel como={FormularioApilado} className={estilos.tarjeta} onSubmit={onJoin}>
             <h2>Sumarme con un código</h2>
             <label>
               Código de invitación
@@ -221,7 +229,7 @@ export function WorkMenuPage({
           </div>
         </div>
       </section>
-      <footer className="app-footer app-footer--end">
+      <PieDePagina alFinal>
         <Boton
           variante="silenciosa" tamano="chico"
           type="button"
@@ -230,7 +238,7 @@ export function WorkMenuPage({
         >
           Cerrar sesión
         </Boton>
-      </footer>
-    </main>
+      </PieDePagina>
+    </PaginaCentrada>
   )
 }
