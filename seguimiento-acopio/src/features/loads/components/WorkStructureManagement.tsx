@@ -4,6 +4,9 @@ import { Panel } from '@/shared/ui/Panel'
 import { cerealOptions } from '../types'
 import type { Destination, Lot, LotChanges } from '../types'
 import { LotManagement } from './LotManagement'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import { unirClases } from '@/shared/utils/unirClases'
+import estilos from './WorkStructureManagement.module.css'
 
 type WorkStructureManagementProps = {
   lots: Lot[]
@@ -45,7 +48,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
   }
 
   const lotForm = (label: string) => (
-    <form className="create-lot-form create-lot-form--lot" onSubmit={submitLot}>
+    <form className={unirClases(estilos.crear, estilos.crearLote)} onSubmit={submitLot}>
       <label>
         {label}
         <input
@@ -84,18 +87,18 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
   return (
     <Panel
       como="details"
-      className="work-structure"
+      className={estilos.estructura}
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary>{summary}</summary>
-      <div className="work-structure__content">
+      <div className={estilos.contenido}>
         {lots.length === 0 && (
           <>
-            <p className="muted">
+            <TextoSuave>
               Para abrir un destino primero necesitás un lote. Poné su nombre y qué
               cereal tiene.
-            </p>
+            </TextoSuave>
             {lotForm('Nombre del lote')}
           </>
         )}
@@ -103,7 +106,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
         {lots.length > 0 && (
           <>
             <details
-              className="field-management"
+              className={estilos.otroLote}
               open={addOpen}
               onToggle={(event) => setAddOpen(event.currentTarget.open)}
             >
@@ -111,6 +114,7 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
               {lotForm('Nombre del lote')}
             </details>
             <LotManagement
+              className={estilos.administracion}
               lots={lots}
               destinations={props.destinations}
               busy={props.busy}

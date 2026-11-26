@@ -1,0 +1,21 @@
+.edicion label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-040);
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-085);
+  font-weight: 650;
+}
+
+.edicion {
+  display: grid;
+  gap: var(--espacio-075);
+  margin-top: var(--espacio-050);
+  padding: var(--espacio-080);
+  border-radius: var(--radio-075);
+  background: var(--color-fondo-suave);
+}
+
+.gestion {
+  margin: var(--espacio-080) 0;
+}

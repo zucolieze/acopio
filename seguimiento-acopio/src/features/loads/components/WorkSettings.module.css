@@ -1,0 +1,59 @@
+.codigo.codigoAcotado {
+  max-width: 20rem;
+}
+
+.codigo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.1rem var(--espacio-075);
+  padding: var(--espacio-080) var(--espacio-090);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-080);
+  background: var(--color-blanco);
+}
+
+.codigo span {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-075);
+}
+
+.codigo strong {
+  grid-row: span 2;
+  grid-column: 2;
+  color: var(--color-verde);
+  font-size: var(--texto-115);
+  letter-spacing: 0.12em;
+}
+
+.codigo button {
+  min-height: 1.7rem;
+  font-size: var(--texto-078);
+}
+
+.edicion label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-040);
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-085);
+  font-weight: 650;
+}
+
+.edicion {
+  display: grid;
+  gap: var(--espacio-075);
+  margin-top: var(--espacio-065);
+}
+
+.administracion {
+  margin-top: var(--espacio-085);
+  padding-top: var(--espacio-080);
+  border-top: 1px solid var(--color-fondo-neutro);
+}
+
+@media (min-width: 42rem) {
+  .codigo {
+    min-width: 12rem;
+  }
+}

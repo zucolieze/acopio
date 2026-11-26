@@ -1,0 +1,56 @@
+.desplegable {
+  margin-top: var(--espacio-085);
+  padding-top: var(--espacio-075);
+  border-top: 1px solid var(--color-fondo-neutro);
+}
+
+.historial {
+  margin-top: var(--espacio-085);
+  padding-top: var(--espacio-080);
+  border-top: 1px solid var(--color-separador);
+}
+
+.desplegable > summary {
+  color: var(--color-verde);
+  cursor: pointer;
+  font-size: var(--texto-088);
+  font-weight: 700;
+}
+
+.historial > ul {
+  display: grid;
+  gap: var(--espacio-065);
+  margin: var(--espacio-070) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historial > ul > li {
+  padding: var(--espacio-070);
+  border-radius: var(--radio-065);
+  background: var(--color-fondo-suave);
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-082);
+}
+
+.historial > ul > li > div {
+  display: grid;
+  gap: var(--espacio-020);
+}
+
+.historial > ul > li > div span {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-075);
+}
+
+.cambios {
+  display: grid;
+  gap: var(--espacio-020);
+  margin: var(--espacio-050) 0;
+  padding-left: var(--espacio-110);
+}
+
+.diferencia {
+  margin: var(--espacio-040) 0;
+  font-size: var(--texto-078);
+}

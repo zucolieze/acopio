@@ -7,6 +7,8 @@ import {
   parseHumidity,
 } from '@/shared/utils/humidity'
 import type { Destination } from '../types'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './ReopenDestination.module.css'
 
 type ReopenDestinationProps = {
   destination: Destination
@@ -25,7 +27,7 @@ export function ReopenDestination({ destination, busy, onReopen }: ReopenDestina
   if (!open) {
     return (
       <Boton
-        variante="secundaria" className="destination-card__reopen"
+        variante="secundaria" className={estilos.reactivar}
         type="button"
         disabled={busy}
         onClick={() => setOpen(true)}
@@ -37,7 +39,7 @@ export function ReopenDestination({ destination, busy, onReopen }: ReopenDestina
 
   return (
     <form
-      className="reopen-form"
+      className={estilos.formulario}
       onSubmit={(event) => {
         event.preventDefault()
         if (needsHumidity && parsed === null) return
@@ -46,11 +48,11 @@ export function ReopenDestination({ destination, busy, onReopen }: ReopenDestina
         setHumidity('')
       }}
     >
-      <p className="muted small-copy">
+      <TextoSuave chico>
         {needsHumidity
           ? 'El destino vuelve a Activos como uno nuevo. Cargá la humedad inicial de esta nueva etapa; las humedades anteriores se conservan para el promedio.'
           : 'El camión vuelve a Activos como un destino nuevo.'}
-      </p>
+      </TextoSuave>
       {needsHumidity && (
         <label>
           Humedad inicial nueva (%)
@@ -68,7 +70,7 @@ export function ReopenDestination({ destination, busy, onReopen }: ReopenDestina
           />
         </label>
       )}
-      <div className="reopen-form__actions">
+      <div className={estilos.acciones}>
         <Boton
           variante="primaria"
           type="submit"
