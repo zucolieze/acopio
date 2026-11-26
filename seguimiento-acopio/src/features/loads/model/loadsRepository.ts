@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, DestinationType } from '@/shared/lib/database.types'
+import type { Database, DestinationType } from '../../../lib/database.types'
 import type {
   ChangeAudit,
   Destination,
@@ -361,7 +361,7 @@ export async function updateLoad(
     .select('id')
     .maybeSingle()
   if (error) throw error
-  if (!data) throw new Error('No se encontró la descarga o no tenés permiso para editarla.')
+  if (!data) throw new Error('No se encontró la pesada o no tenés permiso para editarla.')
 }
 
 export async function updateLoadAttribution(
@@ -419,7 +419,7 @@ export async function softDeleteLoad(client: Client, loadId: string) {
     .select('id')
     .maybeSingle()
   if (error) throw error
-  if (!data) throw new Error('No se encontró la descarga o ya fue eliminada.')
+  if (!data) throw new Error('No se encontró la pesada o ya fue eliminada.')
 }
 
 export type { ChangeAudit, Destination, Load, Lot }

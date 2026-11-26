@@ -1,12 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Boton } from '@/shared/ui/Boton'
-import { Marca } from '@/shared/ui/Marca'
-import { Avisos } from '@/shared/ui/Aviso'
-import { FormularioApilado } from '@/shared/ui/FormularioApilado'
-import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
-import { TextoSuave } from '@/shared/ui/TextoSuave'
-import { PanelAcceso } from './PanelAcceso'
-import estilos from './AccountSetupPages.module.css'
+import { Brand } from '../../../components/ui/Brand'
+import { Feedback } from '../../../components/ui/Feedback'
 
 type SetupProps = {
   busy: boolean
@@ -26,10 +20,12 @@ export function ResetPasswordPage({ busy, error, onSubmit }: SetupProps) {
   }
 
   return (
-    <PaginaCentrada>
-      <Marca soloIcono />
-      <PanelAcceso sobretitulo="Contraseña nueva" titulo="Elegí tu contraseña">
-        <FormularioApilado onSubmit={submit}>
+    <main className="center-page">
+      <Brand iconOnly />
+      <section className="panel auth-panel">
+        <p className="eyebrow">Contraseña nueva</p>
+        <h1>Elegí tu contraseña</h1>
+        <form className="form-stack" onSubmit={submit}>
           <label>
             Contraseña nueva
             <input
@@ -40,7 +36,7 @@ export function ResetPasswordPage({ busy, error, onSubmit }: SetupProps) {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
-            <TextoSuave como="span" chico>Mínimo 8 caracteres.</TextoSuave>
+            <span className="muted small-copy">Mínimo 8 caracteres.</span>
           </label>
           <label>
             Repetila
@@ -52,18 +48,18 @@ export function ResetPasswordPage({ busy, error, onSubmit }: SetupProps) {
               value={repeat}
               onChange={(event) => setRepeat(event.target.value)}
             />
-            {mismatch && <span className={estilos.errorCampo}>Las contraseñas no coinciden.</span>}
+            {mismatch && <span className="field-error">Las contraseñas no coinciden.</span>}
           </label>
-          <Boton
-            variante="primaria" tamano="grande"
+          <button
+            className="button button--primary button--large"
             disabled={busy || password !== repeat}
           >
             {busy ? 'Guardando…' : 'Guardar contraseña'}
-          </Boton>
-        </FormularioApilado>
-        <Avisos error={error} aviso="" />
-      </PanelAcceso>
-    </PaginaCentrada>
+          </button>
+        </form>
+        <Feedback error={error} notice="" />
+      </section>
+    </main>
   )
 }
 
@@ -76,14 +72,13 @@ export function ProfileNamePage({ busy, error, onSubmit }: SetupProps) {
   }
 
   return (
-    <PaginaCentrada>
-      <Marca soloIcono />
-      <PanelAcceso
-        sobretitulo="Último paso"
-        titulo="¿Cómo te llamás?"
-        introduccion="Tu equipo va a ver este nombre en cada descarga que cargues."
-      >
-        <FormularioApilado onSubmit={submit}>
+    <main className="center-page">
+      <Brand iconOnly />
+      <section className="panel auth-panel">
+        <p className="eyebrow">Último paso</p>
+        <h1>¿Cómo te llamás?</h1>
+        <p className="muted">Tu equipo va a ver este nombre en cada pesada que cargues.</p>
+        <form className="form-stack" onSubmit={submit}>
           <label>
             Tu nombre
             <input
@@ -96,15 +91,15 @@ export function ProfileNamePage({ busy, error, onSubmit }: SetupProps) {
               onChange={(event) => setName(event.target.value)}
             />
           </label>
-          <Boton
-            variante="primaria" tamano="grande"
+          <button
+            className="button button--primary button--large"
             disabled={busy || !name.trim()}
           >
             {busy ? 'Guardando…' : 'Continuar'}
-          </Boton>
-        </FormularioApilado>
-        <Avisos error={error} aviso="" />
-      </PanelAcceso>
-    </PaginaCentrada>
+          </button>
+        </form>
+        <Feedback error={error} notice="" />
+      </section>
+    </main>
   )
 }

@@ -1,13 +1,7 @@
 import type { FormEvent } from 'react'
-import { Boton } from '@/shared/ui/Boton'
-import { Marca } from '@/shared/ui/Marca'
-import { Avisos } from '@/shared/ui/Aviso'
-import { IndicacionInstalar } from '@/shared/ui/IndicacionInstalar'
-import { FormularioApilado } from '@/shared/ui/FormularioApilado'
-import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
-import { TextoSuave } from '@/shared/ui/TextoSuave'
-import { PanelAcceso } from './PanelAcceso'
-import estilos from './AuthPage.module.css'
+import { Brand } from '../../../components/ui/Brand'
+import { Feedback } from '../../../components/ui/Feedback'
+import { InstallHint } from '../../../components/ui/InstallHint'
 import type { AuthMode } from '../types'
 
 type AuthPageProps = {
@@ -37,22 +31,19 @@ export function AuthPage(props: AuthPageProps) {
 
   if (linkSentTo) {
     return (
-      <AuthShell
-        titulo="Revisá tu correo"
-        introduccion={
-          <>
-            Te mandamos un enlace a <strong>{linkSentTo}</strong>. Abrí el correo y
-            tocá el botón para entrar.
-          </>
-        }
-      >
-        <p className={estilos.ayuda}>
+      <AuthShell>
+        <h1>Revisá tu correo</h1>
+        <p className="muted">
+          Te mandamos un enlace a <strong>{linkSentTo}</strong>. Abrí el correo y
+          tocá el botón para entrar.
+        </p>
+        <p className="auth-hint">
           ¿No lo ves? Mirá en <strong>Spam</strong> o <strong>Correo no deseado</strong>.
           Puede tardar un minuto.
         </p>
-        <Avisos error={error} aviso={notice} />
-        <Boton
-          variante="secundaria" tamano="grande" className={estilos.anchoCompleto}
+        <Feedback error={error} notice={notice} />
+        <button
+          className="button button--secondary button--large"
           type="button"
           disabled={busy || props.resendIn > 0}
           onClick={props.onResendMagicLink}
@@ -60,71 +51,74 @@ export function AuthPage(props: AuthPageProps) {
           {props.resendIn > 0
             ? `Pedir otro enlace en ${props.resendIn} s`
             : 'Pedir otro enlace'}
-        </Boton>
-        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
+        </button>
+        <button className="link-button" type="button" onClick={() => onModeChange('entrar')}>
           Usar otro correo
-        </Boton>
+        </button>
       </AuthShell>
     )
   }
 
   if (mode === 'entrar') {
     return (
-      <AuthShell
-        titulo="Entrá a Acopio"
-        introduccion="Si es tu primera vez, tu cuenta se crea sola. No hace falta recordar contraseñas."
-      >
-        <Boton
-          variante="google" tamano="grande" className={estilos.anchoCompleto}
+      <AuthShell>
+        <h1>Entrá a Acopio</h1>
+        <p className="muted">
+          Si es tu primera vez, tu cuenta se crea sola. No hace falta recordar contraseñas.
+        </p>
+        <button
+          className="button button--google button--large"
           type="button"
           disabled={busy}
           onClick={props.onGoogle}
         >
           <GoogleMark />
           Continuar con Google
-        </Boton>
-        <p className={estilos.divisor}>o con tu correo</p>
-        <FormularioApilado onSubmit={props.onMagicLink}>
+        </button>
+        <p className="auth-divider">o con tu correo</p>
+        <form className="form-stack" onSubmit={props.onMagicLink}>
           <EmailField value={props.email} onChange={props.onEmailChange} />
-          <Boton variante="primaria" tamano="grande" disabled={busy}>
+          <button className="button button--primary button--large" disabled={busy}>
             {busy ? 'Un momento…' : 'Mandarme un enlace para entrar'}
-          </Boton>
-          <p className={estilos.ayuda}>
+          </button>
+          <p className="auth-hint">
             Te llega un correo con un botón. Lo tocás y ya estás adentro.
           </p>
-        </FormularioApilado>
-        <Avisos error={error} aviso={notice} />
-        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('clave')}>
+        </form>
+        <Feedback error={error} notice={notice} />
+        <button className="link-button" type="button" onClick={() => onModeChange('clave')}>
           Prefiero entrar con contraseña
-        </Boton>
+        </button>
       </AuthShell>
     )
   }
 
   if (mode === 'recuperar') {
     return (
-      <AuthShell
-        titulo="Recuperar contraseña"
-        introduccion="Poné tu correo y te mandamos un enlace para elegir una contraseña nueva."
-      >
-        <FormularioApilado onSubmit={props.onRecover}>
+      <AuthShell>
+        <h1>Recuperar contraseña</h1>
+        <p className="muted">
+          Poné tu correo y te mandamos un enlace para elegir una contraseña nueva.
+        </p>
+        <form className="form-stack" onSubmit={props.onRecover}>
           <EmailField value={props.email} onChange={props.onEmailChange} />
-          <Boton variante="primaria" tamano="grande" disabled={busy}>
+          <button className="button button--primary button--large" disabled={busy}>
             {busy ? 'Un momento…' : 'Mandarme el enlace'}
-          </Boton>
-        </FormularioApilado>
-        <Avisos error={error} aviso={notice} />
-        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('clave')}>
+          </button>
+        </form>
+        <Feedback error={error} notice={notice} />
+        <button className="link-button" type="button" onClick={() => onModeChange('clave')}>
           Volver
-        </Boton>
+        </button>
       </AuthShell>
     )
   }
 
   const creating = mode === 'crear'
   return (
-    <AuthShell titulo={creating ? 'Crear cuenta' : 'Entrar con contraseña'}>
-      <FormularioApilado onSubmit={creating ? props.onSignUp : props.onSignIn}>
+    <AuthShell>
+      <h1>{creating ? 'Crear cuenta' : 'Entrar con contraseña'}</h1>
+      <form className="form-stack" onSubmit={creating ? props.onSignUp : props.onSignIn}>
         {creating && (
           <label>
             Tu nombre
@@ -149,51 +143,43 @@ export function AuthPage(props: AuthPageProps) {
             value={props.password}
             onChange={(event) => props.onPasswordChange(event.target.value)}
           />
-          {creating && <TextoSuave como="span" chico>Mínimo 8 caracteres.</TextoSuave>}
+          {creating && <span className="muted small-copy">Mínimo 8 caracteres.</span>}
         </label>
-        <Boton variante="primaria" tamano="grande" disabled={busy}>
+        <button className="button button--primary button--large" disabled={busy}>
           {busy ? 'Un momento…' : creating ? 'Crear cuenta' : 'Iniciar sesión'}
-        </Boton>
-      </FormularioApilado>
-      <Avisos error={error} aviso={notice} />
+        </button>
+      </form>
+      <Feedback error={error} notice={notice} />
       {!creating && (
-        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('recuperar')}>
+        <button className="link-button" type="button" onClick={() => onModeChange('recuperar')}>
           Olvidé mi contraseña
-        </Boton>
+        </button>
       )}
-      <Boton
-        className={estilos.enlaceCentrado}
-        variante="enlace"
+      <button
+        className="link-button"
         type="button"
         onClick={() => onModeChange(creating ? 'clave' : 'crear')}
       >
         {creating ? 'Ya tengo una cuenta' : 'Crear una cuenta con contraseña'}
-      </Boton>
-      <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
+      </button>
+      <button className="link-button" type="button" onClick={() => onModeChange('entrar')}>
         Volver a las otras formas de entrar
-      </Boton>
+      </button>
     </AuthShell>
   )
 }
 
-function AuthShell({
-  titulo,
-  introduccion,
-  children,
-}: {
-  titulo: string
-  introduccion?: React.ReactNode
-  children: React.ReactNode
-}) {
+function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <PaginaCentrada>
-      <Marca />
-      <PanelAcceso sobretitulo="Seguimiento de cosecha" titulo={titulo} introduccion={introduccion}>
+    <main className="center-page">
+      <Brand />
+      <section className="panel auth-panel">
+        <p className="eyebrow">Seguimiento de cosecha</p>
         {children}
-      </PanelAcceso>
-      <IndicacionInstalar />
-      <p className={estilos.version}>Versión {__APP_VERSION__}</p>
-    </PaginaCentrada>
+      </section>
+      <InstallHint />
+      <p className="app-version">Versión {__APP_VERSION__}</p>
+    </main>
   )
 }
 

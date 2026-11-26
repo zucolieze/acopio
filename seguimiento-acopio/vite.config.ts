@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { fileURLToPath, URL } from 'node:url'
 
 // Versión visible en el login: 0.MM.DD con el mes y el día de la compilación
 // (hora de Argentina), por ejemplo 0.11.18. La primera cifra sigue en 0.
@@ -17,9 +16,6 @@ function appVersion() {
 }
 
 export default defineConfig({
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-  },
   define: {
     __APP_VERSION__: JSON.stringify(appVersion()),
   },

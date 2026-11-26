@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, MemberRole } from '@/shared/lib/database.types'
-import { formatPeriod } from '@/shared/utils/format'
+import type { Database, MemberRole } from '../../../lib/database.types'
+import { formatPeriod } from '../../../utils/format'
 import type { Membership } from '../types'
 
 type Client = SupabaseClient<Database>

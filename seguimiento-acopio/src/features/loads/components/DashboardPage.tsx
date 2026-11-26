@@ -1,12 +1,9 @@
-import { Boton } from '@/shared/ui/Boton'
-import { Pestanas } from '@/shared/ui/Pestanas'
-import { Marca } from '@/shared/ui/Marca'
-import { Avisos } from '@/shared/ui/Aviso'
-import { EstadoVacio } from '@/shared/ui/EstadoVacio'
-import { Panel } from '@/shared/ui/Panel'
-import type { DestinationType } from '@/shared/lib/database.types'
-import { formatDate, formatKilos } from '@/shared/utils/format'
-import { workLabel, type Membership } from '@/features/groups/types'
+import type { DestinationType } from '../../../lib/database.types'
+import { Brand } from '../../../components/ui/Brand'
+import { EmptyState } from '../../../components/ui/EmptyState'
+import { Feedback } from '../../../components/ui/Feedback'
+import { formatDate, formatKilos } from '../../../utils/format'
+import { workLabel, type Membership } from '../../groups/types'
 import type {
   ChangeAudit,
   Destination,
@@ -341,15 +338,15 @@ export function DashboardPage(props: DashboardPageProps) {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <Marca soloIcono />
+        <Brand iconOnly />
         <div className="app-header__actions">
-          <Boton variante="silenciosa" tamano="chico" type="button" onClick={props.onReturnToMenu}>
+          <button className="button button--quiet button--small" type="button" onClick={props.onReturnToMenu}>
             Trabajos
-          </Boton>
+          </button>
           {props.isDebugAdmin && props.membership.role === 'admin' && (
-            <Boton variante="silenciosa" tamano="chico" type="button" onClick={props.onAdminModeToggle}>
+            <button className="button button--quiet button--small" type="button" onClick={props.onAdminModeToggle}>
               Ver como {props.adminMode === 'observador' ? 'carrero' : 'observador'}
-            </Boton>
+            </button>
           )}
         </div>
       </header>
@@ -398,8 +395,20 @@ export function DashboardPage(props: DashboardPageProps) {
       <section className="dashboard">
         <h1 className="sr-only">{workLabel(props.membership)}</h1>
 
-        <Avisos error={props.error} aviso={props.notice} />
-        <Pestanas etiqueta="Secciones" opciones={tabs} activa={tab} alElegir={props.onTabChange} />
+        <Feedback error={props.error} notice={props.notice} />
+        <nav className="tabs" aria-label="Secciones">
+          {tabs.map((item) => (
+            <button
+              key={item.id}
+              className={tab === item.id ? 'tabs__button is-selected' : 'tabs__button'}
+              type="button"
+              aria-current={tab === item.id ? 'page' : undefined}
+              onClick={() => props.onTabChange(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
 
         {tab === 'nuevo' && props.isProvider && (
           <>
@@ -426,9 +435,9 @@ export function DashboardPage(props: DashboardPageProps) {
         {tab === 'activos' && (
           <section className="destination-list" aria-live="polite">
             {props.activeDestinations.length === 0 ? (
-              <EstadoVacio
-                titulo="Todavía no hay destinos activos"
-                descripcion={props.isProvider ? 'Tocá “Nuevo” para abrir un camión, silo o silobolsa.' : 'Cuando el carrero abra un destino, va a aparecer acá.'}
+              <EmptyState
+                title="Todavía no hay destinos activos"
+                description={props.isProvider ? 'Tocá “Nuevo” para abrir un camión, silo o silobolsa.' : 'Cuando el carrero abra un destino, va a aparecer acá.'}
               />
             ) : (
               props.activeDestinations.map((destination) => {
@@ -469,9 +478,9 @@ export function DashboardPage(props: DashboardPageProps) {
         {tab === 'historial' && (
           <section aria-live="polite">
             {historyDestinations.length === 0 ? (
-              <EstadoVacio
-                titulo="Todavía no hay destinos"
-                descripcion="Acá vas a ver cada destino, activo o cerrado, con sus descargas."
+              <EmptyState
+                title="Todavía no hay destinos"
+                description="Acá vas a ver cada destino, activo o cerrado, con sus descargas."
               />
             ) : (
               <DestinationBrowser
@@ -494,14 +503,14 @@ export function DashboardPage(props: DashboardPageProps) {
               {props.deletedDestinations.map((destination) => (
                 <div className="deleted-destination" key={destination.id}>
                   {renderHistoryDestination(destination, true)}
-                  <Boton
-                    variante="secundaria"
+                  <button
+                    className="button button--secondary"
                     type="button"
                     disabled={props.busy === destination.id}
                     onClick={() => props.onRestoreDestination(destination)}
                   >
                     {props.busy === destination.id ? 'Restaurando…' : 'Restaurar destino'}
-                  </Boton>
+                  </button>
                 </div>
               ))}
             </div>
@@ -528,7 +537,7 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
 
         {tab === 'lotes' && !props.isProvider && (
-          <Panel como="div">
+          <div className="panel">
             <LotSummary
               lots={props.lots}
               destinations={historyDestinations}
@@ -540,11 +549,11 @@ export function DashboardPage(props: DashboardPageProps) {
               destinationNames={destinationNames}
               profileNames={props.profileNames}
             />
-          </Panel>
+          </div>
         )}
 
         {tab === 'info' && !props.isProvider && (
-          <Panel className="work-info">
+          <section className="work-info panel">
             <h2>Información del trabajo</h2>
             <div className="summary-row">
               <div className="summary-card">
@@ -574,7 +583,7 @@ export function DashboardPage(props: DashboardPageProps) {
             {workAudits.length > 0 && (
               <AuditList entries={workAudits} profileNames={props.profileNames} lots={props.lots} />
             )}
-          </Panel>
+          </section>
         )}
       </section>
       <footer className="app-footer">
@@ -583,14 +592,14 @@ export function DashboardPage(props: DashboardPageProps) {
             ? `Ingresaste como ${props.fullName}.`
             : 'Seguimiento de cosecha'}
         </span>
-        <Boton
-          variante="silenciosa" tamano="chico"
+        <button
+          className="button button--quiet button--small"
           type="button"
           disabled={props.busy === 'signout'}
           onClick={props.onSignOut}
         >
           Cerrar sesión
-        </Boton>
+        </button>
       </footer>
     </main>
   )

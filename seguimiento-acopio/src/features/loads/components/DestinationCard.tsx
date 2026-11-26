@@ -1,16 +1,14 @@
 import type { FormEvent } from 'react'
-import { Aviso } from '@/shared/ui/Aviso'
-import { Boton } from '@/shared/ui/Boton'
 import { DestinationHeading } from './DestinationHeading'
 import type { Destination, Load } from '../types'
-import { formatKilos } from '@/shared/utils/format'
+import { formatKilos } from '../../../utils/format'
 import {
   formatHumidityInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
   formatHumidity,
   parseHumidity,
-} from '@/shared/utils/humidity'
+} from '../../../utils/humidity'
 
 type DestinationCardProps = {
   destination: Destination
@@ -95,7 +93,7 @@ export function DestinationCard({
         <>
           <form className="load-form" onSubmit={handleAddLoad}>
             <label>
-              Kilos de esta descarga{loadingLot ? ` · ${loadingLot}` : ''}
+              Kilos de esta pesada{loadingLot ? ` · ${loadingLot}` : ''}
               <input
                 inputMode="decimal"
                 min="0.01"
@@ -108,16 +106,16 @@ export function DestinationCard({
               />
             </label>
             {cerealMismatch && (
-              <Aviso variante="error" className="load-form__warning">
+              <p className="feedback feedback--error load-form__warning" role="alert">
                 {cerealMismatch}
-              </Aviso>
+              </p>
             )}
-            <Boton
-              variante="primaria" tamano="grande"
+            <button
+              className="button button--primary button--large"
               disabled={busy || Boolean(cerealMismatch)}
             >
-              {busy ? 'Guardando…' : 'Guardar descarga'}
-            </Boton>
+              {busy ? 'Guardando…' : 'Guardar pesada'}
+            </button>
           </form>
         </>
       )}
@@ -125,15 +123,15 @@ export function DestinationCard({
         <CapacitySummary destination={destination} total={total} />
       )}
       {isProvider && isEmpty && (
-        <Boton
-          variante="peligro" tamano="grande" className="destination-card__delete"
+        <button
+          className="button button--danger button--large destination-card__delete"
           type="button"
           disabled={busy}
           onClick={onDelete}
         >
           Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'} (no
-          tiene descargas)
-        </Boton>
+          tiene cargas)
+        </button>
       )}
       {isProvider && !isEmpty && destination.destination_type !== 'camion' && (
         <form className="destination-card__close-form" onSubmit={handleClose}>
@@ -152,40 +150,39 @@ export function DestinationCard({
               onChange={(event) => onClosingHumidityChange(formatHumidityInput(event.target.value))}
             />
           </label>
-          <Boton
-            variante="peligro"
+          <button
+            className="button button--danger"
             type="submit"
             disabled={busy || parseHumidity(closingHumidity) === null}
           >
             Cerrar silo con humedad
-          </Boton>
+          </button>
         </form>
       )}
-      {/* Se puede eliminar cualquier destino en cualquier momento, tenga o no descargas. */}
+      {isProvider && !isEmpty && destination.destination_type === 'camion' && (
+        <button
+          className={
+            limitReached
+              ? 'button button--danger button--large destination-card__close is-urgent'
+              : 'link-button destination-card__close'
+          }
+          type="button"
+          disabled={busy}
+          onClick={() => onClose('')}
+        >
+          Cerrar camión
+        </button>
+      )}
+      {/* Se puede eliminar cualquier destino en cualquier momento, tenga o no cargas. */}
       {isProvider && !isEmpty && (
-        <div className="destination-card__actions">
-          {destination.destination_type === 'camion' && (
-            <Boton
-              variante={limitReached ? 'peligro' : 'enlace'}
-              tamano={limitReached ? 'grande' : undefined}
-              className={limitReached ? 'destination-card__close is-urgent' : 'destination-card__close'}
-              type="button"
-              disabled={busy}
-              onClick={() => onClose('')}
-            >
-              Cerrar camión
-            </Boton>
-          )}
-          <Boton
-            variante="enlacePeligro"
-            className="destination-card__delete-link"
-            type="button"
-            disabled={busy}
-            onClick={onDelete}
-          >
-            Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'}
-          </Boton>
-        </div>
+        <button
+          className="link-button link-button--danger destination-card__delete-link"
+          type="button"
+          disabled={busy}
+          onClick={onDelete}
+        >
+          Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'}
+        </button>
       )}
     </article>
   )

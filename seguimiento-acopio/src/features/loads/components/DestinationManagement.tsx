@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Boton } from '@/shared/ui/Boton'
 import type { DestinationChanges, Destination, Lot } from '../types'
-import type { DestinationType } from '@/shared/lib/database.types'
+import type { DestinationType } from '../../../lib/database.types'
 import { cerealOptions, destinationLabels } from '../types'
-import { isArgentinePlate, normalizePlate } from '@/shared/utils/plates'
+import { isArgentinePlate, normalizePlate } from '../../../utils/plates'
 import {
   formatHumidityInput,
   humidityToInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
   parseHumidity,
-} from '@/shared/utils/humidity'
+} from '../../../utils/humidity'
 
 type DestinationManagementProps = {
   destination: Destination
@@ -92,22 +91,22 @@ export function DestinationManagement({
   return (
     <div className="destination-management">
       <div className="destination-management__actions">
-        <Boton
-          variante="enlace"
+        <button
+          className="link-button"
           type="button"
           onClick={() => setEditing((current) => !current)}
           disabled={busy}
         >
           {editing ? 'Cancelar edición' : 'Editar destino'}
-        </Boton>
-        <Boton
-          variante="enlacePeligro"
+        </button>
+        <button
+          className="link-button link-button--danger"
           type="button"
           onClick={onDelete}
           disabled={busy || destination.deleted_at !== null}
         >
           Eliminar destino
-        </Boton>
+        </button>
       </div>
       {editing && (
         <form className="destination-edit-form" onSubmit={handleSubmit}>
@@ -261,9 +260,9 @@ export function DestinationManagement({
               />
             </label>
           )}
-          <Boton variante="secundaria" type="submit" disabled={busy}>
+          <button className="button button--secondary" type="submit" disabled={busy}>
             Guardar cambios
-          </Boton>
+          </button>
         </form>
       )}
     </div>

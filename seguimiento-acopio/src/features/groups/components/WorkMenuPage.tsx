@@ -1,10 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { Boton } from '@/shared/ui/Boton'
-import { Marca } from '@/shared/ui/Marca'
-import { Avisos } from '@/shared/ui/Aviso'
-import { Panel } from '@/shared/ui/Panel'
-import { modeLabels, type WorkMode } from '@/shared/types/app'
-import type { MemberRole } from '@/shared/lib/database.types'
+import { Brand } from '../../../components/ui/Brand'
+import { Feedback } from '../../../components/ui/Feedback'
+import { modeLabels, type WorkMode } from '../../../types/app'
+import type { MemberRole } from '../../../lib/database.types'
 import { workLabel, type Membership, type WorkMenuAction } from '../types'
 
 const roleLabels: Record<MemberRole, string> = {
@@ -64,11 +62,11 @@ export function WorkMenuPage({
   return (
     <main className="center-page center-page--top">
       <header className="simple-header">
-        <Marca soloIcono />
+        <Brand iconOnly />
         <div className="app-header__actions">
-          <Boton variante="silenciosa" tamano="chico" type="button" onClick={onChangeMode}>
+          <button className="button button--quiet button--small" type="button" onClick={onChangeMode}>
             Cambiar modalidad
-          </Boton>
+          </button>
         </div>
       </header>
       <section className="onboarding">
@@ -79,7 +77,7 @@ export function WorkMenuPage({
             ? 'Elegí un trabajo al que ya pertenecés o sumate con un código. El carrero crea los trabajos.'
             : 'Creá un trabajo, elegí uno al que ya pertenecés o sumate con un código.'}
         </p>
-        <Avisos error={error} aviso={notice} />
+        <Feedback error={error} notice={notice} />
 
         <div className="work-actions">
           {canCreateWork && (
@@ -93,7 +91,7 @@ export function WorkMenuPage({
                   <span>Empezá a registrar kilos en un trabajo nuevo.</span>
                 </button>
         {action === 'crear' && canCreateWork && (
-          <Panel como="form" className="form-stack work-form" onSubmit={onCreate}>
+          <form className="panel form-stack work-form" onSubmit={onCreate}>
             <h2>Crear trabajo</h2>
             <label>
               Nombre del trabajo o campo
@@ -106,10 +104,10 @@ export function WorkMenuPage({
                 onChange={(event) => onGroupNameChange(event.target.value)}
               />
             </label>
-            <Boton variante="primaria" disabled={busy}>
+            <button className="button button--primary" disabled={busy}>
               {busy ? 'Creando…' : 'Crear trabajo'}
-            </Boton>
-          </Panel>
+            </button>
+          </form>
         )}
             </div>
           )}
@@ -128,7 +126,7 @@ export function WorkMenuPage({
               </span>
             </button>
         {action === 'elegir' && (
-          <Panel como="div" className="form-stack work-form">
+          <div className="panel form-stack work-form">
             <h2>Elegir un trabajo</h2>
             <label>
               Trabajos donde ya participás
@@ -141,14 +139,14 @@ export function WorkMenuPage({
                 ))}
               </select>
             </label>
-            <Boton
-              variante="primaria"
+            <button
+              className="button button--primary"
               disabled={!activeMemberships.some((membership) => membership.groupId === selectedGroupId)}
               onClick={onEnter}
             >
               Entrar al trabajo
-            </Boton>
-          </Panel>
+            </button>
+          </div>
         )}
           </div>
           {mode === 'observador' && archivedMemberships.length > 0 && (
@@ -167,24 +165,24 @@ export function WorkMenuPage({
                 </span>
               </button>
               {showArchived && (
-                <Panel como="div" className="form-stack work-form archived-works">
+                <div className="panel form-stack work-form archived-works">
                   <h2>Reactivar un trabajo</h2>
                   <ul>
                     {archivedMemberships.map((membership) => (
                       <li key={membership.groupId}>
                         <span>{workLabel(membership)}</span>
-                        <Boton
-                          variante="secundaria" tamano="chico"
+                        <button
+                          className="button button--secondary button--small"
                           type="button"
                           disabled={busy}
                           onClick={() => onUnarchive(membership.groupId)}
                         >
                           Reactivar
-                        </Boton>
+                        </button>
                       </li>
                     ))}
                   </ul>
-                </Panel>
+                </div>
               )}
             </div>
           )}
@@ -198,7 +196,7 @@ export function WorkMenuPage({
               <span>Ingresá el código de invitación que te compartieron.</span>
             </button>
         {action === 'sumarme' && (
-          <Panel como="form" className="form-stack work-form" onSubmit={onJoin}>
+          <form className="panel form-stack work-form" onSubmit={onJoin}>
             <h2>Sumarme con un código</h2>
             <label>
               Código de invitación
@@ -213,23 +211,23 @@ export function WorkMenuPage({
                 onChange={(event) => onInviteCodeChange(event.target.value.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g, '').slice(0, 6))}
               />
             </label>
-            <Boton variante="secundaria" disabled={busy}>
+            <button className="button button--secondary" disabled={busy}>
               {busy ? 'Ingresando…' : 'Sumarme'}
-            </Boton>
-          </Panel>
+            </button>
+          </form>
         )}
           </div>
         </div>
       </section>
       <footer className="app-footer app-footer--end">
-        <Boton
-          variante="silenciosa" tamano="chico"
+        <button
+          className="button button--quiet button--small"
           type="button"
           disabled={busy}
           onClick={onSignOut}
         >
           Cerrar sesión
-        </Boton>
+        </button>
       </footer>
     </main>
   )

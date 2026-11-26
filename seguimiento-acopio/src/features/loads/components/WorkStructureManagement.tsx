@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Boton } from '@/shared/ui/Boton'
-import { Panel } from '@/shared/ui/Panel'
 import { cerealOptions } from '../types'
 import type { Destination, Lot, LotChanges } from '../types'
 import { LotManagement } from './LotManagement'
@@ -69,22 +67,21 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
           ))}
         </select>
       </label>
-      <Boton
-        variante="primaria"
+      <button
+        className="button button--primary"
         type="submit"
         disabled={props.busy === 'lot'}
       >
         {props.busy === 'lot' ? 'Creando…' : 'Crear lote'}
-      </Boton>
+      </button>
     </form>
   )
 
   const summary = lots.length > 0 ? `Lotes del campo (${lots.length})` : 'Creá el primer lote'
 
   return (
-    <Panel
-      como="details"
-      className="work-structure"
+    <details
+      className="work-structure panel"
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
@@ -121,6 +118,6 @@ export function WorkStructureManagement(props: WorkStructureManagementProps) {
           </>
         )}
       </div>
-    </Panel>
+    </details>
   )
 }

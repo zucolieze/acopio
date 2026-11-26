@@ -1,4 +1,4 @@
-import type { MemberRole } from '@/shared/lib/database.types'
+import type { MemberRole } from '../../lib/database.types'
 
 export type Membership = {
   groupId: string

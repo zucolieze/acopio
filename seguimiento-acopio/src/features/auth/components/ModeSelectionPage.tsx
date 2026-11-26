@@ -1,14 +1,7 @@
 import { useState } from 'react'
-import { Boton } from '@/shared/ui/Boton'
-import { Marca } from '@/shared/ui/Marca'
-import { Avisos } from '@/shared/ui/Aviso'
-import { EncabezadoSimple } from '@/shared/ui/EncabezadoSimple'
-import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
-import { PieDePagina } from '@/shared/ui/PieDePagina'
-import { TextoSuave } from '@/shared/ui/TextoSuave'
-import { unirClases } from '@/shared/utils/unirClases'
-import estilos from './ModeSelectionPage.module.css'
-import type { WorkMode } from '@/shared/types/app'
+import { Brand } from '../../../components/ui/Brand'
+import { Feedback } from '../../../components/ui/Feedback'
+import type { WorkMode } from '../../../types/app'
 
 type ModeSelectionPageProps = {
   welcomeName: string
@@ -33,30 +26,28 @@ export function ModeSelectionPage({
   const adminUnlocked = isDebugAdmin && taps >= 5
 
   return (
-    <PaginaCentrada arriba>
-      <EncabezadoSimple>
-        <Marca soloIcono />
-      </EncabezadoSimple>
-      <section className={estilos.contenido}>
-        <p className={estilos.saludo} onClick={() => setTaps((count) => count + 1)}>
+    <main className="center-page center-page--top">
+      <header className="simple-header">
+        <Brand iconOnly />
+      </header>
+      <section className="mode-selection">
+        <p className="eyebrow" onClick={() => setTaps((count) => count + 1)}>
           Bienvenido {welcomeName}
         </p>
         <h1>¿Qué necesitás hacer?</h1>
-        <TextoSuave className={estilos.introduccion}>
-          Después podés elegir un trabajo para continuar.
-        </TextoSuave>
-        <Avisos error={error} aviso={notice} />
-        <div className={estilos.tarjetas}>
+        <p className="muted">Después podés elegir un trabajo para continuar.</p>
+        <Feedback error={error} notice={notice} />
+        <div className="mode-cards">
           <button
-            className={unirClases(estilos.tarjeta, estilos.carrero)}
+            className="mode-card mode-card--carrero"
             type="button"
             onClick={() => onChooseMode('carrero')}
           >
             <strong>Carrero</strong>
-            <span>Abro destinos y cargo las descargas.</span>
+            <span>Abro destinos y cargo las pesadas.</span>
           </button>
           <button
-            className={unirClases(estilos.tarjeta, estilos.observador)}
+            className="mode-card mode-card--observador"
             type="button"
             onClick={() => onChooseMode('observador')}
           >
@@ -65,7 +56,7 @@ export function ModeSelectionPage({
           </button>
           {adminUnlocked && (
             <button
-              className={unirClases(estilos.tarjeta, estilos.prueba)}
+              className="mode-card mode-card--debug"
               type="button"
               onClick={() => onChooseMode('admin')}
             >
@@ -75,16 +66,16 @@ export function ModeSelectionPage({
           )}
         </div>
       </section>
-      <PieDePagina alFinal>
-        <Boton
-          variante="silenciosa" tamano="chico"
+      <footer className="app-footer app-footer--end">
+        <button
+          className="button button--quiet button--small"
           type="button"
           disabled={busy}
           onClick={onSignOut}
         >
           Cerrar sesión
-        </Boton>
-      </PieDePagina>
-    </PaginaCentrada>
+        </button>
+      </footer>
+    </main>
   )
 }

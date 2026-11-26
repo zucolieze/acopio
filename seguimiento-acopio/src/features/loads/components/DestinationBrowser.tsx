@@ -1,8 +1,7 @@
 import { useState, type ReactNode } from 'react'
-import { Boton } from '@/shared/ui/Boton'
 import { destinationLabels } from '../types'
 import type { Destination, Lot } from '../types'
-import type { DestinationType } from '@/shared/lib/database.types'
+import type { DestinationType } from '../../../lib/database.types'
 
 type DestinationBrowserProps = {
   destinations: Destination[]
@@ -111,9 +110,9 @@ export function DestinationBrowser({
           ? `${destinations.length} ${destinations.length === 1 ? 'destino' : 'destinos'}`
           : `${filtered.length} de ${destinations.length} destinos`}
         {filtering && (
-          <Boton variante="enlace" type="button" onClick={clearFilters}>
+          <button className="link-button" type="button" onClick={clearFilters}>
             Limpiar filtros
-          </Boton>
+          </button>
         )}
       </p>
 
@@ -135,15 +134,15 @@ export function DestinationBrowser({
                 {group.items.slice(0, shown).map((destination) => render(destination))}
               </div>
               {group.items.length > shown && (
-                <Boton
-                  variante="secundaria" className="destination-group__more"
+                <button
+                  className="button button--secondary destination-group__more"
                   type="button"
                   onClick={() =>
                     setVisible((current) => ({ ...current, [group.type]: shown + PAGE_SIZE }))
                   }
                 >
                   Mostrar más ({group.items.length - shown} restantes)
-                </Boton>
+                </button>
               )}
             </details>
           )

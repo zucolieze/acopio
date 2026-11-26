@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, DestinationType } from '@/shared/lib/database.types'
-import { messageFromError } from '@/shared/utils/errors'
-import { HUMIDITY_ERROR, parseHumidity } from '@/shared/utils/humidity'
-import { readStored, writeStored } from '@/shared/utils/storage'
-import { isValidPlate, normalizePlate } from '@/shared/utils/plates'
+import type { Database, DestinationType } from '../../../lib/database.types'
+import { messageFromError } from '../../../utils/errors'
+import { HUMIDITY_ERROR, parseHumidity } from '../../../utils/humidity'
+import { readStored, writeStored } from '../../../utils/storage'
+import { isValidPlate, normalizePlate } from '../../../utils/plates'
 import {
   addLoad as addLoadToRepository,
   closeDestination as closeDestinationInRepository,
@@ -429,7 +429,7 @@ export function useLoads(
       try {
         await addLoadToRepository(client, destinationId, userId, kilos, activeLotId)
         setLoadKilos((values) => ({ ...values, [destinationId]: '' }))
-        setNotice('Descarga guardada.')
+        setNotice('Pesada guardada.')
         await refresh()
       } catch (addError) {
         setError(messageFromError(addError))
@@ -481,7 +481,7 @@ export function useLoads(
       setError('')
       try {
         await updateLoadInRepository(client, load.id, kg, parsedDate.toISOString())
-        setNotice('Descarga actualizada. El cambio quedó registrado en el historial.')
+        setNotice('Pesada actualizada. El cambio quedó registrado en el historial.')
         await refresh()
       } catch (editError) {
         setError(messageFromError(editError))
@@ -499,7 +499,7 @@ export function useLoads(
       setError('')
       try {
         await softDeleteLoad(client, load.id)
-        setNotice('Descarga eliminada del historial; el movimiento quedó guardado.')
+        setNotice('Pesada eliminada del historial; el movimiento quedó guardado.')
         await refresh()
       } catch (deleteError) {
         setError(messageFromError(deleteError))

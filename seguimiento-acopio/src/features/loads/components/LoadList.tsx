@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Boton } from '@/shared/ui/Boton'
-import { formatDate, formatKilos } from '@/shared/utils/format'
+import { formatDate, formatKilos } from '../../../utils/format'
 import type { Load, WorkMember } from '../types'
 
 type LoadListProps = {
@@ -29,7 +28,7 @@ export function LoadList({
   onDelete,
 }: LoadListProps) {
   if (entries.length === 0) {
-    return <p className="empty-loads">Todavía no se cargaron descargas.</p>
+    return <p className="empty-loads">Todavía no se cargaron pesadas.</p>
   }
 
   return (
@@ -100,14 +99,14 @@ function LoadRow({
       </div>
       <strong>{formatKilos(entry.kg)} kg</strong>
       {canChangeAuthor && !changingAuthor && (
-        <Boton
-          variante="enlace" className="load-list__author-toggle"
+        <button
+          className="link-button load-list__author-toggle"
           type="button"
           disabled={busy}
           onClick={() => setChangingAuthor(true)}
         >
           Cambiar responsable
-        </Boton>
+        </button>
       )}
       {canChangeAuthor && changingAuthor && (
         <div className="load-list__author">
@@ -139,8 +138,8 @@ function LoadRow({
       )}
       {canEdit && (
         <div className="load-list__actions">
-          <Boton
-            variante="enlace"
+          <button
+            className="link-button"
             type="button"
             disabled={busy}
             onClick={() => {
@@ -150,15 +149,15 @@ function LoadRow({
             }}
           >
             {editing ? 'Cancelar' : 'Editar'}
-          </Boton>
-          <Boton
-            variante="enlacePeligro"
+          </button>
+          <button
+            className="link-button link-button--danger"
             type="button"
             disabled={busy}
             onClick={() => onDelete?.(entry)}
           >
             Eliminar
-          </Boton>
+          </button>
         </div>
       )}
       {editing && (
@@ -184,9 +183,9 @@ function LoadRow({
               onChange={(event) => setDate(event.target.value)}
             />
           </label>
-          <Boton variante="secundaria" type="submit" disabled={busy}>
+          <button className="button button--secondary" type="submit" disabled={busy}>
             Guardar cambios
-          </Boton>
+          </button>
         </form>
       )}
     </li>

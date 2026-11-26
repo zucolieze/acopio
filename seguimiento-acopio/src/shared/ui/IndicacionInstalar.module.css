@@ -1,8 +1,0 @@
-.indicacion {
-  max-width: 28rem;
-  margin: var(--espacio-075) 0 0;
-  color: var(--color-texto-suave);
-  font-size: var(--texto-090);
-  line-height: 1.45;
-  text-align: center;
-}
