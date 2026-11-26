@@ -6,3 +6,7 @@ supabase/.temp/
 
 # Credenciales de prueba
 CREDENCIALES.local.md
+
+# Archivos generados
+tsconfig.tsbuildinfo
+supabase/.branches/
