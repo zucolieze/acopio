@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Boton } from '@/shared/ui/Boton'
 import { formatDate, formatKilos } from '@/shared/utils/format'
 import type { Load, WorkMember } from '../types'
+import { FilaAcciones } from './FilaAcciones'
+import estilos from './LoadList.module.css'
 
 type LoadListProps = {
   entries: Load[]
@@ -29,11 +31,11 @@ export function LoadList({
   onDelete,
 }: LoadListProps) {
   if (entries.length === 0) {
-    return <p className="empty-loads">Todavía no se cargaron descargas.</p>
+    return <p className={estilos.vacio}>Todavía no se cargaron descargas.</p>
   }
 
   return (
-    <ul className="load-list">
+    <ul className={estilos.lista}>
       {entries.map((entry) => (
         <LoadRow
           key={entry.id}
@@ -92,16 +94,16 @@ function LoadRow({
   }
 
   return (
-    <li className="load-list__entry">
-      <div className="load-list__details">
+    <li className={estilos.descarga}>
+      <div className={estilos.detalle}>
         <time dateTime={entry.date}>{formatDate(entry.date)}</time>
         <span>Cargó {profileName}</span>
-        {lotName && <span className="load-list__lot">Lote: {lotName}</span>}
+        {lotName && <span className={estilos.lote}>Lote: {lotName}</span>}
       </div>
       <strong>{formatKilos(entry.kg)} kg</strong>
       {canChangeAuthor && !changingAuthor && (
         <Boton
-          variante="enlace" className="load-list__author-toggle"
+          variante="enlace" className={estilos.cambiarResponsable}
           type="button"
           disabled={busy}
           onClick={() => setChangingAuthor(true)}
@@ -110,9 +112,9 @@ function LoadRow({
         </Boton>
       )}
       {canChangeAuthor && changingAuthor && (
-        <div className="load-list__author">
+        <div className={estilos.responsable}>
           <button
-            className="load-list__author-close"
+            className={estilos.cerrarResponsable}
             type="button"
             aria-expanded="true"
             onClick={() => setChangingAuthor(false)}
@@ -138,7 +140,7 @@ function LoadRow({
         </div>
       )}
       {canEdit && (
-        <div className="load-list__actions">
+        <FilaAcciones className={estilos.accionesDescarga}>
           <Boton
             variante="enlace"
             type="button"
@@ -159,10 +161,10 @@ function LoadRow({
           >
             Eliminar
           </Boton>
-        </div>
+        </FilaAcciones>
       )}
       {editing && (
-        <form className="load-edit-form" onSubmit={submitEdit}>
+        <form className={estilos.edicion} onSubmit={submitEdit}>
           <label>
             Kilos
             <input

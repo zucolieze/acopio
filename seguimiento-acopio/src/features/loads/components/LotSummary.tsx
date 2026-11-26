@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Boton } from '@/shared/ui/Boton'
 import { formatDate, formatKilos } from '@/shared/utils/format'
 import type { Destination, Load, Lot, LotChanges } from '../types'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './LotSummary.module.css'
 
 type LotSummaryProps = {
   lots: Lot[]
@@ -56,7 +58,7 @@ export function LotSummary({
     .filter((row) => row.lot.deleted_at === null || row.loads.length > 0)
 
   if (rows.length === 0) {
-    return <p className="muted small-copy">Todavía no hay lotes en este trabajo.</p>
+    return <TextoSuave chico>Todavía no hay lotes en este trabajo.</TextoSuave>
   }
 
   const byCereal = new Map<string, number>()
@@ -66,9 +68,9 @@ export function LotSummary({
   }
 
   return (
-    <section className="lot-summary" aria-labelledby="lot-summary-title">
+    <section className={estilos.resumen} aria-labelledby="lot-summary-title">
       <h2 id="lot-summary-title">Campo: {fieldName}</h2>
-      <ul className="lot-summary__list">
+      <ul className={estilos.lista}>
         {rows.map((row) => (
           <LotSummaryItem
             key={row.lot.id}
@@ -81,7 +83,7 @@ export function LotSummary({
           />
         ))}
       </ul>
-      <p className="lot-summary__totals">
+      <p className={estilos.totales}>
         Total por cereal:{' '}
         {[...byCereal.entries()]
           .map(([cereal, kilos]) => `${cereal} ${formatKilos(kilos)} kg`)
@@ -113,15 +115,15 @@ function LotSummaryItem({
   const kgPerHa = row.lot.hectares ? row.kilos / row.lot.hectares : null
 
   return (
-    <li className="lot-summary__item">
-      <div className="lot-summary__heading">
+    <li className={estilos.item}>
+      <div className={estilos.encabezado}>
         <span>
           Lote: <strong>{row.lot.name}</strong>
           {row.lot.deleted_at ? ' (eliminado)' : ''}
         </span>
-        <span className="lot-summary__cereal">{row.lot.cereal ?? 'Sin cereal'}</span>
+        <span className={estilos.cereal}>{row.lot.cereal ?? 'Sin cereal'}</span>
       </div>
-      <dl className="lot-summary__stats">
+      <dl className={estilos.datos}>
         <div>
           <dt>Kilos</dt>
           <dd>{formatKilos(row.kilos)} kg</dd>
@@ -144,7 +146,7 @@ function LotSummaryItem({
         </div>
       </dl>
       {row.loads.length > 0 && (
-        <details className="lot-summary__loads">
+        <details className={estilos.descargas}>
           <summary>Ver descargas ({row.loads.length})</summary>
           <ul>
             {row.loads.map((load) => (
@@ -161,7 +163,7 @@ function LotSummaryItem({
       )}
       {canEditHectares && !editing && (
         <Boton
-          variante="enlace" className="lot-summary__edit"
+          variante="enlace" className={estilos.editar}
           type="button"
           disabled={busy}
           onClick={() => {
@@ -174,7 +176,7 @@ function LotSummaryItem({
       )}
       {canEditHectares && editing && (
         <form
-          className="lot-summary__form"
+          className={estilos.formulario}
           onSubmit={(event) => {
             event.preventDefault()
             const value = hectares.trim() ? Number(hectares.replace(',', '.')) : null

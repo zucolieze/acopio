@@ -3,6 +3,8 @@ import { formatDate, formatKilos } from '@/shared/utils/format'
 import { destinationLabels } from '../types'
 import type { Destination, Load } from '../types'
 import { EtiquetaEstado } from '@/shared/ui/EtiquetaEstado'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './DestinationHeading.module.css'
 
 type DestinationHeadingProps = {
   destination: Destination
@@ -26,30 +28,30 @@ export function DestinationHeading({
   const total = entries.reduce((sum, entry) => sum + entry.kg, 0)
 
   return (
-    <div className="destination-heading">
-      <div className="destination-heading__topline">
+    <div className={estilos.cabecera}>
+      <div className={estilos.linea}>
         <EtiquetaEstado estado={deleted ? 'eliminado' : closed ? 'cerrado' : 'activo'} />
-        <span className="destination-heading__type">
+        <span className={estilos.tipo}>
           {destinationLabels[destination.destination_type]}
         </span>
         {destination.pinned && !closed && !deleted && !action && (
           <EtiquetaEstado estado="fijado" />
         )}
-        {action && <span className="destination-heading__action">{action}</span>}
+        {action && <span className={estilos.accion}>{action}</span>}
       </div>
-      <div className="destination-heading__body">
+      <div className={estilos.cuerpo}>
         <div>
           <h2>{destination.name}</h2>
           {!compact && (
-          <p className="muted">
+          <TextoSuave className={estilos.cantidadDescargas}>
             {entries.length} {entries.length === 1 ? 'descarga' : 'descargas'}
             {closed && destination.closed_at
               ? ` · Cerrado ${formatDate(destination.closed_at)}`
               : ''}
-          </p>
+          </TextoSuave>
           )}
         </div>
-        <strong className="destination-total">{formatKilos(total)} kg</strong>
+        <strong className={estilos.total}>{formatKilos(total)} kg</strong>
       </div>
     </div>
   )

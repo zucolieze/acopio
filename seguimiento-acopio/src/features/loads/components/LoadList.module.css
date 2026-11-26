@@ -1,0 +1,109 @@
+.lista {
+  display: grid;
+  gap: var(--espacio-020);
+  margin: 0;
+  padding: var(--espacio-055) 0 0;
+  border-top: 1px solid var(--color-fondo-neutro);
+  list-style: none;
+}
+
+.lista li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-100);
+  padding: var(--espacio-035) 0;
+  color: var(--color-texto-suave);
+  font-size: var(--texto-078);
+}
+
+.lista strong {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-085);
+}
+
+.detalle {
+  display: grid;
+  gap: var(--espacio-015);
+}
+
+.detalle span {
+  font-size: var(--texto-072);
+}
+
+.vacio {
+  margin: var(--espacio-070) 0 0;
+  color: var(--color-texto-suave);
+  font-size: var(--texto-085);
+}
+
+.edicion label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-040);
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-085);
+  font-weight: 650;
+}
+
+.edicion {
+  display: grid;
+  gap: var(--espacio-075);
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: end;
+  padding: var(--espacio-075);
+  border-radius: var(--radio-070);
+  background: var(--color-fondo-suave);
+}
+
+.descarga {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.descarga > .accionesDescarga,
+.descarga > .edicion {
+  grid-column: 1 / -1;
+}
+
+.responsable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-040);
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-085);
+  font-weight: 650;
+  grid-column: 1 / -1;
+}
+
+.responsable select {
+  min-height: 2.75rem;
+  font-size: var(--texto-085);
+}
+
+.cambiarResponsable {
+  justify-self: start;
+  min-height: 2rem;
+  font-size: var(--texto-085);
+}
+
+.lote {
+  color: var(--color-mostaza-texto);
+  font-size: var(--texto-078);
+  font-weight: 650;
+}
+
+.cerrarResponsable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-texto-secundario);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--texto-085);
+  font-weight: 650;
+  text-align: left;
+}

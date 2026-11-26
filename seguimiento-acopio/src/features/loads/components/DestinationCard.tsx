@@ -11,6 +11,9 @@ import {
   formatHumidity,
   parseHumidity,
 } from '@/shared/utils/humidity'
+import { TarjetaDestino } from './TarjetaDestino'
+import { unirClases } from '@/shared/utils/unirClases'
+import estilos from './DestinationCard.module.css'
 
 type DestinationCardProps = {
   destination: Destination
@@ -67,7 +70,7 @@ export function DestinationCard({
   }
 
   return (
-    <article className="destination-card">
+    <TarjetaDestino>
       <DestinationHeading
         destination={destination}
         entries={entries}
@@ -75,7 +78,7 @@ export function DestinationCard({
         action={
           pin && (
             <button
-              className={pin.pinned ? 'pin-button is-pinned' : 'pin-button'}
+              className={unirClases(estilos.fijar, pin.pinned && estilos.fijado)}
               type="button"
               disabled={busy}
               aria-pressed={pin.pinned}
@@ -89,11 +92,11 @@ export function DestinationCard({
         }
       />
       {/* El carrero ve lo justo para cargar; el detalle queda en las otras pestañas. */}
-      {!isProvider && <p className="destination-card__lot">{location}</p>}
-      {!isProvider && origin && <p className="destination-card__origin">{origin}</p>}
+      {!isProvider && <p className={estilos.lote}>{location}</p>}
+      {!isProvider && origin && <p className={estilos.origen}>{origin}</p>}
       {isProvider && (
         <>
-          <form className="load-form" onSubmit={handleAddLoad}>
+          <form className={estilos.carga} onSubmit={handleAddLoad}>
             <label>
               Kilos de esta descarga{loadingLot ? ` · ${loadingLot}` : ''}
               <input
@@ -108,7 +111,7 @@ export function DestinationCard({
               />
             </label>
             {cerealMismatch && (
-              <Aviso variante="error" className="load-form__warning">
+              <Aviso variante="error" className={estilos.advertencia}>
                 {cerealMismatch}
               </Aviso>
             )}
@@ -126,7 +129,7 @@ export function DestinationCard({
       )}
       {isProvider && isEmpty && (
         <Boton
-          variante="peligro" tamano="grande" className="destination-card__delete"
+          variante="peligro" tamano="grande" className={estilos.eliminarVacio}
           type="button"
           disabled={busy}
           onClick={onDelete}
@@ -136,7 +139,7 @@ export function DestinationCard({
         </Boton>
       )}
       {isProvider && !isEmpty && destination.destination_type !== 'camion' && (
-        <form className="destination-card__close-form" onSubmit={handleClose}>
+        <form className={estilos.cierreConHumedad} onSubmit={handleClose}>
           <label>
             Humedad de cierre (%)
             <input
@@ -163,12 +166,12 @@ export function DestinationCard({
       )}
       {/* Se puede eliminar cualquier destino en cualquier momento, tenga o no descargas. */}
       {isProvider && !isEmpty && (
-        <div className="destination-card__actions">
+        <div className={estilos.acciones}>
           {destination.destination_type === 'camion' && (
             <Boton
               variante={limitReached ? 'peligro' : 'enlace'}
               tamano={limitReached ? 'grande' : undefined}
-              className={limitReached ? 'destination-card__close is-urgent' : 'destination-card__close'}
+              className={unirClases(estilos.cerrar, limitReached && estilos.urgente)}
               type="button"
               disabled={busy}
               onClick={() => onClose('')}
@@ -178,7 +181,7 @@ export function DestinationCard({
           )}
           <Boton
             variante="enlacePeligro"
-            className="destination-card__delete-link"
+            className={estilos.eliminar}
             type="button"
             disabled={busy}
             onClick={onDelete}
@@ -187,7 +190,7 @@ export function DestinationCard({
           </Boton>
         </div>
       )}
-    </article>
+    </TarjetaDestino>
   )
 }
 
@@ -210,11 +213,11 @@ export function CapacitySummary({
   total: number
 }) {
   if (destination.capacity_kg === null) {
-    return <p className="capacity-summary">No hay un límite configurado.</p>
+    return <p className={estilos.limite}>No hay un límite configurado.</p>
   }
 
   const difference = total - destination.capacity_kg
-  const state = difference < 0 ? 'is-under' : difference > 0 ? 'is-over' : 'is-exact'
+  const state = difference < 0 ? estilos.faltan : difference > 0 ? estilos.excedido : estilos.justo
   const label =
     difference < 0
       ? `Faltan ${formatKilos(Math.abs(difference))} kg para el límite`
@@ -223,7 +226,7 @@ export function CapacitySummary({
         : 'Llegó justo al límite'
 
   return (
-    <p className={`capacity-summary ${state}`}>
+    <p className={unirClases(estilos.limite, state)}>
       Límite: {formatKilos(destination.capacity_kg)} kg · {label}
     </p>
   )
@@ -244,7 +247,7 @@ export function HumiditySummary({ destination }: { destination: Destination }) {
       : null
 
   return (
-    <dl className="humidity-summary">
+    <dl className={estilos.humedad}>
       <div>
         <dt>Humedad inicial</dt>
         <dd>

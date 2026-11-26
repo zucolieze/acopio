@@ -76,10 +76,13 @@ para que quien los usa los ubique (ancho, márgenes). Para combinar clases está
 
 ## Orden de los estilos
 
-`app/main.tsx` importa `tokens.css` y `base.css`, después la app (con los
-módulos de `shared/ui`) y al final `App.css`. Ese orden permite que los estilos
-de cada feature, que todavía están en `App.css`, ajusten a los componentes
-compartidos. Cambiarlo altera cómo se ve la app.
+`app/main.tsx` importa `tokens.css` y `base.css` antes que la app. Cada
+componente importa su `.module.css` **después** de los componentes que usa, para
+que sus reglas de ubicación (por ejemplo el ancho de un `Boton`) ganen sobre las
+del componente compartido. Cambiar ese orden altera cómo se ve la app.
+
+Dentro de `features/loads/components/` hay piezas que comparten varias vistas de
+cargas: `TarjetaDestino`, `ListaDestinos` y `FilaAcciones`.
 
 ## Idioma de los nombres
 
@@ -91,9 +94,9 @@ de capa. Roles: `carrero` y `observador`. Ver [GLOSARIO.md](GLOSARIO.md).
 
 ## Estado actual
 
-Etapas 1, 2, 3a y 3b hechas: la estructura de carpetas ya es la objetivo, la base de
-estilos y los componentes compartidos están en `shared/`, y las features `auth` y
-`groups` usan solo CSS Modules. Todavía falta:
+Etapas 1 a 3 hechas: la estructura de carpetas ya es la objetivo, la base de
+estilos y los componentes compartidos están en `shared/`, y todas las features
+usan CSS Modules (`App.css` ya no existe). Todavía falta:
 
 - Hay tres features: `auth`, `groups` y `loads`. La administración de lotes y
   campos vive dentro de `loads`.
@@ -103,11 +106,8 @@ estilos y los componentes compartidos están en `shared/`, y las features `auth`
   features y decide qué pantalla mostrar por estado. `index.html` carga
   `/src/app/main.tsx`.
 - El alias `@/` apunta a `src/` (en `tsconfig.json` y `vite.config.ts`).
-- Los estilos de `loads` siguen en `src/App.css` (globales). Se pasan a CSS
-  Modules en la etapa 3c. Hasta entonces, `App.css` repite algunas reglas que ya
-  están en `shared/ui` (pie, formulario apilado y textos suaves).
-- `App.css` todavía usa puntos de corte de `40rem` y `65rem`, además de los
-  documentados. Se unifican en la Etapa 4.
+- Algunos módulos todavía usan puntos de corte de `40rem` y `65rem`, además de
+  los documentados. Se unifican en la Etapa 4.
 - Los nombres están en inglés y los roles en la base y en el código son
   `proveedor` y `cliente`.
 - Los tipos de las filas de la base circulan por hooks y componentes.

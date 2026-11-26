@@ -1,0 +1,11 @@
+.lista {
+  display: grid;
+  gap: var(--espacio-065);
+}
+
+@media (min-width: 65rem) {
+  .lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}

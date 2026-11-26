@@ -12,6 +12,9 @@ import {
   HUMIDITY_PATTERN,
   parseHumidity,
 } from '@/shared/utils/humidity'
+import { FilaAcciones } from './FilaAcciones'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './DestinationManagement.module.css'
 
 type DestinationManagementProps = {
   destination: Destination
@@ -90,8 +93,8 @@ export function DestinationManagement({
   }
 
   return (
-    <div className="destination-management">
-      <div className="destination-management__actions">
+    <div className={estilos.gestion}>
+      <FilaAcciones>
         <Boton
           variante="enlace"
           type="button"
@@ -108,9 +111,9 @@ export function DestinationManagement({
         >
           Eliminar destino
         </Boton>
-      </div>
+      </FilaAcciones>
       {editing && (
-        <form className="destination-edit-form" onSubmit={handleSubmit}>
+        <form className={estilos.edicion} onSubmit={handleSubmit}>
           <label>
             {type === 'camion' ? 'Patente' : 'Nombre'}
             <input
@@ -158,9 +161,9 @@ export function DestinationManagement({
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
-            <span className="muted small-copy">
+            <TextoSuave como="span" chico>
               Cambia el cereal de todo el lote. No se permite si quedaría mezclado en un destino.
-            </span>
+            </TextoSuave>
           </label>
           <label>
             Tipo de destino

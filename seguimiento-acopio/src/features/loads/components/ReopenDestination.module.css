@@ -1,0 +1,28 @@
+.reactivar {
+  width: 100%;
+  margin-top: var(--espacio-075);
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espacio-060);
+  margin-top: var(--espacio-075);
+  padding: var(--espacio-080);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-075);
+  background: var(--color-fondo-dato);
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-040);
+  font-size: var(--texto-090);
+  font-weight: 650;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-075);
+}

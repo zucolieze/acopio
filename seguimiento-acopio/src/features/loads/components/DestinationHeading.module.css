@@ -1,0 +1,39 @@
+.linea {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-055);
+  margin-bottom: var(--espacio-065);
+}
+
+.tipo {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-080);
+}
+
+.cuerpo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espacio-060);
+}
+
+.cabecera h2 {
+  margin: 0;
+  color: var(--color-verde);
+  font-size: var(--texto-125);
+}
+
+.cabecera .cantidadDescargas {
+  margin: var(--espacio-025) 0 0;
+  font-size: var(--texto-080);
+}
+
+.total {
+  flex: 0 0 auto;
+  color: var(--color-verde);
+  font-size: var(--texto-120);
+}
+
+.accion {
+  margin-left: auto;
+}

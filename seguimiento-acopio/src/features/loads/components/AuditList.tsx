@@ -1,6 +1,7 @@
 import { formatKilos } from '@/shared/utils/format'
 import { formatHumidity } from '@/shared/utils/humidity'
 import type { ChangeAudit, Lot } from '../types'
+import estilos from './AuditList.module.css'
 
 const fieldLabels: Record<string, string> = {
   kg: 'Kilos',
@@ -37,9 +38,9 @@ export function AuditList({
   if (deletions.length === 0) return null
 
   return (
-    <details className="audit-history-details">
+    <details className={estilos.desplegable}>
       <summary>Eliminaciones ({deletions.length})</summary>
-      <section className="audit-history">
+      <section className={estilos.historial}>
       <ul>
         {deletions.map((entry) => (
           <li key={entry.id}>
@@ -57,7 +58,7 @@ export function AuditList({
                   : 'Integrante del grupo'}
               </span>
             </div>
-            <ul className="audit-history__changes">
+            <ul className={estilos.cambios}>
               {Object.entries(entry.changes).map(([field, values]) => (
                 <li key={field}>
                   {fieldLabels[field] ?? field}:{' '}
@@ -66,7 +67,7 @@ export function AuditList({
               ))}
             </ul>
             {entry.kg_delta !== null && entry.kg_delta !== 0 && (
-              <p className="small-copy">
+              <p className={estilos.diferencia}>
                 Diferencia: {entry.kg_delta > 0 ? '+' : ''}
                 {formatKilos(entry.kg_delta)} kg
               </p>

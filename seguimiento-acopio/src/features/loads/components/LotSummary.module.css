@@ -1,0 +1,125 @@
+.resumen {
+  margin-bottom: var(--espacio-075);
+}
+
+.resumen h2 {
+  margin: 0 0 var(--espacio-060);
+  color: var(--color-verde);
+  font-size: var(--texto-115);
+}
+
+.lista {
+  display: grid;
+  gap: var(--espacio-055);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  padding: var(--espacio-070) var(--espacio-080);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-075);
+  background: var(--color-fondo-suave);
+}
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-035) var(--espacio-075);
+  color: var(--color-texto);
+  font-size: 0.92rem;
+}
+
+.cereal {
+  padding: var(--espacio-015) var(--espacio-055);
+  border-radius: var(--radio-pildora);
+  background: var(--color-mostaza-fondo);
+  color: var(--color-mostaza-texto);
+  font-size: var(--texto-078);
+  font-weight: 750;
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-040) var(--espacio-075);
+  margin: var(--espacio-055) 0 0;
+}
+
+.datos dt {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-075);
+}
+
+.datos dd {
+  margin: 0;
+  color: var(--color-verde);
+  font-weight: 700;
+}
+
+.totales {
+  margin: var(--espacio-065) 0 0;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-085);
+}
+
+.editar {
+  min-height: 2rem;
+  margin-top: var(--espacio-035);
+  font-size: var(--texto-085);
+}
+
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--espacio-050);
+  margin-top: var(--espacio-050);
+}
+
+.formulario label {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-direction: column;
+  gap: var(--espacio-030);
+  font-size: var(--texto-085);
+  font-weight: 650;
+}
+
+.descargas {
+  margin-top: var(--espacio-050);
+}
+
+.descargas > summary {
+  color: var(--color-verde);
+  cursor: pointer;
+  font-size: var(--texto-088);
+  font-weight: 700;
+}
+
+.descargas ul {
+  display: grid;
+  gap: var(--espacio-030);
+  margin: var(--espacio-050) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.descargas li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-075);
+  padding: var(--espacio-040) var(--espacio-055);
+  border-radius: 0.5rem;
+  background: var(--color-blanco);
+  font-size: var(--texto-085);
+}
+
+@media (min-width: 40rem) {
+  .datos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

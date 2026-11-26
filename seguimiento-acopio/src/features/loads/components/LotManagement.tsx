@@ -3,8 +3,13 @@ import type { FormEvent } from 'react'
 import { Boton } from '@/shared/ui/Boton'
 import { cerealOptions } from '../types'
 import type { Destination, Lot, LotChanges } from '../types'
+import { unirClases } from '@/shared/utils/unirClases'
+import { FilaAcciones } from './FilaAcciones'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './LotManagement.module.css'
 
 type LotManagementProps = {
+  className?: string
   lots: Lot[]
   destinations: Destination[]
   busy: string
@@ -14,6 +19,7 @@ type LotManagementProps = {
 }
 
 export function LotManagement({
+  className,
   lots,
   destinations,
   busy,
@@ -24,7 +30,7 @@ export function LotManagement({
   if (lots.length === 0) return null
 
   return (
-    <details className="lot-management">
+    <details className={unirClases(estilos.lotes, className)}>
       <summary>Administrar lotes</summary>
       <ul>
         {lots.map((lot) => (
@@ -80,7 +86,7 @@ function LotRow({
   return (
     <li>
       {editing ? (
-        <form className="lot-management__edit" onSubmit={submit}>
+        <form className={estilos.edicion} onSubmit={submit}>
           <input
             maxLength={120}
             required
@@ -109,7 +115,7 @@ function LotRow({
             {lot.cereal ? ` · ${lot.cereal}` : ''}
             {lot.hectares ? ` · ${lot.hectares} ha` : ''}
           </span>
-          <div className="lot-management__actions">
+          <FilaAcciones>
             <Boton
               variante="enlace"
               type="button"
@@ -137,14 +143,14 @@ function LotRow({
             >
               Eliminar
             </Boton>
-          </div>
+          </FilaAcciones>
         </>
       )}
       {hasActiveDestinations && (
-        <p className="muted small-copy">Tiene destinos activos; no se puede eliminar todavía.</p>
+        <TextoSuave chico>Tiene destinos activos; no se puede eliminar todavía.</TextoSuave>
       )}
       {isLastActiveLot && (
-        <p className="muted small-copy">El trabajo debe conservar al menos un lote activo.</p>
+        <TextoSuave chico>El trabajo debe conservar al menos un lote activo.</TextoSuave>
       )}
     </li>
   )

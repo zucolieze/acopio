@@ -6,12 +6,13 @@ type PropsTextoSuave = {
   como?: 'p' | 'span'
   chico?: boolean
   className?: string
+  role?: 'status'
   children: ReactNode
 }
 
-export function TextoSuave({ como: Elemento = 'p', chico, className, children }: PropsTextoSuave) {
+export function TextoSuave({ como: Elemento = 'p', chico, className, role, children }: PropsTextoSuave) {
   return (
-    <Elemento className={unirClases(estilos.suave, chico && estilos.chico, className)}>
+    <Elemento role={role} className={unirClases(estilos.suave, chico && estilos.chico, className)}>
       {children}
     </Elemento>
   )

@@ -9,6 +9,10 @@ import {
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
 } from '@/shared/utils/humidity'
+import { unirClases } from '@/shared/utils/unirClases'
+import { FormularioApilado } from '@/shared/ui/FormularioApilado'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './NewDestinationForm.module.css'
 
 type NewDestinationFormProps = {
   destinationType: DestinationType
@@ -59,16 +63,16 @@ export function NewDestinationForm({
         : 'Ej.: Bolsa 12'
 
   return (
-    <Panel className="new-destination">
-      <p className="new-destination__lot">
+    <Panel className={estilos.nuevo}>
+      <p className={estilos.lote}>
         {lotLabel ? <>Lote: <strong>{lotLabel}</strong></> : 'Primero creá el campo y el lote acá abajo.'}
       </p>
-      <form className="form-stack" onSubmit={handleSubmit}>
-        <div className="destination-types" role="group" aria-label="Tipo de destino">
+      <FormularioApilado className={estilos.formulario} onSubmit={handleSubmit}>
+        <div className={estilos.tipos} role="group" aria-label="Tipo de destino">
           {(Object.keys(destinationLabels) as DestinationType[]).map((type) => (
             <button
               key={type}
-              className={destinationType === type ? 'type-choice is-selected' : 'type-choice'}
+              className={unirClases(estilos.tipo, destinationType === type && estilos.elegido)}
               type="button"
               aria-pressed={destinationType === type}
               onClick={() => onDestinationTypeChange(type)}
@@ -96,7 +100,7 @@ export function NewDestinationForm({
             }
           />
           {destinationType === 'camion' && (
-            <span className="muted small-copy">Formato sugerido: ABC123 o AA123BB. Si es de otro país, escribila como figura.</span>
+            <TextoSuave como="span" chico className={estilos.ayuda}>Formato sugerido: ABC123 o AA123BB. Si es de otro país, escribila como figura.</TextoSuave>
           )}
         </label>
         {destinationType === 'camion' && (
@@ -134,7 +138,7 @@ export function NewDestinationForm({
         <Boton variante="primaria" tamano="grande" disabled={busy || loading || !canOpen}>
           {busy ? 'Abriendo destino…' : loading ? 'Cargando trabajo…' : !canOpen ? 'Elegí un lote primero' : 'Abrir destino'}
         </Boton>
-      </form>
+      </FormularioApilado>
     </Panel>
   )
 }

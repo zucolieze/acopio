@@ -1,8 +1,14 @@
 import { useState } from 'react'
 import { Boton } from '@/shared/ui/Boton'
 import type { Membership } from '@/features/groups/types'
+import { unirClases } from '@/shared/utils/unirClases'
+import { FilaAcciones } from './FilaAcciones'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './WorkSettings.module.css'
 
 type WorkSettingsProps = {
+  /** Limita el ancho del recuadro del código de invitación. */
+  codigoAcotado?: boolean
   membership: Membership
   busy: boolean
   canEdit: boolean
@@ -15,6 +21,7 @@ type WorkSettingsProps = {
 
 // Código de invitación y acciones sobre el trabajo (editar, archivar, eliminar).
 export function WorkSettings({
+  codigoAcotado,
   membership,
   busy,
   canEdit,
@@ -29,15 +36,15 @@ export function WorkSettings({
 
   return (
     <>
-      <div className="group-code">
+      <div className={unirClases(estilos.codigo, codigoAcotado && estilos.codigoAcotado)}>
         <span>Código para invitar</span>
         <strong>{membership.inviteCode}</strong>
         <Boton variante="enlace" type="button" onClick={onCopyInviteCode}>
           Copiar código
         </Boton>
       </div>
-      <section className="work-management">
-        <div className="destination-management__actions">
+      <section className={estilos.administracion}>
+        <FilaAcciones>
           {canEdit && (
             <Boton
               variante="enlace"
@@ -68,15 +75,15 @@ export function WorkSettings({
               Eliminar trabajo
             </Boton>
           )}
-        </div>
+        </FilaAcciones>
         {hasActiveDestinations && (
-          <p className="muted small-copy">
+          <TextoSuave chico>
             Para archivar el trabajo primero cerrá o eliminá sus destinos activos.
-          </p>
+          </TextoSuave>
         )}
         {editing && (
           <form
-            className="group-edit-form"
+            className={estilos.edicion}
             onSubmit={(event) => {
               event.preventDefault()
               onRename(name)

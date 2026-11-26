@@ -1,0 +1,35 @@
+.lotes {
+  margin-top: var(--espacio-085);
+}
+
+.lotes > summary {
+  color: var(--color-verde);
+  cursor: pointer;
+  font-size: var(--texto-088);
+  font-weight: 700;
+}
+
+.lotes ul {
+  display: grid;
+  gap: var(--espacio-065);
+  margin: var(--espacio-070) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lotes li {
+  padding: var(--espacio-070);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-070);
+  background: var(--color-blanco);
+}
+
+.lotes li > span {
+  font-weight: 650;
+}
+
+.edicion {
+  display: flex;
+  gap: var(--espacio-050);
+  flex-wrap: wrap;
+}

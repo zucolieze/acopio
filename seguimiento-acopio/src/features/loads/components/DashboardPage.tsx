@@ -33,6 +33,12 @@ import { NewDestinationForm } from './NewDestinationForm'
 import { ReopenDestination } from './ReopenDestination'
 import { WorkSettings } from './WorkSettings'
 import { WorkStructureManagement } from './WorkStructureManagement'
+import { TarjetaDestino } from './TarjetaDestino'
+import { unirClases } from '@/shared/utils/unirClases'
+import { ListaDestinos } from './ListaDestinos'
+import { PieDePagina } from '@/shared/ui/PieDePagina'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './DashboardPage.module.css'
 
 type DashboardPageProps = {
   membership: Membership
@@ -192,7 +198,7 @@ export function DashboardPage(props: DashboardPageProps) {
   // Mientras no haya ningún lote, crearlo es lo primero que se ve en "Nuevo".
   const firstLotFirst = !props.loading && availableLots.length === 0
   const structurePanel = props.loading ? (
-    <p className="muted" role="status">Cargando lotes…</p>
+    <TextoSuave role="status">Cargando lotes…</TextoSuave>
   ) : (
     <WorkStructureManagement
       lots={props.lots}
@@ -226,16 +232,16 @@ export function DashboardPage(props: DashboardPageProps) {
       />
     )
     return (
-      <article className={`destination-card${deleted ? ' is-deleted' : ''}`} key={destination.id}>
+      <TarjetaDestino eliminado={deleted} key={destination.id}>
         {props.isProvider ? (
           <button
-            className="history-toggle"
+            className={estilos.alternar}
             type="button"
             aria-expanded={expanded}
             onClick={() => props.onHistoryToggle(expanded ? null : destination.id)}
           >
             {heading}
-            <span className="history-toggle__icon" aria-hidden="true">
+            <span className={estilos.signo} aria-hidden="true">
               {expanded ? '−' : '+'}
             </span>
           </button>
@@ -243,8 +249,8 @@ export function DashboardPage(props: DashboardPageProps) {
           heading
         )}
         {expanded && (
-          <div className="destination-history">
-            <dl className="destination-facts">
+          <div className={estilos.detalle}>
+            <dl className={estilos.datos}>
               <div>
                 <dt>Lotes</dt>
                 <dd>
@@ -330,7 +336,7 @@ export function DashboardPage(props: DashboardPageProps) {
             )}
           </div>
         )}
-      </article>
+      </TarjetaDestino>
     )
   }
 
@@ -339,10 +345,10 @@ export function DashboardPage(props: DashboardPageProps) {
   )
 
   return (
-    <main className="app-shell">
-      <header className="app-header">
+    <main className={estilos.pagina}>
+      <header className={estilos.encabezado}>
         <Marca soloIcono />
-        <div className="app-header__actions">
+        <div className={estilos.accionesEncabezado}>
           <Boton variante="silenciosa" tamano="chico" type="button" onClick={props.onReturnToMenu}>
             Trabajos
           </Boton>
@@ -354,13 +360,13 @@ export function DashboardPage(props: DashboardPageProps) {
         </div>
       </header>
 
-      <div className="work-context" aria-label="Campo y lote de trabajo">
+      <div className={estilos.contexto} aria-label="Campo y lote de trabajo">
         {props.isProvider ? (
-          <p className="work-context__item">
+          <p className={estilos.dato}>
             <span>Campo:</span> <strong>{fieldName}</strong>
           </p>
         ) : (
-          <label className="work-context__item">
+          <label className={estilos.dato}>
             <span>Campo:</span>
             <select
               aria-label="Campo"
@@ -376,7 +382,7 @@ export function DashboardPage(props: DashboardPageProps) {
           </label>
         )}
         {props.isProvider && (
-          <label className="work-context__item">
+          <label className={estilos.dato}>
             <span>Lote:</span>
             <select
               aria-label="Lote"
@@ -395,7 +401,7 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
       </div>
 
-      <section className="dashboard">
+      <section className={estilos.tablero}>
         <h1 className="sr-only">{workLabel(props.membership)}</h1>
 
         <Avisos error={props.error} aviso={props.notice} />
@@ -424,7 +430,7 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
 
         {tab === 'activos' && (
-          <section className="destination-list" aria-live="polite">
+          <ListaDestinos como="section" aria-live="polite">
             {props.activeDestinations.length === 0 ? (
               <EstadoVacio
                 titulo="Todavía no hay destinos activos"
@@ -463,7 +469,7 @@ export function DashboardPage(props: DashboardPageProps) {
                 )
               })
             )}
-          </section>
+          </ListaDestinos>
         )}
 
         {tab === 'historial' && (
@@ -488,11 +494,11 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
 
         {tab === 'historial' && props.deletedDestinations.length > 0 && (
-          <details className="deleted-destinations">
+          <details className={estilos.eliminados}>
             <summary>Destinos eliminados ({props.deletedDestinations.length})</summary>
-            <div className="destination-list">
+            <ListaDestinos className={estilos.listaEliminados}>
               {props.deletedDestinations.map((destination) => (
-                <div className="deleted-destination" key={destination.id}>
+                <div className={estilos.eliminado} key={destination.id}>
                   {renderHistoryDestination(destination, true)}
                   <Boton
                     variante="secundaria"
@@ -504,19 +510,20 @@ export function DashboardPage(props: DashboardPageProps) {
                   </Boton>
                 </div>
               ))}
-            </div>
+            </ListaDestinos>
           </details>
         )}
 
         {tab === 'historial' && props.isProvider && (
-          <details className="work-summary">
+          <details className={estilos.opciones}>
             <summary>Opciones del trabajo</summary>
-            <div className="work-summary__content">
+            <div className={estilos.opcionesContenido}>
               <WorkSettings
                 key={groupId}
                 membership={props.membership}
                 busy={props.busy === 'group'}
                 canEdit
+                codigoAcotado
                 hasActiveDestinations={ownActiveDestinations.length > 0}
                 onCopyInviteCode={props.onCopyInviteCode}
                 onRename={props.onRenameGroup}
@@ -544,19 +551,19 @@ export function DashboardPage(props: DashboardPageProps) {
         )}
 
         {tab === 'info' && !props.isProvider && (
-          <Panel className="work-info">
+          <Panel className={estilos.informacion}>
             <h2>Información del trabajo</h2>
-            <div className="summary-row">
-              <div className="summary-card">
+            <div className={estilos.resumen}>
+              <div className={estilos.indicador}>
                 <span>Kilos de este campo</span>
                 <strong>{formatKilos(props.totalKilos)} kg</strong>
               </div>
-              <div className="summary-card">
+              <div className={estilos.indicador}>
                 <span>Destinos activos</span>
                 <strong>{ownActiveDestinations.length}</strong>
               </div>
-              <div className="connection-state" role="status">
-                <span className={props.live ? 'connection-state__dot is-live' : 'connection-state__dot'} />
+              <div className={estilos.conexion} role="status">
+                <span className={unirClases(estilos.punto, props.live && estilos.enLinea)} />
                 {props.live ? 'En línea' : 'Conectando'}
               </div>
             </div>
@@ -577,7 +584,7 @@ export function DashboardPage(props: DashboardPageProps) {
           </Panel>
         )}
       </section>
-      <footer className="app-footer">
+      <PieDePagina>
         <span>
           {props.fullName
             ? `Ingresaste como ${props.fullName}.`
@@ -591,7 +598,7 @@ export function DashboardPage(props: DashboardPageProps) {
         >
           Cerrar sesión
         </Boton>
-      </footer>
+      </PieDePagina>
     </main>
   )
 }

@@ -3,6 +3,9 @@ import { Boton } from '@/shared/ui/Boton'
 import { destinationLabels } from '../types'
 import type { Destination, Lot } from '../types'
 import type { DestinationType } from '@/shared/lib/database.types'
+import { ListaDestinos } from './ListaDestinos'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import estilos from './DestinationBrowser.module.css'
 
 type DestinationBrowserProps = {
   destinations: Destination[]
@@ -61,9 +64,9 @@ export function DestinationBrowser({
   }
 
   return (
-    <section className="destination-browser" aria-label="Buscar destinos">
-      <div className="destination-filters">
-        <label className="destination-filters__search">
+    <section aria-label="Buscar destinos">
+      <div className={estilos.filtros}>
+        <label className={estilos.busqueda}>
           <span className="sr-only">Buscar por nombre o patente</span>
           <input
             type="search"
@@ -106,7 +109,7 @@ export function DestinationBrowser({
           </select>
         </label>
       </div>
-      <p className="destination-browser__count" role="status">
+      <p className={estilos.cantidad} role="status">
         {filtered.length === destinations.length
           ? `${destinations.length} ${destinations.length === 1 ? 'destino' : 'destinos'}`
           : `${filtered.length} de ${destinations.length} destinos`}
@@ -118,25 +121,25 @@ export function DestinationBrowser({
       </p>
 
       {groups.length === 0 ? (
-        <p className="muted">No hay destinos que coincidan con la búsqueda.</p>
+        <TextoSuave>No hay destinos que coincidan con la búsqueda.</TextoSuave>
       ) : (
         groups.map((group, index) => {
           const shown = visible[group.type] ?? PAGE_SIZE
           return (
             <details
-              className="destination-group"
+              className={estilos.grupo}
               key={`${group.type}-${filtering}`}
               open={filtering || index === 0}
             >
               <summary>
                 {group.label} ({group.items.length})
               </summary>
-              <div className="destination-list">
+              <ListaDestinos className={estilos.listaGrupo}>
                 {group.items.slice(0, shown).map((destination) => render(destination))}
-              </div>
+              </ListaDestinos>
               {group.items.length > shown && (
                 <Boton
-                  variante="secundaria" className="destination-group__more"
+                  variante="secundaria" className={estilos.mas}
                   type="button"
                   onClick={() =>
                     setVisible((current) => ({ ...current, [group.type]: shown + PAGE_SIZE }))
