@@ -12,7 +12,8 @@
     "db:start": "npm exec --yes supabase -- start",
     "db:stop": "npm exec --yes supabase -- stop",
     "db:reset": "npm exec --yes supabase -- db reset --local",
-    "db:push": "npm exec --yes supabase -- db push"
+    "db:push": "npm exec --yes supabase -- db push",
+    "db:types": "npm exec --yes supabase -- gen types typescript --local > src/shared/lib/database.types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
