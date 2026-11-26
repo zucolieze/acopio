@@ -83,6 +83,7 @@ npm.cmd run db:start    # inicia Supabase local
 npm.cmd run db:stop     # detiene Supabase local
 npm.cmd run db:reset    # recrea la base LOCAL (borra los datos locales)
 npm.cmd run db:push     # publica migraciones en el proyecto remoto vinculado
+npm.cmd run db:types    # regenera src/shared/lib/database.types.ts desde la base LOCAL
 ```
 
 Antes de enviar cambios a GitHub: `npm.cmd run typecheck` y
@@ -137,8 +138,9 @@ a mano desde el panel de Supabase. En orden:
 | `20261118100000_reopen_with_new_humidity.sql` | Al reactivar un silo se carga una humedad inicial nueva y se conservan las anteriores |
 | `20261118110000_anyone_can_restore.sql` | Cualquier integrante del trabajo puede restaurar y reactivar destinos (temporal) |
 
-El cliente tipado está en `src/lib/supabase.ts` y los tipos en
-`src/lib/database.types.ts`. El acceso a datos está separado por feature en
+El cliente tipado está en `src/shared/lib/supabase.ts` y los tipos en
+`src/shared/lib/database.types.ts` (se regeneran con `npm.cmd run db:types`, con
+la base local iniciada). El acceso a datos está separado por feature en
 `src/features/auth/model/`, `src/features/groups/model/` y
 `src/features/loads/model/`.
 
