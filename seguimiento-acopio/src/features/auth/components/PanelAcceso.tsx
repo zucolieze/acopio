@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Panel } from '@/shared/ui/Panel'
+import { Sobretitulo } from '@/shared/ui/Sobretitulo'
 import { TextoSuave } from '@/shared/ui/TextoSuave'
 import estilos from './PanelAcceso.module.css'
 
@@ -14,7 +15,7 @@ type PropsPanelAcceso = {
 export function PanelAcceso({ sobretitulo, titulo, introduccion, children }: PropsPanelAcceso) {
   return (
     <Panel className={estilos.panel}>
-      <p className={estilos.sobretitulo}>{sobretitulo}</p>
+      <Sobretitulo>{sobretitulo}</Sobretitulo>
       <h1>{titulo}</h1>
       {introduccion && <TextoSuave className={estilos.introduccion}>{introduccion}</TextoSuave>}
       {children}
