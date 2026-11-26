@@ -1405,7 +1405,7 @@ button:focus-visible {
   margin-top: var(--espacio-075);
 }
 
-/* Aviso de cereales mezclados en el formulario de pesada */
+/* Aviso de cereales mezclados en el formulario de descarga */
 .load-form__warning {
   grid-column: 1 / -1;
   margin: 0;

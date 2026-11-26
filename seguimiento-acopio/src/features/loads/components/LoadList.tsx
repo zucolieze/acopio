@@ -29,7 +29,7 @@ export function LoadList({
   onDelete,
 }: LoadListProps) {
   if (entries.length === 0) {
-    return <p className="empty-loads">Todavía no se cargaron pesadas.</p>
+    return <p className="empty-loads">Todavía no se cargaron descargas.</p>
   }
 
   return (

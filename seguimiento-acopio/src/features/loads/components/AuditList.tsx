@@ -4,7 +4,7 @@ import type { ChangeAudit, Lot } from '../types'
 
 const fieldLabels: Record<string, string> = {
   kg: 'Kilos',
-  date: 'Fecha de pesada',
+  date: 'Fecha de descarga',
   name: 'Nombre',
   lot_id: 'Lote',
   destination_type: 'Tipo de destino',
@@ -82,7 +82,7 @@ export function AuditList({
 function entityLabel(entity: ChangeAudit['entity_type']) {
   switch (entity) {
     case 'carga':
-      return 'pesada'
+      return 'descarga'
     case 'campo':
       return 'campo'
     case 'destino':

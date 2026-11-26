@@ -95,7 +95,7 @@ export function DestinationCard({
         <>
           <form className="load-form" onSubmit={handleAddLoad}>
             <label>
-              Kilos de esta pesada{loadingLot ? ` · ${loadingLot}` : ''}
+              Kilos de esta descarga{loadingLot ? ` · ${loadingLot}` : ''}
               <input
                 inputMode="decimal"
                 min="0.01"
@@ -116,7 +116,7 @@ export function DestinationCard({
               variante="primaria" tamano="grande"
               disabled={busy || Boolean(cerealMismatch)}
             >
-              {busy ? 'Guardando…' : 'Guardar pesada'}
+              {busy ? 'Guardando…' : 'Guardar descarga'}
             </Boton>
           </form>
         </>

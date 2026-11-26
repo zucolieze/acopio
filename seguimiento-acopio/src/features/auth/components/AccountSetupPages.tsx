@@ -79,7 +79,7 @@ export function ProfileNamePage({ busy, error, onSubmit }: SetupProps) {
       <Panel className="auth-panel">
         <p className="eyebrow">Último paso</p>
         <h1>¿Cómo te llamás?</h1>
-        <p className="muted">Tu equipo va a ver este nombre en cada pesada que cargues.</p>
+        <p className="muted">Tu equipo va a ver este nombre en cada descarga que cargues.</p>
         <form className="form-stack" onSubmit={submit}>
           <label>
             Tu nombre

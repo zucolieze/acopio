@@ -42,7 +42,7 @@ Qué hace la app hoy, en detalle. Para el resumen, ver el
   cerrar desde cualquiera y queda registrado desde cuál se cerró.
 - Las patentes se normalizan a mayúsculas, sin espacios. El formato `ABC123` o
   `AA123BB` es una sugerencia: otros formatos se aceptan tras una confirmación.
-- Los camiones llevan un límite de carga. Las pesadas que lo excedan se aceptan;
+- Los camiones llevan un límite de carga. Las descargas que lo excedan se aceptan;
   la diferencia se muestra en rojo si faltan kilos y en amarillo si se supera.
 - Silos y silobolsas piden humedad inicial al abrirse y de cierre al cerrarse,
   siempre con dos cifras y un decimal (12 se guarda como 12.0). Se guardan sus
@@ -61,13 +61,13 @@ Qué hace la app hoy, en detalle. Para el resumen, ver el
 - La vista por lote muestra los kilos de cada lote con su cereal, la lista de
   descargas y el rendimiento (kg/ha y qq/ha) cuando hay hectáreas.
 - Cada descarga muestra campo, lote y cereal de origen.
-- Las pesadas, destinos, lotes y trabajos se eliminan de forma lógica; las
+- Las descargas, destinos, lotes y trabajos se eliminan de forma lógica; las
   eliminaciones quedan en una bitácora visible para el grupo.
 
 ## Permisos y tiempo real
 
-- El carrero corrige kilos y fecha de las pesadas y edita destinos; el
-  observador corrige quién realizó una pesada, edita destinos y reactiva los
+- El carrero corrige kilos y fecha de las descargas y edita destinos; el
+  observador corrige quién realizó una descarga, edita destinos y reactiva los
   cerrados. RLS aplica los permisos en la base. Ver [SEGURIDAD.md](SEGURIDAD.md).
-- Supabase Realtime actualiza destinos y pesadas del grupo sin recargar.
+- Supabase Realtime actualiza destinos y descargas del grupo sin recargar.
 - Los avisos de acción completada desaparecen a los 10 segundos.

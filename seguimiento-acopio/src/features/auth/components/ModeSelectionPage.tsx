@@ -45,7 +45,7 @@ export function ModeSelectionPage({
             onClick={() => onChooseMode('carrero')}
           >
             <strong>Carrero</strong>
-            <span>Abro destinos y cargo las pesadas.</span>
+            <span>Abro destinos y cargo las descargas.</span>
           </button>
           <button
             className="mode-card mode-card--observador"

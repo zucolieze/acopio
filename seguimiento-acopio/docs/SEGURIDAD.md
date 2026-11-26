@@ -41,7 +41,7 @@ correos. Las contraseñas **no** se guardan en el repositorio: están en
 | Cuenta | Correo | Uso |
 |---|---|---|
 | Admin | `admin-acopio@example.com` | Modalidad oculta (ver más abajo) |
-| Carrero | `carrero-acopio@example.com` | Elegir "Carrero": crea el trabajo y carga pesadas |
+| Carrero | `carrero-acopio@example.com` | Elegir "Carrero": crea el trabajo y carga descargas |
 | Observador | `observador-acopio@example.com` | Elegir "Observador": se suma con el código de invitación |
 
 Ingresar con "Prefiero entrar con contraseña". El rol (carrero u observador) no
@@ -75,7 +75,7 @@ actúa sobre producción y no se puede deshacer.
 
 1. **Qué se conserva y qué se borra.** Los trabajos (`public.groups`) son la raíz
    de los datos: al borrarlos se eliminan en cascada sus miembros, campañas,
-   campos, lotes y la auditoría. Las pesadas (`loads`) bloquean el borrado de los
+   campos, lotes y la auditoría. Las descargas (`loads`) bloquean el borrado de los
    destinos (`on delete restrict`), así que hay que borrarlas antes. Las cuentas
    (`auth.users`) y los perfiles (`public.profiles`) no se tocan.
 2. **Revisar qué hay** (opcional, solo lectura), desde esta carpeta:
@@ -112,4 +112,4 @@ actúa sobre producción y no se puede deshacer.
    (ver [ACCESO.md](ACCESO.md)).
 7. **Probar de punta a punta** con cuentas nuevas: registro o enlace por correo,
    crear un trabajo como carrero, sumarse como observador con el código y cargar
-   una pesada.
+   una descarga.

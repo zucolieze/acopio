@@ -278,7 +278,7 @@ export default function AppController() {
   function handleDeleteLoad(load: Parameters<typeof loads.deleteLoad>[0]) {
     if (
       window.confirm(
-        `¿Eliminar la pesada de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
+        `¿Eliminar la descarga de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
       )
     ) {
       void loads.deleteLoad(load)
