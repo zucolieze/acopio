@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { Brand } from '@/shared/ui/Brand'
-import { Feedback } from '@/shared/ui/Feedback'
+import { Boton } from '@/shared/ui/Boton'
+import { Marca } from '@/shared/ui/Marca'
+import { Avisos } from '@/shared/ui/Aviso'
+import { Panel } from '@/shared/ui/Panel'
 
 type SetupProps = {
   busy: boolean
@@ -21,8 +23,8 @@ export function ResetPasswordPage({ busy, error, onSubmit }: SetupProps) {
 
   return (
     <main className="center-page">
-      <Brand iconOnly />
-      <section className="panel auth-panel">
+      <Marca soloIcono />
+      <Panel className="auth-panel">
         <p className="eyebrow">Contraseña nueva</p>
         <h1>Elegí tu contraseña</h1>
         <form className="form-stack" onSubmit={submit}>
@@ -50,15 +52,15 @@ export function ResetPasswordPage({ busy, error, onSubmit }: SetupProps) {
             />
             {mismatch && <span className="field-error">Las contraseñas no coinciden.</span>}
           </label>
-          <button
-            className="button button--primary button--large"
+          <Boton
+            variante="primaria" tamano="grande"
             disabled={busy || password !== repeat}
           >
             {busy ? 'Guardando…' : 'Guardar contraseña'}
-          </button>
+          </Boton>
         </form>
-        <Feedback error={error} notice="" />
-      </section>
+        <Avisos error={error} aviso="" />
+      </Panel>
     </main>
   )
 }
@@ -73,11 +75,11 @@ export function ProfileNamePage({ busy, error, onSubmit }: SetupProps) {
 
   return (
     <main className="center-page">
-      <Brand iconOnly />
-      <section className="panel auth-panel">
+      <Marca soloIcono />
+      <Panel className="auth-panel">
         <p className="eyebrow">Último paso</p>
         <h1>¿Cómo te llamás?</h1>
-        <p className="muted">Tu equipo va a ver este nombre en cada pesada que cargues.</p>
+        <p className="muted">Tu equipo va a ver este nombre en cada descarga que cargues.</p>
         <form className="form-stack" onSubmit={submit}>
           <label>
             Tu nombre
@@ -91,15 +93,15 @@ export function ProfileNamePage({ busy, error, onSubmit }: SetupProps) {
               onChange={(event) => setName(event.target.value)}
             />
           </label>
-          <button
-            className="button button--primary button--large"
+          <Boton
+            variante="primaria" tamano="grande"
             disabled={busy || !name.trim()}
           >
             {busy ? 'Guardando…' : 'Continuar'}
-          </button>
+          </Boton>
         </form>
-        <Feedback error={error} notice="" />
-      </section>
+        <Avisos error={error} aviso="" />
+      </Panel>
     </main>
   )
 }

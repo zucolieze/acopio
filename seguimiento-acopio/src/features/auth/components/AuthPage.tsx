@@ -1,7 +1,9 @@
 import type { FormEvent } from 'react'
-import { Brand } from '@/shared/ui/Brand'
-import { Feedback } from '@/shared/ui/Feedback'
-import { InstallHint } from '@/shared/ui/InstallHint'
+import { Boton } from '@/shared/ui/Boton'
+import { Marca } from '@/shared/ui/Marca'
+import { Avisos } from '@/shared/ui/Aviso'
+import { IndicacionInstalar } from '@/shared/ui/IndicacionInstalar'
+import { Panel } from '@/shared/ui/Panel'
 import type { AuthMode } from '../types'
 
 type AuthPageProps = {
@@ -41,9 +43,9 @@ export function AuthPage(props: AuthPageProps) {
           ¿No lo ves? Mirá en <strong>Spam</strong> o <strong>Correo no deseado</strong>.
           Puede tardar un minuto.
         </p>
-        <Feedback error={error} notice={notice} />
-        <button
-          className="button button--secondary button--large"
+        <Avisos error={error} aviso={notice} />
+        <Boton
+          variante="secundaria" tamano="grande"
           type="button"
           disabled={busy || props.resendIn > 0}
           onClick={props.onResendMagicLink}
@@ -51,10 +53,10 @@ export function AuthPage(props: AuthPageProps) {
           {props.resendIn > 0
             ? `Pedir otro enlace en ${props.resendIn} s`
             : 'Pedir otro enlace'}
-        </button>
-        <button className="link-button" type="button" onClick={() => onModeChange('entrar')}>
+        </Boton>
+        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
           Usar otro correo
-        </button>
+        </Boton>
       </AuthShell>
     )
   }
@@ -66,29 +68,29 @@ export function AuthPage(props: AuthPageProps) {
         <p className="muted">
           Si es tu primera vez, tu cuenta se crea sola. No hace falta recordar contraseñas.
         </p>
-        <button
-          className="button button--google button--large"
+        <Boton
+          variante="google" tamano="grande"
           type="button"
           disabled={busy}
           onClick={props.onGoogle}
         >
           <GoogleMark />
           Continuar con Google
-        </button>
+        </Boton>
         <p className="auth-divider">o con tu correo</p>
         <form className="form-stack" onSubmit={props.onMagicLink}>
           <EmailField value={props.email} onChange={props.onEmailChange} />
-          <button className="button button--primary button--large" disabled={busy}>
+          <Boton variante="primaria" tamano="grande" disabled={busy}>
             {busy ? 'Un momento…' : 'Mandarme un enlace para entrar'}
-          </button>
+          </Boton>
           <p className="auth-hint">
             Te llega un correo con un botón. Lo tocás y ya estás adentro.
           </p>
         </form>
-        <Feedback error={error} notice={notice} />
-        <button className="link-button" type="button" onClick={() => onModeChange('clave')}>
+        <Avisos error={error} aviso={notice} />
+        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('clave')}>
           Prefiero entrar con contraseña
-        </button>
+        </Boton>
       </AuthShell>
     )
   }
@@ -102,14 +104,14 @@ export function AuthPage(props: AuthPageProps) {
         </p>
         <form className="form-stack" onSubmit={props.onRecover}>
           <EmailField value={props.email} onChange={props.onEmailChange} />
-          <button className="button button--primary button--large" disabled={busy}>
+          <Boton variante="primaria" tamano="grande" disabled={busy}>
             {busy ? 'Un momento…' : 'Mandarme el enlace'}
-          </button>
+          </Boton>
         </form>
-        <Feedback error={error} notice={notice} />
-        <button className="link-button" type="button" onClick={() => onModeChange('clave')}>
+        <Avisos error={error} aviso={notice} />
+        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('clave')}>
           Volver
-        </button>
+        </Boton>
       </AuthShell>
     )
   }
@@ -145,26 +147,27 @@ export function AuthPage(props: AuthPageProps) {
           />
           {creating && <span className="muted small-copy">Mínimo 8 caracteres.</span>}
         </label>
-        <button className="button button--primary button--large" disabled={busy}>
+        <Boton variante="primaria" tamano="grande" disabled={busy}>
           {busy ? 'Un momento…' : creating ? 'Crear cuenta' : 'Iniciar sesión'}
-        </button>
+        </Boton>
       </form>
-      <Feedback error={error} notice={notice} />
+      <Avisos error={error} aviso={notice} />
       {!creating && (
-        <button className="link-button" type="button" onClick={() => onModeChange('recuperar')}>
+        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('recuperar')}>
           Olvidé mi contraseña
-        </button>
+        </Boton>
       )}
-      <button
-        className="link-button"
+      <Boton
+        className="auth-link"
+        variante="enlace"
         type="button"
         onClick={() => onModeChange(creating ? 'clave' : 'crear')}
       >
         {creating ? 'Ya tengo una cuenta' : 'Crear una cuenta con contraseña'}
-      </button>
-      <button className="link-button" type="button" onClick={() => onModeChange('entrar')}>
+      </Boton>
+      <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
         Volver a las otras formas de entrar
-      </button>
+      </Boton>
     </AuthShell>
   )
 }
@@ -172,12 +175,12 @@ export function AuthPage(props: AuthPageProps) {
 function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <main className="center-page">
-      <Brand />
-      <section className="panel auth-panel">
+      <Marca />
+      <Panel className="auth-panel">
         <p className="eyebrow">Seguimiento de cosecha</p>
         {children}
-      </section>
-      <InstallHint />
+      </Panel>
+      <IndicacionInstalar />
       <p className="app-version">Versión {__APP_VERSION__}</p>
     </main>
   )

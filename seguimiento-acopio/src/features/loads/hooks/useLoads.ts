@@ -429,7 +429,7 @@ export function useLoads(
       try {
         await addLoadToRepository(client, destinationId, userId, kilos, activeLotId)
         setLoadKilos((values) => ({ ...values, [destinationId]: '' }))
-        setNotice('Pesada guardada.')
+        setNotice('Descarga guardada.')
         await refresh()
       } catch (addError) {
         setError(messageFromError(addError))
@@ -481,7 +481,7 @@ export function useLoads(
       setError('')
       try {
         await updateLoadInRepository(client, load.id, kg, parsedDate.toISOString())
-        setNotice('Pesada actualizada. El cambio quedó registrado en el historial.')
+        setNotice('Descarga actualizada. El cambio quedó registrado en el historial.')
         await refresh()
       } catch (editError) {
         setError(messageFromError(editError))
@@ -499,7 +499,7 @@ export function useLoads(
       setError('')
       try {
         await softDeleteLoad(client, load.id)
-        setNotice('Pesada eliminada del historial; el movimiento quedó guardado.')
+        setNotice('Descarga eliminada del historial; el movimiento quedó guardado.')
         await refresh()
       } catch (deleteError) {
         setError(messageFromError(deleteError))

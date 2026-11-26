@@ -120,18 +120,18 @@ a mano desde el panel de Supabase. En orden:
 | Migración | Qué agrega |
 |---|---|
 | `20261011190000_create_initial_schema.sql` | Perfiles, grupos, miembros, campañas, campos, lotes, descargas, funciones para crear y unirse a grupos y políticas RLS iniciales |
-| `20261011200000_add_active_destinations.sql` | Destinos activos y cerrados, pesadas asociadas al destino, políticas del flujo simplificado y suscripción Realtime |
+| `20261011200000_add_active_destinations.sql` | Destinos activos y cerrados, descargas asociadas al destino, políticas del flujo simplificado y suscripción Realtime |
 | `20261012100000_enable_debug_admin_role.sql` y `20261012100100_secure_debug_admin_role.sql` | Rol admin de prueba y comprobación de identidad y metadata del usuario en políticas y RPC |
 | `20261017100000_expand_storage_workflow.sql` | Lotes asociados a destinos, capacidad de camiones, humedades de inicio y cierre, bajas lógicas, auditoría y permisos de edición |
 | `20261017120000_preserve_soft_deleted_rows.sql` | Consulta del historial auditado de elementos dados de baja y bloqueo de invitaciones a trabajos borrados |
 | `20261017130000_realtime_work_structure.sql` | Realtime para cambios de trabajos y lotes |
-| `20261018100000_observer_work_corrections.sql` | Correcciones de campos y lotes por el observador, auditoría de campos, reasignación del responsable de una pesada, validación de patentes y Realtime de campos |
+| `20261018100000_observer_work_corrections.sql` | Correcciones de campos y lotes por el observador, auditoría de campos, reasignación del responsable de una descarga, validación de patentes y Realtime de campos |
 | `20261102100000_harden_debug_admin.sql` | El admin de prueba depende solo de la marca `debug_admin` del servidor, sin correo fijo |
 | `20261104100000_add_lot_cereal.sql` y `20261105100000_lot_cereal_editable.sql` | Cereal del lote y permiso para editarlo |
 | `20261105110000_restore_deleted_destination.sql` | Función para restaurar un destino eliminado |
 | `20261107100000_lots_flow_and_yield.sql` | Sin lote automático, hectáreas del lote y formato fijo de humedad |
 | `20261107110000_field_is_the_work.sql` | El campo se crea con el trabajo y toma su nombre |
-| `20261108100000_loads_per_lot_and_reopen.sql` | Cada pesada guarda su lote y función para reabrir un destino cerrado |
+| `20261108100000_loads_per_lot_and_reopen.sql` | Cada descarga guarda su lote y función para reabrir un destino cerrado |
 | `20261108110000_prevent_cereal_mixing.sql` | Control en la base para no mezclar cereales en un destino |
 | `20261112100000_pinned_destinations_and_archive.sql` | Destinos fijados entre trabajos, edición de destinos por el observador y trabajos archivados |
 | `20261112110000_foreign_plates_and_closed_from.sql` | Patentes de otros países y desde qué trabajo se cerró un destino |

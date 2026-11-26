@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Marca } from '@/shared/ui/Marca'
+import { Avisos } from '@/shared/ui/Aviso'
+import { Panel } from '@/shared/ui/Panel'
 import type { MemberRole } from '@/shared/lib/database.types'
-import { Brand } from '@/shared/ui/Brand'
-import { Feedback } from '@/shared/ui/Feedback'
 import {
   AuthPage,
   ModeSelectionPage,
@@ -277,7 +278,7 @@ export default function AppController() {
   function handleDeleteLoad(load: Parameters<typeof loads.deleteLoad>[0]) {
     if (
       window.confirm(
-        `¿Eliminar la pesada de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
+        `¿Eliminar la descarga de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
       )
     ) {
       void loads.deleteLoad(load)
@@ -344,15 +345,15 @@ export default function AppController() {
   if (auth.configurationError) {
     return (
       <main className="center-page">
-        <Brand iconOnly />
-        <section className="panel">
+        <Marca soloIcono />
+        <Panel>
           <h1>Falta conectar la base</h1>
           <p>{auth.configurationError}</p>
           <p className="muted">
             Revisá el archivo <code>.env.local</code> dentro de
             <code> seguimiento-acopio/</code>.
           </p>
-        </section>
+        </Panel>
       </main>
     )
   }
@@ -360,7 +361,7 @@ export default function AppController() {
   if (auth.starting || !auth.client) {
     return (
       <main className="center-page">
-        <Brand iconOnly />
+        <Marca soloIcono />
         <p role="status">Cargando Acopio…</p>
       </main>
     )
@@ -418,9 +419,9 @@ export default function AppController() {
   ) {
     return (
       <main className="center-page">
-        <Brand iconOnly />
+        <Marca soloIcono />
         <p role="status">Cargando tus trabajos…</p>
-        <Feedback error={auth.error || groups.error} notice={auth.notice || groups.notice} />
+        <Avisos error={auth.error || groups.error} aviso={auth.notice || groups.notice} />
       </main>
     )
   }

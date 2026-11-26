@@ -3,7 +3,7 @@
 Plan para ordenar la arquitectura de Acopio (`zucolieze/acopio`, app en
 `seguimiento-acopio/`) de forma que sea fácil de mantener y pueda crecer.
 Cada etapa es un prompt independiente para Claude Code y se hace en **su propia
-rama**. No se arranca una etapa hasta que la anterior esté integrada en `main`.
+rama**. No se arranca una etapa hasta que la anterior esté integrada en `RefactorGeneral`.
 
 ## Cómo usar este archivo
 
@@ -12,7 +12,7 @@ rama**. No se arranca una etapa hasta que la anterior esté integrada en `main`.
    mensaje.
 3. Al terminar, revisá el resultado: `npm.cmd run typecheck`, `npm.cmd run build`,
    prueba manual en local y, después del push, el Preview de Vercel.
-4. Integrá la rama a `main` y recién ahí pasá a la siguiente etapa.
+4. Integrá la rama a `RefactorGeneral` y recién ahí pasá a la siguiente etapa.
 
 La Etapa 0 crea un `CLAUDE.md` con las reglas generales. Claude Code lo lee
 solo en cada sesión, por eso las etapas siguientes no repiten esas reglas.
@@ -83,7 +83,7 @@ El orden importa:
 
 Trabajá en el repositorio de Acopio (app en `seguimiento-acopio/`). Esta es la
 Etapa 0 de un refactor por etapas. Creá la rama `etapa-00-convenciones` desde
-`main` actualizado.
+`RefactorGeneral` actualizado.
 
 **Objetivo:** dejar escritas las reglas del proyecto y ordenar la
 documentación. No se cambia código de la aplicación.
@@ -168,7 +168,7 @@ la Etapa 7.
 ## Etapa 1 — Estructura `app/` y `shared/`
 
 Etapa 1 del refactor (ver `CLAUDE.md` y `docs/ARQUITECTURA.md`). Creá la rama
-`etapa-01-estructura` desde `main` actualizado.
+`etapa-01-estructura` desde `RefactorGeneral` actualizado.
 
 **Objetivo:** llevar el código a la estructura objetivo moviendo archivos. Sin
 cambios de comportamiento ni de nombres internos.
@@ -202,7 +202,7 @@ pesada y cerrar el destino.
 ## Etapa 2 — Base de estilos y UI compartida
 
 Etapa 2 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-02-estilos-base`
-desde `main` actualizado.
+desde `RefactorGeneral` actualizado.
 
 **Objetivo:** preparar la base de CSS Modules y sacar de `App.css` los estilos
 globales y los de componentes reutilizables. La app tiene que verse **igual**
@@ -257,7 +257,7 @@ su rama y con su merge antes de la siguiente:
 Prompt (reemplazá `<feature>` y `<rama>`):
 
 Etapa 3 del refactor (ver `CLAUDE.md`), feature `<feature>`. Creá la rama
-`<rama>` desde `main` actualizado.
+`<rama>` desde `RefactorGeneral` actualizado.
 
 **Objetivo:** que cada componente de `src/features/<feature>/components/`
 tenga su propio `.module.css` y que la feature no dependa más de `App.css`.
@@ -291,7 +291,7 @@ feature.
 ## Etapa 4 — Responsive para tablet y PC
 
 Etapa 4 del refactor (ver `CLAUDE.md` y los puntos de corte de
-`docs/ARQUITECTURA.md`). Creá la rama `etapa-04-responsive` desde `main`
+`docs/ARQUITECTURA.md`). Creá la rama `etapa-04-responsive` desde `RefactorGeneral`
 actualizado.
 
 **Objetivo:** que la app, pensada para celular, también sea cómoda en tablet y
@@ -326,7 +326,7 @@ celular.
 ## Etapa 5 — Límites entre features con ESLint
 
 Etapa 5 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-05-limites` desde
-`main` actualizado.
+`RefactorGeneral` actualizado.
 
 **Objetivo:** que las reglas de importación de `docs/ARQUITECTURA.md` se
 verifiquen solas.
@@ -355,7 +355,7 @@ excepciones desactivadas con comentarios.
 ## Etapa 6 — Tipos del dominio y mapeadores
 
 Etapa 6 del refactor (ver `CLAUDE.md` y `docs/GLOSARIO.md`). Creá la rama
-`etapa-06-dominio` desde `main` actualizado.
+`etapa-06-dominio` desde `RefactorGeneral` actualizado.
 
 **Objetivo:** que la capa `model/` sea la única que conoce la forma de las
 filas de la base. Hacia arriba (hooks y componentes) solo circulan tipos del
@@ -390,7 +390,7 @@ y la bitácora de cambios.
 ## Etapa 7 — Código del frontend en español
 
 Etapa 7 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-07-codigo-es`
-desde `main` actualizado. **Requisito:** el glosario de `docs/GLOSARIO.md`
+desde `RefactorGeneral` actualizado. **Requisito:** el glosario de `docs/GLOSARIO.md`
 tiene que estar confirmado por mí (sin "a confirmar" pendientes).
 
 **Objetivo:** que todo identificador del frontend que nombramos nosotros esté
@@ -421,7 +421,7 @@ en local, y una búsqueda de los nombres en inglés del glosario y de
 ## Etapa 8 — Base de datos en español y roles (riesgo alto)
 
 Etapa 8 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-08-base-es` desde
-`main` actualizado. **No ejecutes nada contra el proyecto remoto de Supabase.**
+`RefactorGeneral` actualizado. **No ejecutes nada contra el proyecto remoto de Supabase.**
 
 **Objetivo:** renombrar a español tablas, columnas, funciones, triggers y
 políticas de la base, y reemplazar los roles `proveedor`/`cliente` por
@@ -482,7 +482,7 @@ documentado. No hagas `db push`: lo hago yo siguiendo `docs/DEPLOY.md`.
 ## Etapa 9 — Rutas con React Router
 
 Etapa 9 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-09-rutas` desde
-`main` actualizado.
+`RefactorGeneral` actualizado.
 
 **Objetivo:** reemplazar la decisión de pantallas por estado de
 `AppController` por rutas con URL propia.
@@ -514,7 +514,7 @@ siguen funcionando.
 ## Etapa 10 — Datos con TanStack Query
 
 Etapa 10 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-10-query` desde
-`main` actualizado.
+`RefactorGeneral` actualizado.
 
 **Objetivo:** que la carga, caché y actualización de datos del servidor la
 maneje TanStack Query en lugar de estado manual en los hooks.
@@ -543,7 +543,7 @@ una carga una pesada y la otra la ve sin recargar.
 ## Etapa 11 — Bases del ingreso con Google
 
 Etapa 11 del refactor (ver `CLAUDE.md` y `docs/ACCESO.md`). Creá la rama
-`etapa-11-ingreso-google` desde `main` actualizado. **No cambies la
+`etapa-11-ingreso-google` desde `RefactorGeneral` actualizado. **No cambies la
 configuración del proyecto remoto de Supabase ni de Google Cloud:** lo que haga
 falta ahí, dejalo como lista de pasos para mí.
 
@@ -591,7 +591,7 @@ tiene las listas completas.
 ## Etapa 12 — Vista de tabla y exportación
 
 Etapa 12 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-12-exportacion`
-desde `main` actualizado. **No ejecutes nada contra el proyecto remoto de
+desde `RefactorGeneral` actualizado. **No ejecutes nada contra el proyecto remoto de
 Supabase.**
 
 **Objetivo:** que toda la información cargada sea fácil de ver en una tabla en
@@ -645,7 +645,7 @@ y fechas correctos.
 ## Etapa 13 — Preparación para Play Store
 
 Etapa 13 del refactor (ver `CLAUDE.md`). Creá la rama `etapa-13-play-store`
-desde `main` actualizado.
+desde `RefactorGeneral` actualizado.
 
 **Objetivo:** dejar la app lista para publicarse en Play Store como PWA
 empaquetada (Trusted Web Activity), y tener claro qué falta para ese hito.

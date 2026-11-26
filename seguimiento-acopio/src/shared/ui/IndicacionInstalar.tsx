@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Boton } from './Boton'
+import estilos from './IndicacionInstalar.module.css'
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -12,7 +14,7 @@ function isInstalled() {
   )
 }
 
-export function InstallHint() {
+export function IndicacionInstalar() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null)
   const [installed, setInstalled] = useState(isInstalled)
   const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent)
@@ -38,8 +40,8 @@ export function InstallHint() {
 
   if (installEvent) {
     return (
-      <button
-        className="button button--quiet"
+      <Boton
+        variante="silenciosa"
         type="button"
         onClick={() => {
           void installEvent.prompt()
@@ -47,13 +49,13 @@ export function InstallHint() {
         }}
       >
         Instalar Acopio en el celular
-      </button>
+      </Boton>
     )
   }
 
   if (isIos) {
     return (
-      <p className="auth-hint install-hint">
+      <p className={estilos.indicacion}>
         Para tener Acopio en tu celular: tocá el botón <strong>Compartir</strong> de
         Safari y después <strong>Agregar a pantalla de inicio</strong>.
       </p>
