@@ -1708,3 +1708,16 @@ button:focus-visible {
   margin-top: var(--espacio-050);
   font-size: var(--texto-085);
 }
+
+/* Cerrar a la izquierda y eliminar a la derecha, uno en cada margen */
+.destination-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--espacio-075);
+}
+
+.destination-card__actions > .destination-card__close:not(.is-urgent) {
+  margin-top: var(--espacio-050);
+}

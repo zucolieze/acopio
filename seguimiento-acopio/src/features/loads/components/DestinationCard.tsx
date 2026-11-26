@@ -132,7 +132,7 @@ export function DestinationCard({
           onClick={onDelete}
         >
           Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'} (no
-          tiene cargas)
+          tiene descargas)
         </Boton>
       )}
       {isProvider && !isEmpty && destination.destination_type !== 'camion' && (
@@ -161,28 +161,31 @@ export function DestinationCard({
           </Boton>
         </form>
       )}
-      {isProvider && !isEmpty && destination.destination_type === 'camion' && (
-        <Boton
-          variante={limitReached ? 'peligro' : 'enlace'}
-          tamano={limitReached ? 'grande' : undefined}
-          className={limitReached ? 'destination-card__close is-urgent' : 'destination-card__close'}
-          type="button"
-          disabled={busy}
-          onClick={() => onClose('')}
-        >
-          Cerrar camión
-        </Boton>
-      )}
-      {/* Se puede eliminar cualquier destino en cualquier momento, tenga o no cargas. */}
+      {/* Se puede eliminar cualquier destino en cualquier momento, tenga o no descargas. */}
       {isProvider && !isEmpty && (
-        <Boton
-          variante="enlacePeligro" className="destination-card__delete-link"
-          type="button"
-          disabled={busy}
-          onClick={onDelete}
-        >
-          Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'}
-        </Boton>
+        <div className="destination-card__actions">
+          {destination.destination_type === 'camion' && (
+            <Boton
+              variante={limitReached ? 'peligro' : 'enlace'}
+              tamano={limitReached ? 'grande' : undefined}
+              className={limitReached ? 'destination-card__close is-urgent' : 'destination-card__close'}
+              type="button"
+              disabled={busy}
+              onClick={() => onClose('')}
+            >
+              Cerrar camión
+            </Boton>
+          )}
+          <Boton
+            variante="enlacePeligro"
+            className="destination-card__delete-link"
+            type="button"
+            disabled={busy}
+            onClick={onDelete}
+          >
+            Eliminar {destination.destination_type === 'camion' ? 'camión' : 'destino'}
+          </Boton>
+        </div>
       )}
     </article>
   )
