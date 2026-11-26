@@ -3,6 +3,8 @@ import type { FormEvent } from 'react'
 import { Marca } from '@/shared/ui/Marca'
 import { Avisos } from '@/shared/ui/Aviso'
 import { Panel } from '@/shared/ui/Panel'
+import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
 import type { MemberRole } from '@/shared/lib/database.types'
 import {
   AuthPage,
@@ -344,26 +346,26 @@ export default function AppController() {
 
   if (auth.configurationError) {
     return (
-      <main className="center-page">
+      <PaginaCentrada>
         <Marca soloIcono />
         <Panel>
           <h1>Falta conectar la base</h1>
           <p>{auth.configurationError}</p>
-          <p className="muted">
+          <TextoSuave>
             Revisá el archivo <code>.env.local</code> dentro de
             <code> seguimiento-acopio/</code>.
-          </p>
+          </TextoSuave>
         </Panel>
-      </main>
+      </PaginaCentrada>
     )
   }
 
   if (auth.starting || !auth.client) {
     return (
-      <main className="center-page">
+      <PaginaCentrada>
         <Marca soloIcono />
         <p role="status">Cargando Acopio…</p>
-      </main>
+      </PaginaCentrada>
     )
   }
 
@@ -418,11 +420,11 @@ export default function AppController() {
     groups.memberships.length === 0
   ) {
     return (
-      <main className="center-page">
+      <PaginaCentrada>
         <Marca soloIcono />
         <p role="status">Cargando tus trabajos…</p>
         <Avisos error={auth.error || groups.error} aviso={auth.notice || groups.notice} />
-      </main>
+      </PaginaCentrada>
     )
   }
 

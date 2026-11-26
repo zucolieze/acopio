@@ -3,7 +3,11 @@ import { Boton } from '@/shared/ui/Boton'
 import { Marca } from '@/shared/ui/Marca'
 import { Avisos } from '@/shared/ui/Aviso'
 import { IndicacionInstalar } from '@/shared/ui/IndicacionInstalar'
-import { Panel } from '@/shared/ui/Panel'
+import { FormularioApilado } from '@/shared/ui/FormularioApilado'
+import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import { PanelAcceso } from './PanelAcceso'
+import estilos from './AuthPage.module.css'
 import type { AuthMode } from '../types'
 
 type AuthPageProps = {
@@ -33,19 +37,22 @@ export function AuthPage(props: AuthPageProps) {
 
   if (linkSentTo) {
     return (
-      <AuthShell>
-        <h1>Revisá tu correo</h1>
-        <p className="muted">
-          Te mandamos un enlace a <strong>{linkSentTo}</strong>. Abrí el correo y
-          tocá el botón para entrar.
-        </p>
-        <p className="auth-hint">
+      <AuthShell
+        titulo="Revisá tu correo"
+        introduccion={
+          <>
+            Te mandamos un enlace a <strong>{linkSentTo}</strong>. Abrí el correo y
+            tocá el botón para entrar.
+          </>
+        }
+      >
+        <p className={estilos.ayuda}>
           ¿No lo ves? Mirá en <strong>Spam</strong> o <strong>Correo no deseado</strong>.
           Puede tardar un minuto.
         </p>
         <Avisos error={error} aviso={notice} />
         <Boton
-          variante="secundaria" tamano="grande"
+          variante="secundaria" tamano="grande" className={estilos.anchoCompleto}
           type="button"
           disabled={busy || props.resendIn > 0}
           onClick={props.onResendMagicLink}
@@ -54,7 +61,7 @@ export function AuthPage(props: AuthPageProps) {
             ? `Pedir otro enlace en ${props.resendIn} s`
             : 'Pedir otro enlace'}
         </Boton>
-        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
+        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
           Usar otro correo
         </Boton>
       </AuthShell>
@@ -63,13 +70,12 @@ export function AuthPage(props: AuthPageProps) {
 
   if (mode === 'entrar') {
     return (
-      <AuthShell>
-        <h1>Entrá a Acopio</h1>
-        <p className="muted">
-          Si es tu primera vez, tu cuenta se crea sola. No hace falta recordar contraseñas.
-        </p>
+      <AuthShell
+        titulo="Entrá a Acopio"
+        introduccion="Si es tu primera vez, tu cuenta se crea sola. No hace falta recordar contraseñas."
+      >
         <Boton
-          variante="google" tamano="grande"
+          variante="google" tamano="grande" className={estilos.anchoCompleto}
           type="button"
           disabled={busy}
           onClick={props.onGoogle}
@@ -77,18 +83,18 @@ export function AuthPage(props: AuthPageProps) {
           <GoogleMark />
           Continuar con Google
         </Boton>
-        <p className="auth-divider">o con tu correo</p>
-        <form className="form-stack" onSubmit={props.onMagicLink}>
+        <p className={estilos.divisor}>o con tu correo</p>
+        <FormularioApilado onSubmit={props.onMagicLink}>
           <EmailField value={props.email} onChange={props.onEmailChange} />
           <Boton variante="primaria" tamano="grande" disabled={busy}>
             {busy ? 'Un momento…' : 'Mandarme un enlace para entrar'}
           </Boton>
-          <p className="auth-hint">
+          <p className={estilos.ayuda}>
             Te llega un correo con un botón. Lo tocás y ya estás adentro.
           </p>
-        </form>
+        </FormularioApilado>
         <Avisos error={error} aviso={notice} />
-        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('clave')}>
+        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('clave')}>
           Prefiero entrar con contraseña
         </Boton>
       </AuthShell>
@@ -97,19 +103,18 @@ export function AuthPage(props: AuthPageProps) {
 
   if (mode === 'recuperar') {
     return (
-      <AuthShell>
-        <h1>Recuperar contraseña</h1>
-        <p className="muted">
-          Poné tu correo y te mandamos un enlace para elegir una contraseña nueva.
-        </p>
-        <form className="form-stack" onSubmit={props.onRecover}>
+      <AuthShell
+        titulo="Recuperar contraseña"
+        introduccion="Poné tu correo y te mandamos un enlace para elegir una contraseña nueva."
+      >
+        <FormularioApilado onSubmit={props.onRecover}>
           <EmailField value={props.email} onChange={props.onEmailChange} />
           <Boton variante="primaria" tamano="grande" disabled={busy}>
             {busy ? 'Un momento…' : 'Mandarme el enlace'}
           </Boton>
-        </form>
+        </FormularioApilado>
         <Avisos error={error} aviso={notice} />
-        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('clave')}>
+        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('clave')}>
           Volver
         </Boton>
       </AuthShell>
@@ -118,9 +123,8 @@ export function AuthPage(props: AuthPageProps) {
 
   const creating = mode === 'crear'
   return (
-    <AuthShell>
-      <h1>{creating ? 'Crear cuenta' : 'Entrar con contraseña'}</h1>
-      <form className="form-stack" onSubmit={creating ? props.onSignUp : props.onSignIn}>
+    <AuthShell titulo={creating ? 'Crear cuenta' : 'Entrar con contraseña'}>
+      <FormularioApilado onSubmit={creating ? props.onSignUp : props.onSignIn}>
         {creating && (
           <label>
             Tu nombre
@@ -145,44 +149,51 @@ export function AuthPage(props: AuthPageProps) {
             value={props.password}
             onChange={(event) => props.onPasswordChange(event.target.value)}
           />
-          {creating && <span className="muted small-copy">Mínimo 8 caracteres.</span>}
+          {creating && <TextoSuave como="span" chico>Mínimo 8 caracteres.</TextoSuave>}
         </label>
         <Boton variante="primaria" tamano="grande" disabled={busy}>
           {busy ? 'Un momento…' : creating ? 'Crear cuenta' : 'Iniciar sesión'}
         </Boton>
-      </form>
+      </FormularioApilado>
       <Avisos error={error} aviso={notice} />
       {!creating && (
-        <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('recuperar')}>
+        <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('recuperar')}>
           Olvidé mi contraseña
         </Boton>
       )}
       <Boton
-        className="auth-link"
+        className={estilos.enlaceCentrado}
         variante="enlace"
         type="button"
         onClick={() => onModeChange(creating ? 'clave' : 'crear')}
       >
         {creating ? 'Ya tengo una cuenta' : 'Crear una cuenta con contraseña'}
       </Boton>
-      <Boton className="auth-link" variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
+      <Boton className={estilos.enlaceCentrado} variante="enlace" type="button" onClick={() => onModeChange('entrar')}>
         Volver a las otras formas de entrar
       </Boton>
     </AuthShell>
   )
 }
 
-function AuthShell({ children }: { children: React.ReactNode }) {
+function AuthShell({
+  titulo,
+  introduccion,
+  children,
+}: {
+  titulo: string
+  introduccion?: React.ReactNode
+  children: React.ReactNode
+}) {
   return (
-    <main className="center-page">
+    <PaginaCentrada>
       <Marca />
-      <Panel className="auth-panel">
-        <p className="eyebrow">Seguimiento de cosecha</p>
+      <PanelAcceso sobretitulo="Seguimiento de cosecha" titulo={titulo} introduccion={introduccion}>
         {children}
-      </Panel>
+      </PanelAcceso>
       <IndicacionInstalar />
-      <p className="app-version">Versión {__APP_VERSION__}</p>
-    </main>
+      <p className={estilos.version}>Versión {__APP_VERSION__}</p>
+    </PaginaCentrada>
   )
 }
 

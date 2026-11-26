@@ -12,11 +12,6 @@
   justify-content: flex-start;
 }
 
-.auth-panel {
-  width: min(100%, 28rem);
-}
-
-.auth-panel h1,
 .onboarding h1,
 .dashboard h1 {
   margin: 0;
@@ -26,7 +21,6 @@
   line-height: 1.05;
 }
 
-.auth-panel .eyebrow,
 .dashboard .eyebrow,
 .onboarding .eyebrow,
 .new-destination .eyebrow {
@@ -41,10 +35,6 @@
 .muted {
   color: var(--color-texto-suave);
   line-height: 1.55;
-}
-
-.auth-panel > .muted {
-  margin: var(--espacio-085) 0 var(--espacio-140);
 }
 
 .form-stack {
@@ -90,70 +80,6 @@ button:focus-visible {
 .onboarding > .muted {
   max-width: 38rem;
   margin: var(--espacio-080) 0 var(--espacio-150);
-}
-
-.mode-selection {
-  width: min(100%, 58rem);
-  margin: var(--espacio-300) auto;
-}
-
-.mode-selection > h1 {
-  max-width: 15ch;
-  margin: 0;
-  color: var(--color-verde);
-  font-size: clamp(2rem, 8vw, 3.2rem);
-  letter-spacing: -0.055em;
-  line-height: 1.05;
-}
-
-.mode-selection > .muted {
-  max-width: 38rem;
-  margin: var(--espacio-080) 0 var(--espacio-150);
-}
-
-.mode-cards {
-  display: grid;
-  gap: var(--espacio-085);
-  margin-top: var(--espacio-125);
-}
-
-.mode-card {
-  display: flex;
-  min-height: 8.5rem;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--espacio-045);
-  padding: var(--espacio-100);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-100);
-  background: var(--color-blanco);
-  color: var(--color-texto-secundario);
-  cursor: pointer;
-  text-align: left;
-}
-
-.mode-card:hover,
-.mode-card:focus-visible {
-  border-color: var(--color-verde-medio);
-  background: var(--color-verde-resaltado);
-}
-
-.mode-card strong {
-  color: var(--color-verde);
-  font-size: var(--texto-110);
-}
-
-.mode-card > span:last-child {
-  color: var(--color-texto-suave);
-  font-size: var(--texto-090);
-}
-
-.mode-card__icon {
-  font-size: 1.5rem;
-}
-
-.mode-card--debug {
-  border-style: dashed;
 }
 
 .work-actions {
@@ -580,9 +506,7 @@ button:focus-visible {
 
   
 
-  .mode-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  
 
   .work-actions {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -966,45 +890,6 @@ button:focus-visible {
   }
 }
 
-.auth-panel > button,
-.auth-panel > .auth-link {
-  width: 100%;
-}
-
-.auth-panel > .auth-link {
-  margin-top: var(--espacio-050);
-  text-align: center;
-}
-
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: var(--espacio-075);
-  margin: var(--espacio-125) 0;
-  color: var(--color-texto-suave);
-  font-size: var(--texto-090);
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  height: 1px;
-  flex: 1;
-  background: var(--color-separador);
-  content: '';
-}
-
-.auth-hint {
-  margin: var(--espacio-075) 0 0;
-  color: var(--color-texto-suave);
-  font-size: var(--texto-090);
-  line-height: 1.45;
-}
-
-.field-error {
-  color: var(--color-rojo);
-  font-size: var(--texto-085);
-}
-
 .destination-card__close.is-urgent {
   width: 100%;
   min-height: 4rem;
@@ -1131,61 +1016,16 @@ button:focus-visible {
   padding-bottom: 0;
 }
 
-.mode-selection,
 .onboarding {
   margin: var(--espacio-050) auto 0;
 }
 
-.mode-selection > .muted,
 .onboarding > .muted {
   margin: var(--espacio-040) 0 var(--espacio-075);
 }
 
-.mode-selection > h1,
 .onboarding > h1 {
   font-size: clamp(1.7rem, 7vw, 2.6rem);
-}
-
-.mode-selection .eyebrow {
-  margin: 0 0 var(--espacio-030);
-}
-
-.mode-cards {
-  gap: var(--espacio-065);
-  margin-top: var(--espacio-050);
-}
-
-.mode-card {
-  min-height: 0;
-  gap: var(--espacio-025);
-  padding: var(--espacio-110) var(--espacio-125);
-  border-width: 2px;
-}
-
-.mode-card strong {
-  font-size: var(--texto-125);
-}
-
-.mode-card--carrero {
-  border-color: #7fae8e;
-  background: #e9f4ec;
-}
-
-.mode-card--carrero:hover,
-.mode-card--carrero:focus-visible {
-  border-color: #2f6f4c;
-  background: #dcede1;
-}
-
-.mode-card--observador {
-  border-color: #d3b45e;
-  background: var(--color-mostaza-fondo);
-}
-
-.mode-card--observador:hover,
-.mode-card--observador:focus-visible {
-  border-color: var(--color-mostaza-borde);
-  background: #f6ebc3;
 }
 
 .work-actions {
@@ -1612,14 +1452,6 @@ button:focus-visible {
 
 .pin-button.is-pinned svg {
   transform: none;
-}
-
-/* Versión de la app (solo en el login) */
-.app-version {
-  margin: 0;
-  color: var(--color-texto-suave);
-  font-size: var(--texto-080);
-  text-align: center;
 }
 
 /* Reactivar un destino cerrado */
