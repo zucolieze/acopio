@@ -1,0 +1,9 @@
+.suave {
+  color: var(--color-texto-suave);
+  line-height: 1.55;
+}
+
+.chico {
+  margin: var(--espacio-040) 0;
+  font-size: var(--texto-078);
+}

@@ -1,0 +1,14 @@
+.apilado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-075);
+}
+
+.apilado label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-045);
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-090);
+  font-weight: 650;
+}
