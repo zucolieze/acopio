@@ -1,0 +1,8 @@
+.encabezado {
+  display: flex;
+  width: min(100%, 68rem);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-100);
+  margin: 0 auto;
+}

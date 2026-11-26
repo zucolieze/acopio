@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Boton } from '@/shared/ui/Boton'
 import { cerealOptions } from '../types'
 import type { Destination, Lot, LotChanges } from '../types'
 
@@ -97,9 +98,9 @@ function LotRow({
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
-          <button className="button button--secondary button--small" type="submit" disabled={busy}>
+          <Boton variante="secundaria" tamano="chico" type="submit" disabled={busy}>
             Guardar
-          </button>
+          </Boton>
         </form>
       ) : (
         <>
@@ -109,8 +110,8 @@ function LotRow({
             {lot.hectares ? ` · ${lot.hectares} ha` : ''}
           </span>
           <div className="lot-management__actions">
-            <button
-              className="link-button"
+            <Boton
+              variante="enlace"
               type="button"
               disabled={busy}
               onClick={() => {
@@ -120,9 +121,9 @@ function LotRow({
               }}
             >
               Editar
-            </button>
-            <button
-              className="link-button link-button--danger"
+            </Boton>
+            <Boton
+              variante="enlacePeligro"
               type="button"
               disabled={busy || hasActiveDestinations || isLastActiveLot}
               title={
@@ -135,7 +136,7 @@ function LotRow({
               onClick={() => onDelete(lot)}
             >
               Eliminar
-            </button>
+            </Boton>
           </div>
         </>
       )}

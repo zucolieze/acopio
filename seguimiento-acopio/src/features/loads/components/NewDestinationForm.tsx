@@ -1,12 +1,14 @@
 import type { FormEvent } from 'react'
-import type { DestinationType } from '../../../lib/database.types'
+import { Boton } from '@/shared/ui/Boton'
+import { Panel } from '@/shared/ui/Panel'
+import type { DestinationType } from '@/shared/lib/database.types'
 import { destinationLabels } from '../types'
-import { normalizePlate } from '../../../utils/plates'
+import { normalizePlate } from '@/shared/utils/plates'
 import {
   formatHumidityInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
-} from '../../../utils/humidity'
+} from '@/shared/utils/humidity'
 
 type NewDestinationFormProps = {
   destinationType: DestinationType
@@ -57,7 +59,7 @@ export function NewDestinationForm({
         : 'Ej.: Bolsa 12'
 
   return (
-    <section className="new-destination panel">
+    <Panel className="new-destination">
       <p className="new-destination__lot">
         {lotLabel ? <>Lote: <strong>{lotLabel}</strong></> : 'Primero creá el campo y el lote acá abajo.'}
       </p>
@@ -129,10 +131,10 @@ export function NewDestinationForm({
             />
           </label>
         )}
-        <button className="button button--primary button--large" disabled={busy || loading || !canOpen}>
+        <Boton variante="primaria" tamano="grande" disabled={busy || loading || !canOpen}>
           {busy ? 'Abriendo destino…' : loading ? 'Cargando trabajo…' : !canOpen ? 'Elegí un lote primero' : 'Abrir destino'}
-        </button>
+        </Boton>
       </form>
-    </section>
+    </Panel>
   )
 }

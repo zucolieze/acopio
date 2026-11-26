@@ -1,0 +1,96 @@
+/*
+ * Tokens de diseño de Acopio.
+ *
+ * Puntos de corte (las variables CSS no funcionan dentro de @media, por eso
+ * son valores fijos):
+ *   - celular: base, sin media query
+ *   - tablet:  @media (min-width: 42rem)
+ *   - PC:      @media (min-width: 64rem)
+ *
+ * Los colores, tamaños y espacios que se usan una sola vez quedan escritos en
+ * el archivo que los usa.
+ */
+:root {
+  /* Colores */
+  --color-verde: #173f35;
+  --color-verde-medio: #39735a;
+  --color-verde-enlace: #286943;
+  --color-verde-fondo: #eef4ec;
+  --color-verde-resaltado: #f3f7f1;
+  --color-verde-exito: #e8f3e8;
+  --color-texto: #1c302a;
+  --color-texto-secundario: #31443c;
+  --color-texto-suave: #4c5a53;
+  --color-blanco: #fff;
+  --color-fondo-suave: #f6f8f4;
+  --color-fondo-dato: #f4f6f2;
+  --color-fondo-neutro: #edf0eb;
+  --color-borde: #aebbb2;
+  --color-borde-boton: #8b998f;
+  --color-borde-campo: #6f7d75;
+  --color-separador: #e4e9df;
+  --color-rojo: #8e2b1e;
+  --color-rojo-enlace: #a52c21;
+  --color-mostaza-fondo: #fbf3d9;
+  --color-mostaza-borde: #9a7414;
+  --color-mostaza-texto: #5c4500;
+
+  /* Espaciados (rem x 100) */
+  --espacio-015: 0.15rem;
+  --espacio-020: 0.2rem;
+  --espacio-025: 0.25rem;
+  --espacio-030: 0.3rem;
+  --espacio-035: 0.35rem;
+  --espacio-040: 0.4rem;
+  --espacio-045: 0.45rem;
+  --espacio-050: 0.5rem;
+  --espacio-055: 0.55rem;
+  --espacio-060: 0.6rem;
+  --espacio-065: 0.65rem;
+  --espacio-070: 0.7rem;
+  --espacio-075: 0.75rem;
+  --espacio-080: 0.8rem;
+  --espacio-085: 0.85rem;
+  --espacio-090: 0.9rem;
+  --espacio-100: 1rem;
+  --espacio-110: 1.1rem;
+  --espacio-125: 1.25rem;
+  --espacio-140: 1.4rem;
+  --espacio-150: 1.5rem;
+  --espacio-180: 1.8rem;
+  --espacio-200: 2rem;
+  --espacio-300: 3rem;
+
+  /* Tamaños de texto (rem x 100) */
+  --texto-072: 0.72rem;
+  --texto-075: 0.75rem;
+  --texto-078: 0.78rem;
+  --texto-080: 0.8rem;
+  --texto-082: 0.82rem;
+  --texto-085: 0.85rem;
+  --texto-088: 0.88rem;
+  --texto-090: 0.9rem;
+  --texto-100: 1rem;
+  --texto-105: 1.05rem;
+  --texto-110: 1.1rem;
+  --texto-115: 1.15rem;
+  --texto-120: 1.2rem;
+  --texto-125: 1.25rem;
+
+  /* Radios */
+  --radio-065: 0.65rem;
+  --radio-070: 0.7rem;
+  --radio-075: 0.75rem;
+  --radio-080: 0.8rem;
+  --radio-100: 1rem;
+  --radio-pildora: 99px;
+
+  /* Sombras */
+  --sombra-panel: 0 0.75rem 2rem rgb(23 63 53 / 5%);
+  --sombra-tarjeta: 0 0.4rem 1.3rem rgb(23 63 53 / 4%);
+
+  /* Alto de botones */
+  --alto-boton-chico: 2.5rem;
+  --alto-boton: 3rem;
+  --alto-boton-grande: 3.5rem;
+}

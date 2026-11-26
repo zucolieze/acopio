@@ -1,4 +1,4 @@
-import type { Database, DestinationType } from '../../lib/database.types'
+import type { Database, DestinationType } from '@/shared/lib/database.types'
 
 export type Destination = Database['public']['Tables']['destinations']['Row']
 export type Load = Database['public']['Tables']['loads']['Row']

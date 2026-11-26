@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import type { Membership } from '../../groups/types'
+import { Boton } from '@/shared/ui/Boton'
+import type { Membership } from '@/features/groups/types'
 
 type WorkSettingsProps = {
   membership: Membership
@@ -31,15 +32,15 @@ export function WorkSettings({
       <div className="group-code">
         <span>Código para invitar</span>
         <strong>{membership.inviteCode}</strong>
-        <button className="link-button" type="button" onClick={onCopyInviteCode}>
+        <Boton variante="enlace" type="button" onClick={onCopyInviteCode}>
           Copiar código
-        </button>
+        </Boton>
       </div>
       <section className="work-management">
         <div className="destination-management__actions">
           {canEdit && (
-            <button
-              className="link-button"
+            <Boton
+              variante="enlace"
               type="button"
               onClick={() => {
                 setName(membership.groupName)
@@ -47,25 +48,25 @@ export function WorkSettings({
               }}
             >
               {editing ? 'Cancelar edición' : 'Editar trabajo'}
-            </button>
+            </Boton>
           )}
-          <button
-            className="link-button"
+          <Boton
+            variante="enlace"
             type="button"
             disabled={busy || hasActiveDestinations}
             onClick={onArchive}
           >
             Archivar trabajo
-          </button>
+          </Boton>
           {canEdit && (
-            <button
-              className="link-button link-button--danger"
+            <Boton
+              variante="enlacePeligro"
               type="button"
               disabled={busy}
               onClick={onDelete}
             >
               Eliminar trabajo
-            </button>
+            </Boton>
           )}
         </div>
         {hasActiveDestinations && (
@@ -91,9 +92,9 @@ export function WorkSettings({
                 onChange={(event) => setName(event.target.value)}
               />
             </label>
-            <button className="button button--secondary" type="submit" disabled={busy}>
+            <Boton variante="secundaria" type="submit" disabled={busy}>
               Guardar nombre
-            </button>
+            </Boton>
           </form>
         )}
       </section>

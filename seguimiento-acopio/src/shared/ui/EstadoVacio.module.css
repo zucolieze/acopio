@@ -1,0 +1,27 @@
+.vacio {
+  display: grid;
+  justify-items: center;
+  padding: var(--espacio-300) var(--espacio-100);
+  border: 1px dashed var(--color-borde-boton);
+  border-radius: var(--radio-100);
+  background: rgb(255 255 255 / 55%);
+  text-align: center;
+}
+
+.icono {
+  margin-bottom: var(--espacio-060);
+  font-size: 2rem;
+}
+
+.vacio h2 {
+  margin: 0;
+  color: var(--color-verde);
+  font-size: var(--texto-110);
+}
+
+.vacio p {
+  max-width: 25rem;
+  margin: var(--espacio-050) 0 0;
+  color: var(--color-texto-suave);
+  line-height: 1.5;
+}

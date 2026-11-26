@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
-import { formatDate, formatKilos } from '../../../utils/format'
+import { formatDate, formatKilos } from '@/shared/utils/format'
 import { destinationLabels } from '../types'
 import type { Destination, Load } from '../types'
+import { EtiquetaEstado } from '@/shared/ui/EtiquetaEstado'
 
 type DestinationHeadingProps = {
   destination: Destination
@@ -27,14 +28,12 @@ export function DestinationHeading({
   return (
     <div className="destination-heading">
       <div className="destination-heading__topline">
-        <span className={deleted ? 'status-badge is-deleted' : closed ? 'status-badge is-closed' : 'status-badge'}>
-          {deleted ? 'Eliminado' : closed ? 'Cerrado' : 'Activo'}
-        </span>
+        <EtiquetaEstado estado={deleted ? 'eliminado' : closed ? 'cerrado' : 'activo'} />
         <span className="destination-heading__type">
           {destinationLabels[destination.destination_type]}
         </span>
         {destination.pinned && !closed && !deleted && !action && (
-          <span className="status-badge is-pinned">Fijado</span>
+          <EtiquetaEstado estado="fijado" />
         )}
         {action && <span className="destination-heading__action">{action}</span>}
       </div>

@@ -1,0 +1,22 @@
+.pestanas {
+  display: flex;
+  gap: var(--espacio-025);
+  margin: 0 0 var(--espacio-075);
+  border-bottom: 1px solid #dfe5dc;
+}
+
+.pestana {
+  min-height: 3rem;
+  padding: var(--espacio-060) var(--espacio-085);
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--color-texto-suave);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.activa {
+  border-bottom-color: var(--color-verde-medio);
+  color: var(--color-verde);
+}

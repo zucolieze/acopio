@@ -1,22 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import type { MemberRole } from '../lib/database.types'
-import { Brand } from '../components/ui/Brand'
-import { Feedback } from '../components/ui/Feedback'
+import { Marca } from '@/shared/ui/Marca'
+import { Avisos } from '@/shared/ui/Aviso'
+import { Panel } from '@/shared/ui/Panel'
+import { PaginaCentrada } from '@/shared/ui/PaginaCentrada'
+import { TextoSuave } from '@/shared/ui/TextoSuave'
+import type { MemberRole } from '@/shared/lib/database.types'
 import {
   AuthPage,
   ModeSelectionPage,
   ProfileNamePage,
   ResetPasswordPage,
   useAuth,
-} from '../features/auth'
-import { useGroups, WorkMenuPage } from '../features/groups'
-import { DashboardPage, destinationLabels, useLoads } from '../features/loads'
-import type { Tab } from '../features/loads'
-import type { AppScreen, WorkMode } from '../types/app'
-import { messageFromError } from '../utils/errors'
-import { clearStored, readStored, writeStored } from '../utils/storage'
-import { isArgentinePlate, isValidPlate, normalizePlate } from '../utils/plates'
+} from '@/features/auth'
+import { useGroups, WorkMenuPage } from '@/features/groups'
+import { DashboardPage, destinationLabels, useLoads } from '@/features/loads'
+import type { Tab } from '@/features/loads'
+import type { AppScreen, WorkMode } from '@/shared/types/app'
+import { messageFromError } from '@/shared/utils/errors'
+import { clearStored, readStored, writeStored } from '@/shared/utils/storage'
+import { isArgentinePlate, isValidPlate, normalizePlate } from '@/shared/utils/plates'
 
 type SavedNavigation = {
   userId: string
@@ -277,7 +280,7 @@ export default function AppController() {
   function handleDeleteLoad(load: Parameters<typeof loads.deleteLoad>[0]) {
     if (
       window.confirm(
-        `¿Eliminar la pesada de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
+        `¿Eliminar la descarga de ${load.kg.toLocaleString('es-AR')} kg? La eliminación quedará auditada.`,
       )
     ) {
       void loads.deleteLoad(load)
@@ -343,26 +346,26 @@ export default function AppController() {
 
   if (auth.configurationError) {
     return (
-      <main className="center-page">
-        <Brand iconOnly />
-        <section className="panel">
+      <PaginaCentrada>
+        <Marca soloIcono />
+        <Panel>
           <h1>Falta conectar la base</h1>
           <p>{auth.configurationError}</p>
-          <p className="muted">
+          <TextoSuave>
             Revisá el archivo <code>.env.local</code> dentro de
             <code> seguimiento-acopio/</code>.
-          </p>
-        </section>
-      </main>
+          </TextoSuave>
+        </Panel>
+      </PaginaCentrada>
     )
   }
 
   if (auth.starting || !auth.client) {
     return (
-      <main className="center-page">
-        <Brand iconOnly />
+      <PaginaCentrada>
+        <Marca soloIcono />
         <p role="status">Cargando Acopio…</p>
-      </main>
+      </PaginaCentrada>
     )
   }
 
@@ -417,11 +420,11 @@ export default function AppController() {
     groups.memberships.length === 0
   ) {
     return (
-      <main className="center-page">
-        <Brand iconOnly />
+      <PaginaCentrada>
+        <Marca soloIcono />
         <p role="status">Cargando tus trabajos…</p>
-        <Feedback error={auth.error || groups.error} notice={auth.notice || groups.notice} />
-      </main>
+        <Avisos error={auth.error || groups.error} aviso={auth.notice || groups.notice} />
+      </PaginaCentrada>
     )
   }
 
