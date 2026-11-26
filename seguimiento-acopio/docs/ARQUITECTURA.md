@@ -57,16 +57,19 @@ tildes ni `ñ` en identificadores. Queda en inglés lo que impone el lenguaje,
 React o una biblioteca, el prefijo `use` de los hooks y los nombres de carpetas
 de capa. Roles: `carrero` y `observador`. Ver [GLOSARIO.md](GLOSARIO.md).
 
-## Estado actual (antes del refactor)
+## Estado actual
 
-El código todavía no sigue la estructura objetivo:
+Etapa 1 hecha: la estructura de carpetas ya es la objetivo. Todavía faltan las
+demás diferencias:
 
 - Hay tres features: `auth`, `groups` y `loads`. La administración de lotes y
   campos vive dentro de `loads`.
-- Lo compartido está en `src/components/ui/`, `src/lib/`, `src/utils/` y
-  `src/types/` (no en `src/shared/`).
-- `src/app/AppController.tsx` compone las features y decide qué pantalla
-  mostrar por estado; `src/App.tsx` y `src/main.tsx` arrancan la app.
+- Lo compartido está en `src/shared/` (`ui/`, `lib/`, `utils/`, `types/`).
+  Falta `shared/styles/` (Etapa 2).
+- `src/app/` tiene `main.tsx`, `App.tsx` y `AppController.tsx`, que compone las
+  features y decide qué pantalla mostrar por estado. `index.html` carga
+  `/src/app/main.tsx`.
+- El alias `@/` apunta a `src/` (en `tsconfig.json` y `vite.config.ts`).
 - Todos los estilos están en `src/App.css` e `src/index.css` (globales, sin CSS
   Modules).
 - Los nombres están en inglés y los roles en la base y en el código son

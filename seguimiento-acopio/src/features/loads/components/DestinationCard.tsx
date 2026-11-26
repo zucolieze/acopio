@@ -1,14 +1,14 @@
 import type { FormEvent } from 'react'
 import { DestinationHeading } from './DestinationHeading'
 import type { Destination, Load } from '../types'
-import { formatKilos } from '../../../utils/format'
+import { formatKilos } from '@/shared/utils/format'
 import {
   formatHumidityInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
   formatHumidity,
   parseHumidity,
-} from '../../../utils/humidity'
+} from '@/shared/utils/humidity'
 
 type DestinationCardProps = {
   destination: Destination

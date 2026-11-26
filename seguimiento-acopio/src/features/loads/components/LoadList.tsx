@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatDate, formatKilos } from '../../../utils/format'
+import { formatDate, formatKilos } from '@/shared/utils/format'
 import type { Load, WorkMember } from '../types'
 
 type LoadListProps = {

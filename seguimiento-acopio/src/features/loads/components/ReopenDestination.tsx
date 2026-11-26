@@ -4,7 +4,7 @@ import {
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
   parseHumidity,
-} from '../../../utils/humidity'
+} from '@/shared/utils/humidity'
 import type { Destination } from '../types'
 
 type ReopenDestinationProps = {

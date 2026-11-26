@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { DestinationChanges, Destination, Lot } from '../types'
-import type { DestinationType } from '../../../lib/database.types'
+import type { DestinationType } from '@/shared/lib/database.types'
 import { cerealOptions, destinationLabels } from '../types'
-import { isArgentinePlate, normalizePlate } from '../../../utils/plates'
+import { isArgentinePlate, normalizePlate } from '@/shared/utils/plates'
 import {
   formatHumidityInput,
   humidityToInput,
   HUMIDITY_ERROR,
   HUMIDITY_PATTERN,
   parseHumidity,
-} from '../../../utils/humidity'
+} from '@/shared/utils/humidity'
 
 type DestinationManagementProps = {
   destination: Destination

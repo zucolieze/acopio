@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Brand } from '../../../components/ui/Brand'
-import { Feedback } from '../../../components/ui/Feedback'
-import type { WorkMode } from '../../../types/app'
+import { Brand } from '@/shared/ui/Brand'
+import { Feedback } from '@/shared/ui/Feedback'
+import type { WorkMode } from '@/shared/types/app'
 
 type ModeSelectionPageProps = {
   welcomeName: string

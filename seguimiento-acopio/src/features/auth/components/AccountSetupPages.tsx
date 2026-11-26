@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Brand } from '../../../components/ui/Brand'
-import { Feedback } from '../../../components/ui/Feedback'
+import { Brand } from '@/shared/ui/Brand'
+import { Feedback } from '@/shared/ui/Feedback'
 
 type SetupProps = {
   busy: boolean

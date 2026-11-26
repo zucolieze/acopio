@@ -1,9 +1,9 @@
-import type { DestinationType } from '../../../lib/database.types'
-import { Brand } from '../../../components/ui/Brand'
-import { EmptyState } from '../../../components/ui/EmptyState'
-import { Feedback } from '../../../components/ui/Feedback'
-import { formatDate, formatKilos } from '../../../utils/format'
-import { workLabel, type Membership } from '../../groups/types'
+import type { DestinationType } from '@/shared/lib/database.types'
+import { Brand } from '@/shared/ui/Brand'
+import { EmptyState } from '@/shared/ui/EmptyState'
+import { Feedback } from '@/shared/ui/Feedback'
+import { formatDate, formatKilos } from '@/shared/utils/format'
+import { workLabel, type Membership } from '@/features/groups/types'
 import type {
   ChangeAudit,
   Destination,

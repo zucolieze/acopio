@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatDate, formatKilos } from '../../../utils/format'
+import { formatDate, formatKilos } from '@/shared/utils/format'
 import type { Destination, Load, Lot, LotChanges } from '../types'
 
 type LotSummaryProps = {

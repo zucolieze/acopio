@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, MemberRole } from '../../../lib/database.types'
-import { messageFromError } from '../../../utils/errors'
+import type { Database, MemberRole } from '@/shared/lib/database.types'
+import { messageFromError } from '@/shared/utils/errors'
 import {
   createGroup as createGroupInRepository,
   fetchMemberships,
