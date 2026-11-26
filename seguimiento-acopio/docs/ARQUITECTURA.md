@@ -49,6 +49,31 @@ src/
   son valores fijos): tablet desde `42rem` y PC desde `64rem`.
 - Sin selectores que apunten a clases de otro componente.
 
+## Componentes compartidos (`shared/ui/`)
+
+| Componente | Variantes y props |
+|---|---|
+| `Boton` | `variante`: `primaria`, `secundaria`, `silenciosa`, `peligro`, `google`, `enlace`, `enlacePeligro`; `tamano`: `chico`, `grande` |
+| `Panel` | `como`: elemento a usar (por defecto `section`) |
+| `Aviso` | `variante`: `error`, `aviso` |
+| `Avisos` (en `Aviso.tsx`) | muestra `error` y `aviso`; el aviso se oculta a los 10 segundos |
+| `Pestanas` | `opciones`, `activa`, `alElegir`, `etiqueta` |
+| `EtiquetaEstado` | `estado`: `activo`, `cerrado`, `eliminado`, `fijado` |
+| `EstadoVacio` | `titulo`, `descripcion` |
+| `Marca` | `soloIcono` |
+| `IndicacionInstalar` | sin props |
+
+El aspecto se elige con props. `className` en `Boton`, `Panel` y `Aviso` es solo
+para que quien los usa los ubique (ancho, márgenes). Para combinar clases está
+`unirClases` en `shared/utils/`.
+
+## Orden de los estilos
+
+`app/main.tsx` importa `tokens.css` y `base.css`, después la app (con los
+módulos de `shared/ui`) y al final `App.css`. Ese orden permite que los estilos
+de cada feature, que todavía están en `App.css`, ajusten a los componentes
+compartidos. Cambiarlo altera cómo se ve la app.
+
 ## Idioma de los nombres
 
 Todo lo que nombramos nosotros va en español (variables, funciones, tipos,
@@ -59,19 +84,21 @@ de capa. Roles: `carrero` y `observador`. Ver [GLOSARIO.md](GLOSARIO.md).
 
 ## Estado actual
 
-Etapa 1 hecha: la estructura de carpetas ya es la objetivo. Todavía faltan las
-demás diferencias:
+Etapas 1 y 2 hechas: la estructura de carpetas ya es la objetivo y la base de
+estilos con los componentes compartidos está en `shared/`. Todavía falta:
 
 - Hay tres features: `auth`, `groups` y `loads`. La administración de lotes y
   campos vive dentro de `loads`.
-- Lo compartido está en `src/shared/` (`ui/`, `lib/`, `utils/`, `types/`).
-  Falta `shared/styles/` (Etapa 2).
+- Lo compartido está en `src/shared/` (`ui/`, `lib/`, `utils/`, `styles/`,
+  `types/`).
 - `src/app/` tiene `main.tsx`, `App.tsx` y `AppController.tsx`, que compone las
   features y decide qué pantalla mostrar por estado. `index.html` carga
   `/src/app/main.tsx`.
 - El alias `@/` apunta a `src/` (en `tsconfig.json` y `vite.config.ts`).
-- Todos los estilos están en `src/App.css` e `src/index.css` (globales, sin CSS
-  Modules).
+- Los estilos propios de cada feature siguen en `src/App.css` (globales). Se
+  pasan a CSS Modules en la Etapa 3.
+- `App.css` todavía usa puntos de corte de `40rem` y `65rem`, además de los
+  documentados. Se unifican en la Etapa 4.
 - Los nombres están en inglés y los roles en la base y en el código son
   `proveedor` y `cliente`.
 - Los tipos de las filas de la base circulan por hooks y componentes.
