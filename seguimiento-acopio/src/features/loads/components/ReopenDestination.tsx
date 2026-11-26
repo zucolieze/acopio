@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Boton } from '@/shared/ui/Boton'
 import {
   formatHumidityInput,
   HUMIDITY_ERROR,
@@ -23,14 +24,14 @@ export function ReopenDestination({ destination, busy, onReopen }: ReopenDestina
 
   if (!open) {
     return (
-      <button
-        className="button button--secondary destination-card__reopen"
+      <Boton
+        variante="secundaria" className="destination-card__reopen"
         type="button"
         disabled={busy}
         onClick={() => setOpen(true)}
       >
         Reactivar destino
-      </button>
+      </Boton>
     )
   }
 
@@ -68,16 +69,16 @@ export function ReopenDestination({ destination, busy, onReopen }: ReopenDestina
         </label>
       )}
       <div className="reopen-form__actions">
-        <button
-          className="button button--primary"
+        <Boton
+          variante="primaria"
           type="submit"
           disabled={busy || (needsHumidity && parsed === null)}
         >
           {busy ? 'Reactivando…' : 'Reactivar'}
-        </button>
-        <button className="link-button" type="button" onClick={() => setOpen(false)}>
+        </Boton>
+        <Boton variante="enlace" type="button" onClick={() => setOpen(false)}>
           Cancelar
-        </button>
+        </Boton>
       </div>
     </form>
   )

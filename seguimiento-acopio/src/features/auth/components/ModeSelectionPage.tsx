@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Brand } from '@/shared/ui/Brand'
-import { Feedback } from '@/shared/ui/Feedback'
+import { Boton } from '@/shared/ui/Boton'
+import { Marca } from '@/shared/ui/Marca'
+import { Avisos } from '@/shared/ui/Aviso'
 import type { WorkMode } from '@/shared/types/app'
 
 type ModeSelectionPageProps = {
@@ -28,7 +29,7 @@ export function ModeSelectionPage({
   return (
     <main className="center-page center-page--top">
       <header className="simple-header">
-        <Brand iconOnly />
+        <Marca soloIcono />
       </header>
       <section className="mode-selection">
         <p className="eyebrow" onClick={() => setTaps((count) => count + 1)}>
@@ -36,7 +37,7 @@ export function ModeSelectionPage({
         </p>
         <h1>¿Qué necesitás hacer?</h1>
         <p className="muted">Después podés elegir un trabajo para continuar.</p>
-        <Feedback error={error} notice={notice} />
+        <Avisos error={error} aviso={notice} />
         <div className="mode-cards">
           <button
             className="mode-card mode-card--carrero"
@@ -67,14 +68,14 @@ export function ModeSelectionPage({
         </div>
       </section>
       <footer className="app-footer app-footer--end">
-        <button
-          className="button button--quiet button--small"
+        <Boton
+          variante="silenciosa" tamano="chico"
           type="button"
           disabled={busy}
           onClick={onSignOut}
         >
           Cerrar sesión
-        </button>
+        </Boton>
       </footer>
     </main>
   )

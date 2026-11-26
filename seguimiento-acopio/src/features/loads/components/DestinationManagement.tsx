@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Boton } from '@/shared/ui/Boton'
 import type { DestinationChanges, Destination, Lot } from '../types'
 import type { DestinationType } from '@/shared/lib/database.types'
 import { cerealOptions, destinationLabels } from '../types'
@@ -91,22 +92,22 @@ export function DestinationManagement({
   return (
     <div className="destination-management">
       <div className="destination-management__actions">
-        <button
-          className="link-button"
+        <Boton
+          variante="enlace"
           type="button"
           onClick={() => setEditing((current) => !current)}
           disabled={busy}
         >
           {editing ? 'Cancelar edición' : 'Editar destino'}
-        </button>
-        <button
-          className="link-button link-button--danger"
+        </Boton>
+        <Boton
+          variante="enlacePeligro"
           type="button"
           onClick={onDelete}
           disabled={busy || destination.deleted_at !== null}
         >
           Eliminar destino
-        </button>
+        </Boton>
       </div>
       {editing && (
         <form className="destination-edit-form" onSubmit={handleSubmit}>
@@ -260,9 +261,9 @@ export function DestinationManagement({
               />
             </label>
           )}
-          <button className="button button--secondary" type="submit" disabled={busy}>
+          <Boton variante="secundaria" type="submit" disabled={busy}>
             Guardar cambios
-          </button>
+          </Boton>
         </form>
       )}
     </div>

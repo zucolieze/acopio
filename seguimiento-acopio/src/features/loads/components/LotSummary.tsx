@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Boton } from '@/shared/ui/Boton'
 import { formatDate, formatKilos } from '@/shared/utils/format'
 import type { Destination, Load, Lot, LotChanges } from '../types'
 
@@ -159,8 +160,8 @@ function LotSummaryItem({
         </details>
       )}
       {canEditHectares && !editing && (
-        <button
-          className="link-button lot-summary__edit"
+        <Boton
+          variante="enlace" className="lot-summary__edit"
           type="button"
           disabled={busy}
           onClick={() => {
@@ -169,7 +170,7 @@ function LotSummaryItem({
           }}
         >
           {row.lot.hectares ? `Hectáreas: ${row.lot.hectares} · Cambiar` : 'Cargar hectáreas'}
-        </button>
+        </Boton>
       )}
       {canEditHectares && editing && (
         <form
@@ -193,12 +194,12 @@ function LotSummaryItem({
               onChange={(event) => setHectares(event.target.value)}
             />
           </label>
-          <button className="button button--secondary button--small" type="submit" disabled={busy}>
+          <Boton variante="secundaria" tamano="chico" type="submit" disabled={busy}>
             Guardar
-          </button>
-          <button className="link-button" type="button" onClick={() => setEditing(false)}>
+          </Boton>
+          <Boton variante="enlace" type="button" onClick={() => setEditing(false)}>
             Cancelar
-          </button>
+          </Boton>
         </form>
       )}
     </li>

@@ -1,0 +1,19 @@
+.mensaje {
+  margin: var(--espacio-075) 0;
+  padding: var(--espacio-080) var(--espacio-090);
+  border-radius: var(--radio-070);
+  font-size: var(--texto-090);
+  line-height: 1.45;
+}
+
+.error {
+  border: 1px solid #efc3bc;
+  background: #fff1ee;
+  color: var(--color-rojo);
+}
+
+.aviso {
+  border: 1px solid #c9dfc9;
+  background: #edf7ea;
+  color: #286139;
+}
